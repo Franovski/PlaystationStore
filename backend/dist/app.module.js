@@ -13,6 +13,9 @@ const config_1 = require("@nestjs/config");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const categoryModule_1 = require("./categories/categoryModule");
+const platformModule_1 = require("./platforms/platformModule");
+const gameModule_1 = require("./games/gameModule");
+const gameCategoryModule_1 = require("./gameCategories/gameCategoryModule");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -37,6 +40,9 @@ exports.AppModule = AppModule = __decorate([
                 }),
             }),
             categoryModule_1.CategoryModule,
+            platformModule_1.PlatformModule,
+            gameModule_1.GameModule,
+            gameCategoryModule_1.GameCategoryModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

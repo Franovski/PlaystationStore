@@ -4,6 +4,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CategoryModule } from './categories/categoryModule';
+import { PlatformModule } from './platforms/platformModule';
+import { GameModule } from './games/gameModule';
+import { GameCategoryModule } from './gameCategories/gameCategoryModule';
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import { CategoryModule } from './categories/categoryModule';
       }),
     }),
     CategoryModule,
+    PlatformModule,
+    GameModule,
+    GameCategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
