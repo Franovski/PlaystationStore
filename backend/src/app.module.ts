@@ -7,11 +7,15 @@ import { CategoryModule } from './categories/categoryModule';
 import { PlatformModule } from './platforms/platformModule';
 import { GameModule } from './games/gameModule';
 import { GameCategoryModule } from './gameCategories/gameCategoryModule';
+import { UsersModule } from './users/userModule';
+import { AuthModule } from './auth/authModule';
+import { MailModule } from './mail/mailModule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env.example',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -24,15 +28,18 @@ import { GameCategoryModule } from './gameCategories/gameCategoryModule';
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'playstation_store'),
         autoLoadEntities: true,
-        synchronize: true, // Use only in development
+        synchronize: true,
       }),
     }),
     CategoryModule,
     PlatformModule,
     GameModule,
     GameCategoryModule,
+    UsersModule,
+    AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
