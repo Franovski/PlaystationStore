@@ -11,6 +11,8 @@ const initialState: AuthState = {
   error: null,
   requiresTwoFactor: false,
   tempToken: null,
+  otpMethod: null,
+  debugOtp: null,
   msg: null,
 };
 
@@ -21,7 +23,12 @@ export const loginUser = createAsyncThunk(
       const response = await authApi.login(credentials);
       
       if (response.requiresTwoFactor) {
-        return { requiresTwoFactor: true, tempToken: response.tempToken };
+        return {
+          requiresTwoFactor: true,
+          tempToken: response.tempToken,
+          otpMethod: response.otpMethod,
+          debugOtp: response.debugOtp,
+        };
       }
       if (response.accessToken) tokenService.setToken(response.accessToken);
       if (response.refreshToken) localStorage.setItem('ps_store_refresh_token', response.refreshToken);
@@ -109,6 +116,8 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.requiresTwoFactor = false;
       state.tempToken = null;
+      state.otpMethod = null;
+      state.debugOtp = null;
       tokenService.removeToken();
       localStorage.removeItem('ps_store_refresh_token');
     },
@@ -128,11 +137,16 @@ const authSlice = createSlice({
         if (action.payload.requiresTwoFactor) {
           state.requiresTwoFactor = true;
           state.tempToken = action.payload.tempToken || null;
+          state.otpMethod = action.payload.otpMethod || null;
+          state.debugOtp = action.payload.debugOtp || null;
         } else {
           state.isAuthenticated = true;
           state.user = action.payload.user || null;
           state.accessToken = action.payload.accessToken || null;
           state.requiresTwoFactor = false;
+          state.tempToken = null;
+          state.otpMethod = null;
+          state.debugOtp = null;
         }
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -146,6 +160,8 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.requiresTwoFactor = false;
         state.tempToken = null;
+        state.otpMethod = null;
+        state.debugOtp = null;
         state.isAuthenticated = true;
         state.user = action.payload.user || null;
         state.accessToken = action.payload.accessToken || null;

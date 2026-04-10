@@ -36,5 +36,7 @@ export interface AuthState {
   error: string | null;
   requiresTwoFactor: boolean;
   tempToken: string | null;
+  otpMethod: 'totp' | 'email-otp' | null;
+  debugOtp: string | null;
   msg: string | null;
 }

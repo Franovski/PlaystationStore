@@ -7,6 +7,8 @@ export interface LoginResponse {
   refreshToken?: string;
   requiresTwoFactor?: boolean;
   tempToken?: string;
+  otpMethod?: 'totp' | 'email-otp';
+  debugOtp?: string;
 }
 
 export const authApi = {
