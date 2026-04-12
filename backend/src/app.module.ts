@@ -7,15 +7,16 @@ import { CategoryModule } from './categories/categoryModule';
 import { PlatformModule } from './platforms/platformModule';
 import { GameModule } from './games/gameModule';
 import { GameCategoryModule } from './gameCategories/gameCategoryModule';
+import { GamePlatformModule } from './gamePlatforms/gamePlatformModule';
 import { UsersModule } from './users/userModule';
 import { AuthModule } from './auth/authModule';
 import { MailModule } from './mail/mailModule';
+import { AdminModule } from './admin/adminModule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.example',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -35,9 +36,11 @@ import { MailModule } from './mail/mailModule';
     PlatformModule,
     GameModule,
     GameCategoryModule,
+    GamePlatformModule,
     UsersModule,
     AuthModule,
     MailModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

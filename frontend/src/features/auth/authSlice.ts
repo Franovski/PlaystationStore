@@ -12,7 +12,6 @@ const initialState: AuthState = {
   requiresTwoFactor: false,
   tempToken: null,
   otpMethod: null,
-  debugOtp: null,
   msg: null,
 };
 
@@ -27,7 +26,6 @@ export const loginUser = createAsyncThunk(
           requiresTwoFactor: true,
           tempToken: response.tempToken,
           otpMethod: response.otpMethod,
-          debugOtp: response.debugOtp,
         };
       }
       if (response.accessToken) tokenService.setToken(response.accessToken);
@@ -117,7 +115,6 @@ const authSlice = createSlice({
       state.requiresTwoFactor = false;
       state.tempToken = null;
       state.otpMethod = null;
-      state.debugOtp = null;
       tokenService.removeToken();
       localStorage.removeItem('ps_store_refresh_token');
     },
@@ -138,7 +135,6 @@ const authSlice = createSlice({
           state.requiresTwoFactor = true;
           state.tempToken = action.payload.tempToken || null;
           state.otpMethod = action.payload.otpMethod || null;
-          state.debugOtp = action.payload.debugOtp || null;
         } else {
           state.isAuthenticated = true;
           state.user = action.payload.user || null;
@@ -146,7 +142,6 @@ const authSlice = createSlice({
           state.requiresTwoFactor = false;
           state.tempToken = null;
           state.otpMethod = null;
-          state.debugOtp = null;
         }
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -161,7 +156,6 @@ const authSlice = createSlice({
         state.requiresTwoFactor = false;
         state.tempToken = null;
         state.otpMethod = null;
-        state.debugOtp = null;
         state.isAuthenticated = true;
         state.user = action.payload.user || null;
         state.accessToken = action.payload.accessToken || null;

@@ -15,6 +15,7 @@ export interface TestMailMessage {
         resetToken?: string;
         resetUrl?: string;
         resetCode?: string;
+        loginCode?: string;
     };
 }
 export declare class MailService implements OnModuleDestroy {
@@ -32,6 +33,13 @@ export declare class MailService implements OnModuleDestroy {
     sendPasswordResetOtpEmail(params: {
         to: string;
         resetCode: string;
+        expiresInMinutes: number;
+    }): Promise<{
+        messageId: string;
+    }>;
+    sendLoginOtpEmail(params: {
+        to: string;
+        loginCode: string;
         expiresInMinutes: number;
     }): Promise<{
         messageId: string;

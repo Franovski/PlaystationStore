@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
+import { PassportModule } from "@nestjs/passport";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 
 import { AuthService } from "./authService";
@@ -9,12 +10,14 @@ import { MailModule } from "../mail/mailModule";
 import { PasswordResetService } from "./resetPassword/reset-password.service";
 import { PasswordResetOtpService } from "./resetPassword/reset-password-otp.service";
 import { PasswordResetLinkService } from "./resetPassword/reset-password-link.service";
+import { JwtStrategy } from "./jwt.strategy";
 
 @Module({
   imports: [
     UsersModule,
     MailModule,
     ConfigModule,
+    PassportModule,
 
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -42,6 +45,7 @@ import { PasswordResetLinkService } from "./resetPassword/reset-password-link.se
     PasswordResetService,
     PasswordResetOtpService,
     PasswordResetLinkService,
+    JwtStrategy,
   ],
   exports: [AuthService, JwtModule],
 })

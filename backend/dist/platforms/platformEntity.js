@@ -9,8 +9,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Platform = void 0;
+exports.Platform = exports.PlatformName = void 0;
 const typeorm_1 = require("typeorm");
+var PlatformName;
+(function (PlatformName) {
+    PlatformName["PS4"] = "ps4";
+    PlatformName["PS5"] = "ps5";
+})(PlatformName || (exports.PlatformName = PlatformName = {}));
 let Platform = class Platform {
 };
 exports.Platform = Platform;
@@ -19,7 +24,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Platform.prototype, "platformId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255, unique: true }),
+    (0, typeorm_1.Column)({ type: 'enum', enum: PlatformName, unique: true }),
     __metadata("design:type", String)
 ], Platform.prototype, "platformName", void 0);
 exports.Platform = Platform = __decorate([

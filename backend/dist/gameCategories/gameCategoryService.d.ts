@@ -11,5 +11,6 @@ export declare class GameCategoryService {
     linkGameAndCategory(dto: AddGameCategoryDto): Promise<GameCategory>;
     unlinkGameAndCategory(gameId: number, categoryId: number): Promise<void>;
     getCategoriesByGame(gameId: number): Promise<import("../categories/categoryEntity").Category[]>;
+    getAllGameCategories(): Promise<GameCategory[]>;
     getGamesByCategory(categoryId: number): Promise<import("../games/gameEntity").Game[]>;
 }

@@ -17,6 +17,12 @@ export class GameCategoryRepository {
     });
   }
 
+  async findAll(): Promise<GameCategory[]> {
+    return this.repository.find({
+      relations: ['game', 'category'],
+    });
+  }
+
   async findByCategory(categoryId: number): Promise<GameCategory[]> {
     return this.repository.find({
       where: { categoryId },

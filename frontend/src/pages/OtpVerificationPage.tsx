@@ -8,7 +8,7 @@ const OtpVerificationPage: React.FC = () => {
   const [code, setCode] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { isLoading, error, requiresTwoFactor, tempToken, otpMethod, debugOtp, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isLoading, error, requiresTwoFactor, tempToken, otpMethod, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     dispatch(clearError());
@@ -35,16 +35,10 @@ const OtpVerificationPage: React.FC = () => {
         <h2 className="text-3xl font-bold text-center text-white mb-6">Two-Factor Authentication</h2>
         <p className="text-gray-300 text-sm text-center mb-6">
           {otpMethod === 'email-otp'
-            ? 'Enter the 6-digit code sent to your email.'
+            ? 'Verification code sent to your email.'
             : 'Open your authenticator app and enter the 6-digit code.'}
         </p>
 
-        {debugOtp && (
-          <div className="mb-4 text-sm text-amber-300 bg-amber-100 bg-opacity-10 py-2 px-3 rounded border border-amber-500">
-            Development OTP: <span className="font-semibold tracking-widest">{debugOtp}</span>
-          </div>
-        )}
-        
         {error && (
           <div className="mb-4 text-sm text-red-500 bg-red-100 bg-opacity-10 py-2 px-3 rounded border border-red-500">
             {error}

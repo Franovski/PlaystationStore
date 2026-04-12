@@ -11,6 +11,11 @@ export class GameCategoryController {
     return this.gameCategoryService.linkGameAndCategory(dto);
   }
 
+  @Get()
+  async getAll() {
+    return this.gameCategoryService.getAllGameCategories();
+  }
+
   @Delete('game/:gameId/category/:categoryId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeCategoryFromGame(

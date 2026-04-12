@@ -1,14 +1,15 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { PlatformName } from './platformEntity';
 
 export class CreatePlatformDto {
-  @IsString()
+  @IsEnum(PlatformName, { message: 'platformName must be either ps4 or ps5' })
   @IsNotEmpty()
-  platformName: string;
+  platformName: PlatformName;
 }
 
 export class UpdatePlatformDto {
   @IsOptional()
-  @IsString()
+  @IsEnum(PlatformName, { message: 'platformName must be either ps4 or ps5' })
   @IsNotEmpty()
-  platformName?: string;
+  platformName?: PlatformName;
 }

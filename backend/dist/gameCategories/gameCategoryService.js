@@ -41,6 +41,9 @@ let GameCategoryService = class GameCategoryService {
         const mappings = await this.gameCategoryRepository.findByGame(gameId);
         return mappings.map((mapping) => mapping.category);
     }
+    async getAllGameCategories() {
+        return this.gameCategoryRepository.findAll();
+    }
     async getGamesByCategory(categoryId) {
         await this.categoryService.getCategoryById(categoryId);
         const mappings = await this.gameCategoryRepository.findByCategory(categoryId);

@@ -27,6 +27,11 @@ let GameCategoryRepository = class GameCategoryRepository {
             relations: ['category'],
         });
     }
+    async findAll() {
+        return this.repository.find({
+            relations: ['game', 'category'],
+        });
+    }
     async findByCategory(categoryId) {
         return this.repository.find({
             where: { categoryId },

@@ -45,6 +45,10 @@ export class GameCategoryService {
     return mappings.map((mapping) => mapping.category);
   }
 
+  async getAllGameCategories(): Promise<GameCategory[]> {
+    return this.gameCategoryRepository.findAll();
+  }
+
   async getGamesByCategory(categoryId: number) {
     // Validate category
     await this.categoryService.getCategoryById(categoryId);

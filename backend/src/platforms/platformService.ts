@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PlatformRepository } from './platformRepository';
 import { CreatePlatformDto, UpdatePlatformDto } from './platformDto';
-import { Platform } from './platformEntity';
+import { Platform, PlatformName } from './platformEntity';
 
 @Injectable()
 export class PlatformService {
@@ -40,7 +40,6 @@ export class PlatformService {
         return this.getPlatformById(id);
     }
     
-    // Check if what we are trying to update exists
     await this.getPlatformById(id);
 
     const existing = await this.platformRepository.findByName(updateDto.platformName);

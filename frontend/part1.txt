@@ -1,0 +1,400 @@
+﻿import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../app/store';
+import { logoutUser } from '../features/auth/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { adminSummaryApi, adminUsersApi, adminGamesApi, adminPlatformsApi, adminCategoriesApi, adminGameCategoriesApi, adminGamePlatformsApi } from '../api/adminApi';
+import { User, Game, Platform, Category, GameCategory, GamePlatform } from '../types';
+
+type UserFormState = {
+  username: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  country: string;
+  dateOfBirth: string;
+  role: 'admin' | 'playstation_user';
+};
+
+type GameFormState = {
+  title: string;
+  description: string;
+  releaseDate: string;
+  basePrice: string;
+  developer: string;
+  publisher: string;
+  ageRating: string;
+};
+
+type PlatformFormState = {
+  platformName: 'ps4' | 'ps5' | '';
+};
+
+type CategoryFormState = {
+  categoryName: string;
+  description: string;
+};
+
+type GameRelationFormState = {
+  gameId: string;
+  relationId: string;
+};
+
+const COUNTRIES = [
+  'Afghanistan',
+  'Albania',
+  'Algeria',
+  'Andorra',
+  'Angola',
+  'Antigua and Barbuda',
+  'Argentina',
+  'Armenia',
+  'Australia',
+  'Austria',
+  'Azerbaijan',
+  'Bahamas',
+  'Bahrain',
+  'Bangladesh',
+  'Barbados',
+  'Belarus',
+  'Belgium',
+  'Belize',
+  'Benin',
+  'Bhutan',
+  'Bolivia',
+  'Bosnia and Herzegovina',
+  'Botswana',
+  'Brazil',
+  'Brunei',
+  'Bulgaria',
+  'Burkina Faso',
+  'Burundi',
+  'Cabo Verde',
+  'Cambodia',
+  'Cameroon',
+  'Canada',
+  'Central African Republic',
+  'Chad',
+  'Chile',
+  'China',
+  'Colombia',
+  'Comoros',
+  'Congo',
+  'Costa Rica',
+  "CÃ´te d'Ivoire",
+  'Croatia',
+  'Cuba',
+  'Cyprus',
+  'Czech Republic',
+  'Democratic Republic of the Congo',
+  'Denmark',
+  'Djibouti',
+  'Dominica',
+  'Dominican Republic',
+  'Ecuador',
+  'Egypt',
+  'El Salvador',
+  'Equatorial Guinea',
+  'Eritrea',
+  'Estonia',
+  'Eswatini',
+  'Ethiopia',
+  'Fiji',
+  'Finland',
+  'France',
+  'Gabon',
+  'Gambia',
+  'Georgia',
+  'Germany',
+  'Ghana',
+  'Greece',
+  'Grenada',
+  'Guatemala',
+  'Guinea',
+  'Guinea-Bissau',
+  'Guyana',
+  'Haiti',
+  'Honduras',
+  'Hungary',
+  'Iceland',
+  'India',
+  'Indonesia',
+  'Iran',
+  'Iraq',
+  'Ireland',
+  'Israel',
+  'Italy',
+  'Jamaica',
+  'Japan',
+  'Jordan',
+  'Kazakhstan',
+  'Kenya',
+  'Kiribati',
+  'Kuwait',
+  'Kyrgyzstan',
+  'Laos',
+  'Latvia',
+  'Lebanon',
+  'Lesotho',
+  'Liberia',
+  'Libya',
+  'Liechtenstein',
+  'Lithuania',
+  'Luxembourg',
+  'Madagascar',
+  'Malawi',
+  'Malaysia',
+  'Maldives',
+  'Mali',
+  'Malta',
+  'Marshall Islands',
+  'Mauritania',
+  'Mauritius',
+  'Mexico',
+  'Micronesia',
+  'Moldova',
+  'Monaco',
+  'Mongolia',
+  'Montenegro',
+  'Morocco',
+  'Mozambique',
+  'Myanmar',
+  'Namibia',
+  'Nauru',
+  'Nepal',
+  'Netherlands',
+  'New Zealand',
+  'Nicaragua',
+  'Niger',
+  'Nigeria',
+  'North Korea',
+  'North Macedonia',
+  'Norway',
+  'Oman',
+  'Pakistan',
+  'Palau',
+  'Palestine',
+  'Panama',
+  'Papua New Guinea',
+  'Paraguay',
+  'Peru',
+  'Philippines',
+  'Poland',
+  'Portugal',
+  'Qatar',
+  'Romania',
+  'Russia',
+  'Rwanda',
+  'Saint Kitts and Nevis',
+  'Saint Lucia',
+  'Saint Vincent and the Grenadines',
+  'Samoa',
+  'San Marino',
+  'Sao Tome and Principe',
+  'Saudi Arabia',
+  'Senegal',
+  'Serbia',
+  'Seychelles',
+  'Sierra Leone',
+  'Singapore',
+  'Slovakia',
+  'Slovenia',
+  'Solomon Islands',
+  'Somalia',
+  'South Africa',
+  'South Korea',
+  'South Sudan',
+  'Spain',
+  'Sri Lanka',
+  'Sudan',
+  'Suriname',
+  'Sweden',
+  'Switzerland',
+  'Syria',
+  'Taiwan',
+  'Tajikistan',
+  'Tanzania',
+  'Thailand',
+  'Timor-Leste',
+  'Togo',
+  'Tonga',
+  'Trinidad and Tobago',
+  'Tunisia',
+  'Turkey',
+  'Turkmenistan',
+  'Tuvalu',
+  'Uganda',
+  'Ukraine',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States',
+  'Uruguay',
+  'Uzbekistan',
+  'Vanuatu',
+  'Vatican City',
+  'Venezuela',
+  'Vietnam',
+  'Yemen',
+  'Zambia',
+  'Zimbabwe',
+];
+
+const emptyUserForm: UserFormState = {
+  username: '',
+  email: '',
+  password: '',
+  firstName: '',
+  lastName: '',
+  country: '',
+  dateOfBirth: '',
+  role: 'playstation_user',
+};
+
+const emptyGameForm: GameFormState = {
+  title: '',
+  description: '',
+  releaseDate: '',
+  basePrice: '',
+  developer: '',
+  publisher: '',
+  ageRating: '',
+};
+
+const emptyPlatformForm: PlatformFormState = { platformName: '' };
+const emptyCategoryForm: CategoryFormState = { categoryName: '', description: '' };
+const emptyRelationForm: GameRelationFormState = { gameId: '', relationId: '' };
+
+const AdminDashboardPage: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { user } = useSelector((state: RootState) => state.auth);
+
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'games' | 'platforms' | 'categories' | 'gameCategories' | 'gamePlatforms'>('dashboard');
+  const [stats, setStats] = useState({
+    users: 0,
+    admins: 0,
+    customers: 0,
+    games: 0,
+    categories: 0,
+    platforms: 0,
+  });
+  const [usersList, setUsersList] = useState<User[]>([]);
+  const [gamesList, setGamesList] = useState<Game[]>([]);
+  const [platformsList, setPlatformsList] = useState<Platform[]>([]);
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
+  const [gameCategoriesList, setGameCategoriesList] = useState<GameCategory[]>([]);
+  const [gamePlatformsList, setGamePlatformsList] = useState<GamePlatform[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isGameModalOpen, setIsGameModalOpen] = useState(false);
+  const [isPlatformModalOpen, setIsPlatformModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isGameCategoryModalOpen, setIsGameCategoryModalOpen] = useState(false);
+  const [isGamePlatformModalOpen, setIsGamePlatformModalOpen] = useState(false);
+
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingGame, setEditingGame] = useState<Game | null>(null);
+  const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingGameCategory, setEditingGameCategory] = useState<GameCategory | null>(null);
+  const [editingGamePlatform, setEditingGamePlatform] = useState<GamePlatform | null>(null);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [userFormData, setUserFormData] = useState<UserFormState>(emptyUserForm);
+  const [gameFormData, setGameFormData] = useState<GameFormState>(emptyGameForm);
+  const [platformFormData, setPlatformFormData] = useState<PlatformFormState>(emptyPlatformForm);
+  const [categoryFormData, setCategoryFormData] = useState<CategoryFormState>(emptyCategoryForm);
+  const [relationFormData, setRelationFormData] = useState<GameRelationFormState>(emptyRelationForm);
+
+  useEffect(() => {
+    if (user && user.role !== 'admin') {
+      navigate('/user');
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    fetchAdminData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const fetchAdminData = async () => {
+    setIsLoading(true);
+    setSearchTerm('');
+
+    try {
+      if (activeTab === 'dashboard') {
+        const summaryRes: any = await adminSummaryApi.getSummary();
+        setStats({
+          users: summaryRes?.totalUsers || 0,
+          admins: summaryRes?.totalAdmins || 0,
+          customers: summaryRes?.totalCustomers || 0,
+          games: summaryRes?.totalGames || 0,
+          categories: summaryRes?.totalCategories || 0,
+          platforms: summaryRes?.totalPlatforms || 0,
+        });
+      } else if (activeTab === 'users') {
+        const res: any = await adminUsersApi.getAll();
+        setUsersList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'games') {
+        const res: any = await adminGamesApi.getAll();
+        setGamesList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'platforms') {
+        const res: any = await adminPlatformsApi.getAll();
+        setPlatformsList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'categories') {
+        const res: any = await adminCategoriesApi.getAll();
+        setCategoriesList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'gameCategories') {
+        const games: any = await adminGamesApi.getAll();
+        setGamesList(Array.isArray(games) ? games : []);
+        const categories: any = await adminCategoriesApi.getAll();
+        setCategoriesList(Array.isArray(categories) ? categories : []);
+        try {
+          const res: any = await adminGameCategoriesApi.getAll();
+          setGameCategoriesList(Array.isArray(res) ? res : []);
+        } catch (ignored) {}
+      } else if (activeTab === 'gamePlatforms') {
+        const games: any = await adminGamesApi.getAll();
+        setGamesList(Array.isArray(games) ? games : []);
+        const platforms: any = await adminPlatformsApi.getAll();
+        setPlatformsList(Array.isArray(platforms) ? platforms : []);
+        try {
+          const res: any = await adminGamePlatformsApi.getAll();
+          setGamePlatformsList(Array.isArray(res) ? res : []);
+        } catch (ignored) {}
+      }
+    } catch (err) {
+      console.error(`Failed to load admin data for ${activeTab}`, err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate('/');
+  };
+
+  const openUserModal = (userToEdit: User | null = null) => {
+    setEditingUser(userToEdit);
+
+    if (userToEdit) {
+      setUserFormData({
+        username: userToEdit.username || '',
+        email: userToEdit.email || '',
+        password: '',
+        firstName: userToEdit.firstName || '',
+        lastName: userToEdit.lastName || '',
+        country: userToEdit.country || '',
+        dateOfBirth: userToEdit.dateOfBirth ? String(userToEdit.dateOfBirth).slice(0, 10) : '',
+        role: userToEdit.role || 'playstation_user',
+      });
+    } else {
+      setUserFormData(emptyUserForm);
+    }
+
+    setIsUserModalOpen(true);
+  };
+

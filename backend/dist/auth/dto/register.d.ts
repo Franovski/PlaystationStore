@@ -1,4 +1,6 @@
+import { UserRole } from '../../users/userEntity';
 export declare class RegisterDto {
+    role?: UserRole;
     username: string;
     email: string;
     password: string;

@@ -117,6 +117,52 @@ let MailService = class MailService {
             messageId: result.messageId,
         };
     }
+    async sendLoginOtpEmail(params) {
+        const from = this.getMailFrom();
+        const subject = 'Your PlayStationStore login verification code';
+        const text = [
+            'Use this code to complete your PlayStationStore login:',
+            '',
+            `${params.loginCode}`,
+            '',
+            `This code expires in ${params.expiresInMinutes} minutes.`,
+            'If you did not try to sign in, you can ignore this email.',
+        ].join('\n');
+        const html = [
+            '<p>Use this code to complete your PlayStationStore login:</p>',
+            `<p><strong>${params.loginCode}</strong></p>`,
+            `<p>This code expires in ${params.expiresInMinutes} minutes.</p>`,
+            '<p>If you did not try to sign in, you can ignore this email.</p>',
+        ].join('');
+        if (this.getTransportMode() === 'memory') {
+            const messageId = `memory-${Date.now()}`;
+            this.testMessages.push({
+                to: params.to,
+                from,
+                subject,
+                text,
+                html,
+                messageId,
+                sentAt: new Date(),
+                transport: 'memory',
+                metadata: {
+                    loginCode: params.loginCode,
+                },
+            });
+            return { messageId };
+        }
+        const transporter = this.getTransporter();
+        const result = await transporter.sendMail({
+            from,
+            to: params.to,
+            subject,
+            text,
+            html,
+        });
+        return {
+            messageId: result.messageId,
+        };
+    }
     getTestMessages() {
         return [...this.testMessages];
     }

@@ -28,7 +28,7 @@ let PlatformRepository = class PlatformRepository {
         return this.repository.findOne({ where: { platformId } });
     }
     async findByName(platformName) {
-        return this.repository.findOne({ where: { platformName } });
+        return this.repository.findOne({ where: { platformName: platformName } });
     }
     async create(platformName) {
         const platform = this.repository.create({ platformName });

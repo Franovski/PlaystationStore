@@ -50,6 +50,15 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
+    // TEMPORARY FOR TESTING: Allow admin signup from public page if DEV mode & flag is enabled
+    if (
+      dto.role === 'admin' &&
+      (process.env.NODE_ENV !== 'development' ||
+        process.env.ENABLE_DEV_ADMIN_SIGNUP !== 'true')
+    ) {
+      dto.role = 'playstation_user' as any;
+    }
+
     const user = await this.usersService.create(dto);
 
     const tokens = await this.generateTokens(user);
@@ -84,13 +93,17 @@ export class AuthService {
 
     const loginCode = this.generateNumericOtp();
     this.storePendingLoginOtp(tempToken, user.userId, loginCode);
-    await this.sendLoginOtp(user.email, loginCode);
+    
+    try {
+      await this.sendLoginOtp(user.email, loginCode);
+    } catch (error) {
+      throw new BadRequestException('Failed to send verification code. Please try again.');
+    }
 
     return {
       requiresTwoFactor: true,
       tempToken,
       otpMethod: 'email-otp' as TwoFactorMethod,
-      debugOtp: this.shouldExposeDebugOtp() ? loginCode : undefined,
     };
   }
 
@@ -343,31 +356,7 @@ export class AuthService {
         expiresInMinutes: AuthService.LOGIN_OTP_TTL_MINUTES,
       });
     } catch (error) {
-      if (!this.shouldExposeDebugOtp()) {
-        throw new BadRequestException('Unable to deliver login verification code');
-      }
-
-      console.warn('Login OTP email delivery failed; using debug OTP fallback.', error);
+      throw new BadRequestException('Failed to send verification code. Please try again.');
     }
-
-    if (this.shouldExposeDebugOtp()) {
-      console.log(`[AUTH DEBUG] Login OTP for ${email}: ${code}`);
-    }
-  }
-
-  private shouldExposeDebugOtp() {
-    const explicit = this.configService
-      .get<string>('EXPOSE_LOGIN_OTP_IN_RESPONSE')
-      ?.toLowerCase();
-
-    if (explicit === 'true') {
-      return true;
-    }
-
-    if (explicit === 'false') {
-      return false;
-    }
-
-    return this.configService.get<string>('NODE_ENV') !== 'production';
   }
 }

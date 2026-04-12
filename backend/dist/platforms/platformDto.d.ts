@@ -1,6 +1,7 @@
+import { PlatformName } from './platformEntity';
 export declare class CreatePlatformDto {
-    platformName: string;
+    platformName: PlatformName;
 }
 export declare class UpdatePlatformDto {
-    platformName?: string;
+    platformName?: PlatformName;
 }

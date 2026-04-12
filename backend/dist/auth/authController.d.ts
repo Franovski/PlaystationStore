@@ -26,25 +26,7 @@ export declare class AuthController {
     login(dto: LoginDto): Promise<{
         requiresTwoFactor: boolean;
         tempToken: string;
-    } | {
-        accessToken: string;
-        refreshToken: string;
-        user: {
-            userId: number;
-            username: string;
-            email: string;
-            firstName: string;
-            lastName: string;
-            country: string;
-            dateOfBirth: Date;
-            role: import("../users/userEntity").UserRole;
-            isEmailVerified: boolean;
-            isTotpEnabled: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-        };
-        requiresTwoFactor?: undefined;
-        tempToken?: undefined;
+        otpMethod: "totp" | "email-otp";
     }>;
     refreshTokens(userId: number, refreshToken: string): Promise<{
         accessToken: string;

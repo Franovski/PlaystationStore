@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, clearError } from '../features/auth/authSlice';
 import { RootState, AppDispatch } from '../app/store';
+import { COUNTRIES } from './AdminDashboardPage';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,8 @@ const RegisterPage: React.FC = () => {
     firstName: '',
     lastName: '',
     country: '',
-    dateOfBirth: ''
+    dateOfBirth: '',
+    role: 'playstation_user', // Default Role
   });
   
   const dispatch = useDispatch<AppDispatch>();
@@ -78,7 +80,20 @@ const RegisterPage: React.FC = () => {
             </div>
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">Country*</label>
-              <input type="text" name="country" value={formData.country} onChange={handleChange} required className="w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500" />
+              <select
+                name="country"
+                value={formData.country}
+                onChange={handleChange as any}
+                required
+                className="w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+              >
+                <option value="">Select a country</option>
+                {COUNTRIES.map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">First Name (Opt)</label>
@@ -92,6 +107,23 @@ const RegisterPage: React.FC = () => {
               <label className="block text-gray-300 text-sm font-medium mb-1">Date of Birth* (YYYY-MM-DD)</label>
               <input type="text" name="dateOfBirth" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}" value={formData.dateOfBirth} onChange={handleChange} required className="w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500" />
             </div>
+            
+            {/* TEMPORARY DEV-ONLY ADMIN SIGNUP TOGGLE */}
+            {import.meta.env.VITE_ENABLE_DEV_ADMIN_SIGNUP === 'true' && (
+              <div className="col-span-2 p-3 bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded">
+                <label className="block text-yellow-500 text-xs font-bold mb-2">DEV ONLY: Account Role</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange as any}
+                  className="w-full p-2 bg-gray-800 text-yellow-400 rounded border border-yellow-600 focus:outline-none"
+                >
+                  <option value="playstation_user">CUSTOMER</option>
+                  <option value="admin">ADMIN</option>
+                </select>
+                <p className="text-xs text-yellow-600 mt-1">This exists only for testing and is removed in prod.</p>
+              </div>
+            )}
           </div>
           
           <button

@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
@@ -17,13 +18,16 @@ const bcrypt = require("bcryptjs");
 const otplib_1 = require("otplib");
 const QRCode = require("qrcode");
 const userService_1 = require("../users/userService");
+const mailService_1 = require("../mail/mailService");
 const reset_password_service_1 = require("./resetPassword/reset-password.service");
-let AuthService = class AuthService {
-    constructor(usersService, passwordResetService, jwtService, configService) {
+let AuthService = AuthService_1 = class AuthService {
+    constructor(usersService, passwordResetService, jwtService, configService, mailService) {
         this.usersService = usersService;
         this.passwordResetService = passwordResetService;
         this.jwtService = jwtService;
         this.configService = configService;
+        this.mailService = mailService;
+        this.pendingLoginOtps = new Map();
     }
     async validateUser(email, password) {
         const user = await this.usersService.findByEmail(email);
@@ -34,6 +38,11 @@ let AuthService = class AuthService {
         return valid ? user : null;
     }
     async register(dto) {
+        if (dto.role === 'admin' &&
+            (process.env.NODE_ENV !== 'development' ||
+                process.env.ENABLE_DEV_ADMIN_SIGNUP !== 'true')) {
+            dto.role = 'playstation_user';
+        }
         const user = await this.usersService.create(dto);
         const tokens = await this.generateTokens(user);
         await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
@@ -43,21 +52,33 @@ let AuthService = class AuthService {
         };
     }
     async login(user) {
+        const tempToken = this.jwtService.sign({
+            sub: user.userId,
+            requiresTwoFactor: true,
+            otpMethod: user.isTotpEnabled ? 'totp' : 'email-otp',
+        }, {
+            secret: this.configService.get('JWT_ACCESS_SECRET'),
+            expiresIn: '5m',
+        });
         if (user.isTotpEnabled) {
-            const tempToken = this.jwtService.sign({ sub: user.userId, requiresTwoFactor: true }, {
-                secret: this.configService.get('JWT_ACCESS_SECRET'),
-                expiresIn: '5m',
-            });
             return {
                 requiresTwoFactor: true,
                 tempToken,
+                otpMethod: 'totp',
             };
         }
-        const tokens = await this.generateTokens(user);
-        await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
+        const loginCode = this.generateNumericOtp();
+        this.storePendingLoginOtp(tempToken, user.userId, loginCode);
+        try {
+            await this.sendLoginOtp(user.email, loginCode);
+        }
+        catch (error) {
+            throw new common_1.BadRequestException('Failed to send verification code. Please try again.');
+        }
         return {
-            user: this.sanitizeUser(user),
-            ...tokens,
+            requiresTwoFactor: true,
+            tempToken,
+            otpMethod: 'email-otp',
         };
     }
     async refreshTokens(userId, refreshToken) {
@@ -136,15 +157,25 @@ let AuthService = class AuthService {
             throw new common_1.BadRequestException('Token is not a 2FA token');
         }
         const user = await this.usersService.findById(payload.sub);
-        if (!user || !user.totpSecret) {
+        if (!user) {
             throw new common_1.UnauthorizedException();
         }
-        const valid = otplib_1.authenticator.verify({
-            token: code,
-            secret: user.totpSecret,
-        });
-        if (!valid) {
-            throw new common_1.UnauthorizedException('Invalid TOTP code');
+        const normalizedCode = code.trim();
+        const isEmailOtpFlow = payload.otpMethod === 'email-otp' || this.pendingLoginOtps.has(tempToken);
+        if (isEmailOtpFlow) {
+            this.verifyPendingLoginOtp(tempToken, user.userId, normalizedCode);
+        }
+        else {
+            if (!user.totpSecret) {
+                throw new common_1.UnauthorizedException();
+            }
+            const valid = otplib_1.authenticator.verify({
+                token: normalizedCode,
+                secret: user.totpSecret,
+            });
+            if (!valid) {
+                throw new common_1.UnauthorizedException('Invalid TOTP code');
+            }
         }
         const tokens = await this.generateTokens(user);
         await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
@@ -166,20 +197,14 @@ let AuthService = class AuthService {
             email: user.email,
             role: user.role,
         };
-        const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
-        const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
-        const accessExpiration = this.configService.get('JWT_ACCESS_EXPIRATION')?.trim() || '15m';
-        const refreshExpiration = this.configService.get('JWT_REFRESH_EXPIRATION')?.trim() || '7d';
-        console.log('JWT_ACCESS_EXPIRATION =', accessExpiration);
-        console.log('JWT_REFRESH_EXPIRATION =', refreshExpiration);
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync(payload, {
-                secret: accessSecret,
-                expiresIn: accessExpiration,
+                secret: this.configService.get('JWT_ACCESS_SECRET'),
+                expiresIn: this.configService.get('JWT_ACCESS_EXPIRATION', '15m'),
             }),
             this.jwtService.signAsync(payload, {
-                secret: refreshSecret,
-                expiresIn: refreshExpiration,
+                secret: this.configService.get('JWT_REFRESH_SECRET'),
+                expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION', '7d'),
             }),
         ]);
         return { accessToken, refreshToken };
@@ -188,13 +213,61 @@ let AuthService = class AuthService {
         const { password, refreshToken, totpSecret, passwordResetToken, passwordResetExpires, passwordResetMethod, passwordResetAttempts, ...safe } = user;
         return safe;
     }
+    storePendingLoginOtp(tempToken, userId, code) {
+        const expiresAt = Date.now() + AuthService_1.LOGIN_OTP_TTL_MINUTES * 60000;
+        this.pendingLoginOtps.set(tempToken, {
+            userId,
+            code,
+            expiresAt,
+        });
+        this.cleanupExpiredPendingOtps();
+    }
+    verifyPendingLoginOtp(tempToken, userId, code) {
+        const pending = this.pendingLoginOtps.get(tempToken);
+        if (!pending || pending.userId !== userId) {
+            throw new common_1.UnauthorizedException('Invalid or expired login verification session');
+        }
+        if (Date.now() > pending.expiresAt) {
+            this.pendingLoginOtps.delete(tempToken);
+            throw new common_1.UnauthorizedException('Login verification code expired');
+        }
+        if (pending.code !== code) {
+            throw new common_1.UnauthorizedException('Invalid login verification code');
+        }
+        this.pendingLoginOtps.delete(tempToken);
+    }
+    cleanupExpiredPendingOtps() {
+        const now = Date.now();
+        for (const [token, pending] of this.pendingLoginOtps.entries()) {
+            if (now > pending.expiresAt) {
+                this.pendingLoginOtps.delete(token);
+            }
+        }
+    }
+    generateNumericOtp() {
+        return String(Math.floor(100000 + Math.random() * 900000));
+    }
+    async sendLoginOtp(email, code) {
+        try {
+            await this.mailService.sendLoginOtpEmail({
+                to: email,
+                loginCode: code,
+                expiresInMinutes: AuthService_1.LOGIN_OTP_TTL_MINUTES,
+            });
+        }
+        catch (error) {
+            throw new common_1.BadRequestException('Failed to send verification code. Please try again.');
+        }
+    }
 };
 exports.AuthService = AuthService;
-exports.AuthService = AuthService = __decorate([
+AuthService.LOGIN_OTP_TTL_MINUTES = 5;
+exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [userService_1.UsersService,
         reset_password_service_1.PasswordResetService,
         jwt_1.JwtService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        mailService_1.MailService])
 ], AuthService);
 //# sourceMappingURL=authService.js.map

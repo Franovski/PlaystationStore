@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
+const passport_1 = require("@nestjs/passport");
 const config_1 = require("@nestjs/config");
 const authService_1 = require("./authService");
 const authController_1 = require("./authController");
@@ -17,6 +18,7 @@ const mailModule_1 = require("../mail/mailModule");
 const reset_password_service_1 = require("./resetPassword/reset-password.service");
 const reset_password_otp_service_1 = require("./resetPassword/reset-password-otp.service");
 const reset_password_link_service_1 = require("./resetPassword/reset-password-link.service");
+const jwt_strategy_1 = require("./jwt.strategy");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -26,6 +28,7 @@ exports.AuthModule = AuthModule = __decorate([
             userModule_1.UsersModule,
             mailModule_1.MailModule,
             config_1.ConfigModule,
+            passport_1.PassportModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
@@ -50,6 +53,7 @@ exports.AuthModule = AuthModule = __decorate([
             reset_password_service_1.PasswordResetService,
             reset_password_otp_service_1.PasswordResetOtpService,
             reset_password_link_service_1.PasswordResetLinkService,
+            jwt_strategy_1.JwtStrategy,
         ],
         exports: [authService_1.AuthService, jwt_1.JwtModule],
     })

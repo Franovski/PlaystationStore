@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Platform } from './platformEntity';
+import { Platform, PlatformName } from './platformEntity';
 
 @Injectable()
 export class PlatformRepository {
@@ -18,16 +18,16 @@ export class PlatformRepository {
     return this.repository.findOne({ where: { platformId } });
   }
 
-  async findByName(platformName: string): Promise<Platform | null> {
-    return this.repository.findOne({ where: { platformName } });
+  async findByName(platformName: PlatformName | string): Promise<Platform | null> {
+    return this.repository.findOne({ where: { platformName: platformName as PlatformName } });
   }
 
-  async create(platformName: string): Promise<Platform> {
+  async create(platformName: PlatformName): Promise<Platform> {
     const platform = this.repository.create({ platformName });
     return this.repository.save(platform);
   }
 
-  async update(platformId: number, platformName: string): Promise<Platform | null> {
+  async update(platformId: number, platformName: PlatformName): Promise<Platform | null> {
     await this.repository.update(platformId, { platformName });
     return this.findById(platformId);
   }

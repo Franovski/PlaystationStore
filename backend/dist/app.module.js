@@ -16,9 +16,11 @@ const categoryModule_1 = require("./categories/categoryModule");
 const platformModule_1 = require("./platforms/platformModule");
 const gameModule_1 = require("./games/gameModule");
 const gameCategoryModule_1 = require("./gameCategories/gameCategoryModule");
+const gamePlatformModule_1 = require("./gamePlatforms/gamePlatformModule");
 const userModule_1 = require("./users/userModule");
 const authModule_1 = require("./auth/authModule");
 const mailModule_1 = require("./mail/mailModule");
+const adminModule_1 = require("./admin/adminModule");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -27,7 +29,6 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                envFilePath: '.env.example',
             }),
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
@@ -47,9 +48,11 @@ exports.AppModule = AppModule = __decorate([
             platformModule_1.PlatformModule,
             gameModule_1.GameModule,
             gameCategoryModule_1.GameCategoryModule,
+            gamePlatformModule_1.GamePlatformModule,
             userModule_1.UsersModule,
             authModule_1.AuthModule,
             mailModule_1.MailModule,
+            adminModule_1.AdminModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

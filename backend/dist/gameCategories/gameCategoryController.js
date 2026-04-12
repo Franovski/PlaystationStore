@@ -23,6 +23,9 @@ let GameCategoryController = class GameCategoryController {
     async assignCategoryToGame(dto) {
         return this.gameCategoryService.linkGameAndCategory(dto);
     }
+    async getAll() {
+        return this.gameCategoryService.getAllGameCategories();
+    }
     async removeCategoryFromGame(gameId, categoryId) {
         return this.gameCategoryService.unlinkGameAndCategory(gameId, categoryId);
     }
@@ -41,6 +44,12 @@ __decorate([
     __metadata("design:paramtypes", [gameCategoryDto_1.AddGameCategoryDto]),
     __metadata("design:returntype", Promise)
 ], GameCategoryController.prototype, "assignCategoryToGame", null);
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], GameCategoryController.prototype, "getAll", null);
 __decorate([
     (0, common_1.Delete)('game/:gameId/category/:categoryId'),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
