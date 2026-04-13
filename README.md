@@ -114,7 +114,7 @@ The database schema relies on strict relational ties mapped by TypeORM:
    ```bash
    npm install
    ```
-3. Setup local PostgreSQL database based on credentials in environment variable configs.
+3. Create a `.env` file in the `backend` directory (see [Environment Variables](#-environment-variables) below) and set up your local PostgreSQL database to match those credentials.
 4. Run the development server:
    ```bash
    npm run start:dev
