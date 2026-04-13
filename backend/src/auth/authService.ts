@@ -50,7 +50,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-    // TEMPORARY FOR TESTING: Allow admin signup from public page if DEV mode & flag is enabled
+
     if (
       dto.role === 'admin' &&
       (process.env.NODE_ENV !== 'development' ||

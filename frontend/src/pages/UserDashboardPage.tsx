@@ -12,7 +12,7 @@ const UserDashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Attempt fetching user games or library.
+
     setIsLoading(false);
   }, []);
 

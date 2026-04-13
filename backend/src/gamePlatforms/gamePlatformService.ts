@@ -14,13 +14,11 @@ export class GamePlatformService {
   ) {}
 
   async linkGameAndPlatform(dto: AddGamePlatformDto): Promise<GamePlatform> {
-    // 1. Verify existence of game
+
     await this.gameService.getGameById(dto.gameId);
 
-    // 2. Verify existence of platform
     await this.platformService.getPlatformById(dto.platformId);
 
-    // 3. Ensure no duplicate mappings exist
     const existing = await this.gamePlatformRepository.checkLink(dto.gameId, dto.platformId);
     if (existing) {
       throw new ConflictException(`Game ID ${dto.gameId} is already linked with Platform ID ${dto.platformId}`);
@@ -38,7 +36,7 @@ export class GamePlatformService {
   }
 
   async getPlatformsByGame(gameId: number) {
-    // Validate game
+
     await this.gameService.getGameById(gameId);
 
     const mappings = await this.gamePlatformRepository.findByGame(gameId);
@@ -50,7 +48,7 @@ export class GamePlatformService {
   }
 
   async getGamesByPlatform(platformId: number) {
-    // Validate platform
+
     await this.platformService.getPlatformById(platformId);
 
     const mappings = await this.gamePlatformRepository.findByPlatform(platformId);

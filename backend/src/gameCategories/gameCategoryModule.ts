@@ -10,8 +10,8 @@ import { CategoryModule } from '../categories/categoryModule';
 @Module({
   imports: [
     TypeOrmModule.forFeature([GameCategory]),
-    GameModule,     // We need this to validate games exist
-    CategoryModule, // We need this to validate categories exist
+    GameModule,
+    CategoryModule,
   ],
   controllers: [GameCategoryController],
   providers: [GameCategoryService, GameCategoryRepository],

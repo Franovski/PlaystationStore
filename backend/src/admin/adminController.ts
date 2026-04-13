@@ -49,7 +49,6 @@ export class AdminController {
     };
   }
 
-  // --- USERS ---
   @Get('users')
   async getAllUsers() {
     return this.usersService.findAll();
@@ -82,7 +81,6 @@ export class AdminController {
     return { message: 'User deleted successfully' };
   }
 
-  // --- GAMES ---
   @Get('games')
   async getAllGames() {
     return this.gameService.getAllGames();

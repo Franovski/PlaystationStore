@@ -42,7 +42,6 @@ export const adminGamesApi = {
   },
 };
 
-// New Extentions
 export const adminPlatformsApi = {
   getAll: async () => {
     return axiosClient.get('/platforms');
@@ -81,7 +80,7 @@ export const adminCategoriesApi = {
 
 export const adminGameCategoriesApi = {
   getAll: async () => {
-    // Requires a custom backend endpoint. Handled implicitly here.
+
     return axiosClient.get('/game-categories')
   },
   getByGame: async (gameId: string | number) => {
@@ -91,7 +90,7 @@ export const adminGameCategoriesApi = {
     return axiosClient.post('/game-categories', data);
   },
   update: async (gameId: string | number, categoryId: string | number, data: { newCategoryId: string | number }) => {
-    // Simulating PUT by replacing if standard UPDATE isn't available
+
     await axiosClient.delete(`/game-categories/game/${gameId}/category/${categoryId}`);
     return axiosClient.post('/game-categories', { gameId, categoryId: data.newCategoryId });
   },

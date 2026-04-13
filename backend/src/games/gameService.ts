@@ -28,7 +28,7 @@ export class GameService {
   }
 
   async createGame(createDto: CreateGameDto): Promise<Game> {
-    // Validate negative prices just in case DTO validation fails or is bypassed internally
+
     if (createDto.basePrice < 0) {
       throw new BadRequestException('Game basePrice cannot be negative');
     }
@@ -48,7 +48,7 @@ export class GameService {
   }
 
   async updateGame(id: number, updateDto: UpdateGameDto): Promise<Game> {
-    // Ensure the game exists first
+
     await this.getGameById(id);
 
     if (updateDto.basePrice !== undefined && updateDto.basePrice < 0) {
@@ -78,15 +78,12 @@ export class GameService {
   }
 
   async deleteGame(id: number): Promise<void> {
-    // Ensure the game exists first
+
     const game = await this.gameRepository.findById(id);
     if (!game) {
       throw new NotFoundException(`Game with ID ${id} not found`);
     }
-    
-    // In a real expanded scenario with relations (like Wishlist or Reviews), 
-    // you might want to handle cascading deletes or prevent deletion if relations exist.
-    // For now, based solely on the Games table structure, we just remove it.
+
     await this.gameRepository.remove(id);
   }
 }

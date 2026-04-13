@@ -9,7 +9,7 @@ export class GameController {
   @Get()
   async getAll(@Query('title') title?: string) {
     if (title) {
-        // e.g., GET /games?title=God%20of%20War
+
         return this.gameService.getGamesByTitle(title);
     }
     return this.gameService.getAllGames();

@@ -125,7 +125,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Login
+
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true; state.error = null; state.msg = null;
       })
@@ -147,7 +147,7 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false; state.error = action.payload as string;
       })
-      // TOTP
+
       .addCase(verifyTotp.pending, (state) => {
         state.isLoading = true; state.error = null;
       })
@@ -163,17 +163,17 @@ const authSlice = createSlice({
       .addCase(verifyTotp.rejected, (state, action) => {
         state.isLoading = false; state.error = action.payload as string;
       })
-      // Register
+
       .addCase(registerUser.pending, (state) => { state.isLoading = true; state.error = null; })
       .addCase(registerUser.fulfilled, (state) => { state.isLoading = false; })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false; state.error = action.payload as string;
       })
-      // Forgot Password
+
       .addCase(forgotPasswordThunk.pending, (state) => { state.isLoading = true; state.error = null; state.msg = null; })
       .addCase(forgotPasswordThunk.fulfilled, (state, action) => { state.isLoading = false; state.msg = action.payload as string; })
       .addCase(forgotPasswordThunk.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
-      // Reset Password
+
       .addCase(resetPasswordThunk.pending, (state) => { state.isLoading = true; state.error = null; state.msg = null; })
       .addCase(resetPasswordThunk.fulfilled, (state, action) => { state.isLoading = false; state.msg = action.payload as string; })
       .addCase(resetPasswordThunk.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });

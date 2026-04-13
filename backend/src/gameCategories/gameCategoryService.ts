@@ -14,13 +14,11 @@ export class GameCategoryService {
   ) {}
 
   async linkGameAndCategory(dto: AddGameCategoryDto): Promise<GameCategory> {
-    // 1. Verify existence of game
+
     await this.gameService.getGameById(dto.gameId);
 
-    // 2. Verify existence of category
     await this.categoryService.getCategoryById(dto.categoryId);
 
-    // 3. Ensure no duplicate mappings exist
     const existing = await this.gameCategoryRepository.checkLink(dto.gameId, dto.categoryId);
     if (existing) {
       throw new ConflictException(`Game ID ${dto.gameId} is already linked with Category ID ${dto.categoryId}`);
@@ -38,7 +36,7 @@ export class GameCategoryService {
   }
 
   async getCategoriesByGame(gameId: number) {
-    // Validate game
+
     await this.gameService.getGameById(gameId);
 
     const mappings = await this.gameCategoryRepository.findByGame(gameId);
@@ -50,7 +48,7 @@ export class GameCategoryService {
   }
 
   async getGamesByCategory(categoryId: number) {
-    // Validate category
+
     await this.categoryService.getCategoryById(categoryId);
 
     const mappings = await this.gameCategoryRepository.findByCategory(categoryId);

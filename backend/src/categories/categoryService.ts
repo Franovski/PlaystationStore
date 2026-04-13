@@ -39,8 +39,7 @@ export class CategoryService {
     if (!updateDto.categoryName) {
         return this.getCategoryById(id);
     }
-    
-    // Throw error if category attempting to update does not exist
+
     await this.getCategoryById(id);
 
     const existing = await this.categoryRepository.findByName(updateDto.categoryName);

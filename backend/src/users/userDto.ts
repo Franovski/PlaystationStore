@@ -37,7 +37,7 @@ export class CreateUserDto {
 
   @IsDateString()
   @IsNotEmpty()
-  dateOfBirth: string; // or Date if using Type transformation
+  dateOfBirth: string;
 
   @IsEnum(UserRole)
   @IsOptional()

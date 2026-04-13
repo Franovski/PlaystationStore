@@ -421,7 +421,6 @@ const AdminDashboardPage: React.FC = () => {
     setIsGameModalOpen(true);
   };
 
-  // Modals Openers for New Entities
   const openPlatformModal = (p: Platform | null = null) => {
     setEditingPlatform(p);
     setPlatformFormData(p ? { platformName: p.platformName } : emptyPlatformForm);

@@ -14,7 +14,7 @@ const RegisterPage: React.FC = () => {
     lastName: '',
     country: '',
     dateOfBirth: '',
-    role: 'playstation_user', // Default Role
+    role: 'playstation_user',
   });
   
   const dispatch = useDispatch<AppDispatch>();
