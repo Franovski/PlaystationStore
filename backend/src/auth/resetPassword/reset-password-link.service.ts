@@ -66,10 +66,8 @@ export class PasswordResetLinkService {
       throw new BadRequestException('Invalid or expired reset token');
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-
     await this.usersService.update(user.userId, {
-      password: hashedPassword,
+      password: newPassword,
       refreshToken: null,
       passwordResetToken: null,
       passwordResetExpires: null,

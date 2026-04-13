@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { resetPasswordThunk, clearError } from '../features/auth/authSlice';
 import { RootState, AppDispatch } from '../app/store';
 
 const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
+  const tokenFromUrl = searchParams.get('token') || '';
   
+  const location = useLocation();
+  const defaultEmail = location.state?.defaultEmail || '';
+  
+  const [email, setEmail] = useState<string>(defaultEmail);
+  const [token, setToken] = useState<string>(tokenFromUrl);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
@@ -17,17 +22,14 @@ const ResetPasswordPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(clearError());
-    if (!token) {
-      // Typically we'll redirect if there's no token, but allowing error msg to show is better UX
-    }
-  }, [dispatch, token]);
+  }, [dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       alert("Passwords do not match"); return;
     }
-    const result = await dispatch(resetPasswordThunk({ token, newPassword }));
+    const result = await dispatch(resetPasswordThunk({ token, email, newPassword }));
     if (result.meta.requestStatus === 'fulfilled') {
       setTimeout(() => {
         navigate('/login');
@@ -53,6 +55,26 @@ const ResetPasswordPage: React.FC = () => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <label className="block text-gray-300 text-sm font-medium mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-1">OTP / Reset Token</label>
+            <input
+              type="text"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              required
+              className="w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div>
             <label className="block text-gray-300 text-sm font-medium mb-1">New Password (Min 8 chars)</label>
             <input
               type="password"
@@ -75,7 +97,7 @@ const ResetPasswordPage: React.FC = () => {
           
           <button
             type="submit"
-            disabled={isLoading || !newPassword || !confirmPassword || !token}
+            disabled={isLoading || !newPassword || !confirmPassword || !token || !email}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6 disabled:opacity-50"
           >
             {isLoading ? 'Resetting...' : 'Confirm Reset'}

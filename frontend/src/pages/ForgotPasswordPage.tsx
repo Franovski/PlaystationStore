@@ -16,7 +16,12 @@ const ForgotPasswordPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dispatch(forgotPasswordThunk(email));
+    const result = await dispatch(forgotPasswordThunk(email));
+    if (forgotPasswordThunk.fulfilled.match(result as any) || result.meta.requestStatus === 'fulfilled') {
+      setTimeout(() => {
+        navigate('/reset-password', { state: { defaultEmail: email } });
+      }, 1000);
+    }
   };
 
   return (

@@ -74,9 +74,8 @@ let PasswordResetOtpService = PasswordResetOtpService_1 = class PasswordResetOtp
             }
             throw new common_1.BadRequestException('Invalid OTP');
         }
-        const hashedPassword = await bcrypt.hash(newPassword, 12);
         await this.usersService.update(user.userId, {
-            password: hashedPassword,
+            password: newPassword,
             refreshToken: null,
             passwordResetToken: null,
             passwordResetExpires: null,

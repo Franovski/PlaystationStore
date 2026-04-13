@@ -13,7 +13,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PasswordResetLinkService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
-const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const mailService_1 = require("../../mail/mailService");
 const userEntity_1 = require("../../users/userEntity");
@@ -55,9 +54,8 @@ let PasswordResetLinkService = PasswordResetLinkService_1 = class PasswordResetL
             }
             throw new common_1.BadRequestException('Invalid or expired reset token');
         }
-        const hashedPassword = await bcrypt.hash(newPassword, 12);
         await this.usersService.update(user.userId, {
-            password: hashedPassword,
+            password: newPassword,
             refreshToken: null,
             passwordResetToken: null,
             passwordResetExpires: null,

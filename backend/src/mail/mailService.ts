@@ -33,9 +33,9 @@ export class MailService implements OnModuleDestroy {
   async sendPasswordResetLinkEmail(params: { to: string; resetToken: string }) {
     const from = this.getMailFrom();
     const resetUrl = this.buildResetPasswordUrl(params.resetToken);
-    const subject = 'Reset your PharmaFlow password';
+    const subject = 'Reset your PlayStation Store password';
     const text = [
-      'We received a request to reset your PharmaFlow password.',
+      'We received a request to reset your PlayStation Store password.',
       '',
       `Reset your password using this link: ${resetUrl}`,
       '',
@@ -43,7 +43,7 @@ export class MailService implements OnModuleDestroy {
       'This link expires soon and can only be used once.',
     ].join('\n');
     const html = [
-      '<p>We received a request to reset your PharmaFlow password.</p>',
+      '<p>We received a request to reset your PlayStation Store password.</p>',
       `<p><a href="${resetUrl}">Reset your password</a></p>`,
       `<p>If the button does not work, use this link:</p><p>${resetUrl}</p>`,
       '<p>If you did not request this, you can ignore this email.</p>',
@@ -92,9 +92,9 @@ export class MailService implements OnModuleDestroy {
     expiresInMinutes: number;
   }) {
     const from = this.getMailFrom();
-    const subject = 'Your PharmaFlow password reset code';
+    const subject = 'Your PlayStation Store password reset code';
     const text = [
-      'We received a request to reset your PharmaFlow password.',
+      'We received a request to reset your PlayStation Store password.',
       '',
       `Your password reset code is: ${params.resetCode}`,
       `This code expires in ${params.expiresInMinutes} minutes.`,
@@ -102,7 +102,7 @@ export class MailService implements OnModuleDestroy {
       'If you did not request this, you can ignore this email.',
     ].join('\n');
     const html = [
-      '<p>We received a request to reset your PharmaFlow password.</p>',
+      '<p>We received a request to reset your PlayStation Store password.</p>',
       `<p>Your password reset code is: <strong>${params.resetCode}</strong></p>`,
       `<p>This code expires in ${params.expiresInMinutes} minutes.</p>`,
       '<p>If you did not request this, you can ignore this email.</p>',
@@ -148,9 +148,9 @@ export class MailService implements OnModuleDestroy {
     expiresInMinutes: number;
   }) {
     const from = this.getMailFrom();
-    const subject = 'Your PlayStationStore login verification code';
+    const subject = 'Your PlayStation Store login verification code';
     const text = [
-      'Use this code to complete your PlayStationStore login:',
+      'Use this code to complete your PlayStation Store login:',
       '',
       `${params.loginCode}`,
       '',
@@ -158,7 +158,7 @@ export class MailService implements OnModuleDestroy {
       'If you did not try to sign in, you can ignore this email.',
     ].join('\n');
     const html = [
-      '<p>Use this code to complete your PlayStationStore login:</p>',
+      '<p>Use this code to complete your PlayStation Store login:</p>',
       `<p><strong>${params.loginCode}</strong></p>`,
       `<p>This code expires in ${params.expiresInMinutes} minutes.</p>`,
       '<p>If you did not try to sign in, you can ignore this email.</p>',
