@@ -354,7 +354,7 @@ const AdminDashboardPage: React.FC = () => {
         try {
           const res: any = await adminGameCategoriesApi.getAll();
           setGameCategoriesList(Array.isArray(res) ? res : []);
-        } catch (ignored) {}
+        } catch (ignored) { }
       } else if (activeTab === 'gamePlatforms') {
         const games: any = await adminGamesApi.getAll();
         setGamesList(Array.isArray(games) ? games : []);
@@ -363,7 +363,7 @@ const AdminDashboardPage: React.FC = () => {
         try {
           const res: any = await adminGamePlatformsApi.getAll();
           setGamePlatformsList(Array.isArray(res) ? res : []);
-        } catch (ignored) {}
+        } catch (ignored) { }
       }
     } catch (err) {
       console.error(`Failed to load admin data for ${activeTab}`, err);
@@ -588,7 +588,7 @@ const AdminDashboardPage: React.FC = () => {
       const gId = parseInt(relationFormData.gameId, 10);
       const cId = parseInt(relationFormData.relationId, 10);
       if (isNaN(gId) || isNaN(cId)) { alert('Game and Category are required'); return; }
-      
+
       if (editingGameCategory) {
         await adminGameCategoriesApi.update(editingGameCategory.gameId, editingGameCategory.categoryId, { newCategoryId: cId });
       } else {
@@ -607,7 +607,7 @@ const AdminDashboardPage: React.FC = () => {
       const gId = parseInt(relationFormData.gameId, 10);
       const pId = parseInt(relationFormData.relationId, 10);
       if (isNaN(gId) || isNaN(pId)) { alert('Game and Platform are required'); return; }
-      
+
       if (editingGamePlatform) {
         await adminGamePlatformsApi.update(editingGamePlatform.gameId, editingGamePlatform.platformId, { newPlatformId: pId });
       } else {
@@ -692,11 +692,10 @@ const AdminDashboardPage: React.FC = () => {
         <nav className="flex-1 space-y-2">
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${
-              activeTab === 'dashboard'
-                ? 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg text-white'
-                : 'text-gray-400 hover:bg-gray-750 hover:text-white'
-            }`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'dashboard'
+              ? 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
           >
             <svg className="w-5 h-5 mr-3 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -706,11 +705,10 @@ const AdminDashboardPage: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('users')}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${
-              activeTab === 'users'
-                ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-lg text-white'
-                : 'text-gray-400 hover:bg-gray-750 hover:text-white'
-            }`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'users'
+              ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
           >
             <svg className="w-5 h-5 mr-3 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -720,11 +718,10 @@ const AdminDashboardPage: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('games')}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${
-              activeTab === 'games'
-                ? 'bg-gradient-to-r from-green-600 to-green-500 shadow-lg text-white'
-                : 'text-gray-400 hover:bg-gray-750 hover:text-white'
-            }`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'games'
+              ? 'bg-gradient-to-r from-green-600 to-green-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
           >
             <svg className="w-5 h-5 mr-3 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -735,44 +732,40 @@ const AdminDashboardPage: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('platforms')}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${
-              activeTab === 'platforms'
-                ? 'bg-gradient-to-r from-red-600 to-red-500 shadow-lg text-white'
-                : 'text-gray-400 hover:bg-gray-750 hover:text-white'
-            }`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'platforms'
+              ? 'bg-gradient-to-r from-red-600 to-red-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
           >
             <span className="mr-3 text-lg opacity-80">🕹️</span> Platforms
           </button>
 
           <button
             onClick={() => setActiveTab('categories')}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${
-              activeTab === 'categories'
-                ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 shadow-lg text-white'
-                : 'text-gray-400 hover:bg-gray-750 hover:text-white'
-            }`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'categories'
+              ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
           >
             <span className="mr-3 text-lg opacity-80">🏷️</span> Categories
           </button>
 
           <button
             onClick={() => setActiveTab('gameCategories')}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${
-              activeTab === 'gameCategories'
-                ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 shadow-lg text-white'
-                : 'text-gray-400 hover:bg-gray-750 hover:text-white'
-            }`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'gameCategories'
+              ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
           >
             <span className="mr-3 text-lg opacity-80">🔗</span> Game Categories
           </button>
 
           <button
             onClick={() => setActiveTab('gamePlatforms')}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${
-              activeTab === 'gamePlatforms'
-                ? 'bg-gradient-to-r from-teal-600 to-teal-500 shadow-lg text-white'
-                : 'text-gray-400 hover:bg-gray-750 hover:text-white'
-            }`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'gamePlatforms'
+              ? 'bg-gradient-to-r from-teal-600 to-teal-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
           >
             <span className="mr-3 text-lg opacity-80">🔗</span> Game Platforms
           </button>
@@ -891,7 +884,7 @@ const AdminDashboardPage: React.FC = () => {
                       Add New
                     </button>
                   </div>
-                  
+
                   <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse whitespace-nowrap">
@@ -917,7 +910,7 @@ const AdminDashboardPage: React.FC = () => {
                               </td>
                             </tr>
                           ))}
-                          
+
                           {activeTab === 'categories' && categoriesList.filter(c => c.categoryName.toLowerCase().includes(normalizedSearch)).map(c => (
                             <tr key={c.categoryId} className="hover:bg-gray-750">
                               <td className="px-6 py-4 text-gray-500 font-mono text-xs">{c.categoryId}</td>
@@ -1016,11 +1009,10 @@ const AdminDashboardPage: React.FC = () => {
                               </td>
                               <td className="px-6 py-4">
                                 <span
-                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${
-                                    u.role === 'admin'
-                                      ? 'bg-red-900/30 text-red-400 border-red-800/50'
-                                      : 'bg-blue-900/30 text-blue-400 border-blue-800/50'
-                                  }`}
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${u.role === 'admin'
+                                    ? 'bg-red-900/30 text-red-400 border-red-800/50'
+                                    : 'bg-blue-900/30 text-blue-400 border-blue-800/50'
+                                    }`}
                                 >
                                   {u.role.replace('_', ' ')}
                                 </span>
@@ -1533,8 +1525,8 @@ const AdminDashboardPage: React.FC = () => {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 transform transition-all scale-100">
             <h2 className="text-2xl font-black text-white tracking-wide uppercase mb-6 border-b border-gray-700 pb-4">
-              {isGameCategoryModalOpen 
-                ? (editingGameCategory ? "Edit Game Category" : "Link Game Category") 
+              {isGameCategoryModalOpen
+                ? (editingGameCategory ? "Edit Game Category" : "Link Game Category")
                 : (editingGamePlatform ? "Edit Game Platform" : "Link Game Platform")}
             </h2>
             <form onSubmit={isGameCategoryModalOpen ? handleGameCategorySubmit : handleGamePlatformSubmit} className="space-y-5">
