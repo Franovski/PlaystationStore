@@ -5,6 +5,7 @@ node_modules/
 
 # 🔐 Secrets & Environment Variables
 .env
+.env.*
 *.pem
 *.key
 *.cert
