@@ -139,21 +139,23 @@ The database schema relies on strict relational ties mapped by TypeORM:
 
 ## 🔐 Environment Variables
 
-Create `.env` files in their respective directories.
+This project uses template `.env.example` files to help you configure your environment variables. 
 
-**Backend `.env`:**
-* `DB_HOST`
-* `DB_PORT`
-* `DB_USERNAME`
-* `DB_PASSWORD`
-* `DB_DATABASE`
-* `JWT_ACCESS_SECRET`
-* `JWT_REFRESH_SECRET`
-* `PASSWORD_RESET_MODE` (Set to `otp` or `link`)
-* Mail configuration variables (SMTP settings)
+### Backend
+1. Navigate to the `backend` directory.
+2. Copy the `.env.example` file and rename it to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+3. Open the `.env` file and replace the dummy values (like `your_db_username`, `your_jwt_access_secret_key`, etc.) with your actual local configuration and secrets.
 
-**Frontend `.env`:**
-* `VITE_API_BASE_URL` (e.g., `http://localhost:3000/api`)
+### Frontend
+1. Navigate to the `frontend` directory.
+2. Copy the `.env.example` file and rename it to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+3. Open the `.env` file and ensure the URLs point to your backend correctly.
 
 ---
 
