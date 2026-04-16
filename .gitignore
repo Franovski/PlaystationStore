@@ -2,6 +2,8 @@
 node_modules/
 .pnp
 .pnp.js
+package.json
+package-lock.json
 
 # 🔐 Secrets & Environment Variables
 .env
@@ -46,11 +48,7 @@ ehthumbs.db
 Thumbs.db
 
 # 🛠️ IDEs & Editors
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode/
 .idea/
 *.suo
 *.ntvs*
