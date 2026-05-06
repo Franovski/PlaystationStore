@@ -6,6 +6,7 @@
  * @interaction Used by the CategoryRepository to query and persist category configurations.
  */
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 
 /**
  * Represents a Category entity within the application.
@@ -14,6 +15,7 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
  * @description Serves as the primary data model for categories, mapping directly to the 'categories' table in the database.
  * Used for grouping and classifying games in the store.
  */
+@ObjectType()
 @Entity('categories')
 export class Category {
   /**
@@ -21,6 +23,7 @@ export class Category {
    * Auto-generated primary key.
    * @type {number}
    */
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   categoryId: number;
 
@@ -29,6 +32,7 @@ export class Category {
    * Must be unique across all categories to prevent duplicates (e.g., two "Action" categories).
    * @type {string}
    */
+  @Field()
   @Column({ type: 'varchar', length: 255, unique: true })
   categoryName: string;
 }

@@ -6,6 +6,7 @@
  * @interaction Accessed primarily by the system's CategoryController as the schema definition for `@Body()` injections.
  */
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
 
 /**
  * Validates the data required to instantiate a brand new Category.
@@ -13,11 +14,13 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
  * @class CreateCategoryDto
  * @description Requires the client to formally establish the category name explicitly. 
  */
+@InputType()
 export class CreateCategoryDto {
   /**
    * The intended display name of the category (e.g. 'Sports').
    * @type {string}
    */
+  @Field()
   @IsString()
   @IsNotEmpty()
   categoryName: string;
@@ -29,12 +32,14 @@ export class CreateCategoryDto {
  * @class UpdateCategoryDto
  * @description Keeps fields optional so HTTP PATCH/PUT calls can supply partial modifications smoothly.
  */
+@InputType()
 export class UpdateCategoryDto {
   /**
    * The replacement display name of the category.
    * If provided, it cannot be completely empty.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty()

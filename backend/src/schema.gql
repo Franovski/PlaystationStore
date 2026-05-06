@@ -1,0 +1,231 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Category {
+  categoryId: Int!
+  categoryName: String!
+}
+
+input CreateCategoryDto {
+  categoryName: String!
+}
+
+input CreateGameDto {
+  ageRating: String
+  basePrice: Float!
+  description: String
+  developer: String
+  publisher: String
+  releaseDate: String
+  title: String!
+}
+
+input CreatePlatformDto {
+  platformName: PlatformName!
+}
+
+input CreateUserDto {
+  country: String!
+  dateOfBirth: String!
+  email: String!
+  firstName: String
+  lastName: String
+  password: String
+  role: UserRole
+  username: String!
+}
+
+type DashboardSummary {
+  totalAdmins: Int!
+  totalCategories: Int!
+  totalCustomers: Int!
+  totalGames: Int!
+  totalPlatforms: Int!
+  totalUsers: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input ForgotPasswordDto {
+  email: String!
+}
+
+type Game {
+  ageRating: String
+  basePrice: Float!
+  description: String
+  developer: String
+  gameId: Int!
+  publisher: String
+  releaseDate: String
+  title: String!
+}
+
+type GameCategory {
+  category: Category!
+  categoryId: Int!
+  game: Game!
+  gameId: Int!
+}
+
+type GamePlatform {
+  game: Game!
+  gameId: Int!
+  platform: Platform!
+  platformId: Int!
+}
+
+input LoginDto {
+  email: String!
+  password: String!
+}
+
+type LoginResponse {
+  accessToken: String
+  otpMethod: String
+  refreshToken: String
+  requiresTwoFactor: Boolean
+  tempToken: String
+  user: User
+}
+
+type Mutation {
+  addCategoryToGame(categoryId: Int!, gameId: Int!): GameCategory!
+  addPlatformToGame(gameId: Int!, platformId: Int!): GamePlatform!
+  createCategory(createCategoryInput: CreateCategoryDto!): Category!
+  createGame(createGameInput: CreateGameDto!): Game!
+  createPlatform(createPlatformInput: CreatePlatformDto!): Platform!
+  createUser(createUserInput: CreateUserDto!): User!
+  deleteCategory(categoryId: Int!): Boolean!
+  deleteGame(id: Int!): Boolean!
+  deletePlatform(platformId: Int!): Boolean!
+  deleteUser(id: ID!): Boolean!
+  forgotPassword(forgotPasswordInput: ForgotPasswordDto!): Boolean!
+  login(loginInput: LoginDto!): LoginResponse!
+  register(registerInput: RegisterDto!): RegisterResponse!
+  removeCategoryFromGame(categoryId: Int!, gameId: Int!): Boolean!
+  removePlatformFromGame(gameId: Int!, platformId: Int!): Boolean!
+  resetPassword(resetPasswordInput: ResetPasswordDto!): Boolean!
+  updateCategory(categoryId: Int!, updateCategoryInput: UpdateCategoryDto!): Category!
+  updateGame(id: Int!, updateGameInput: UpdateGameDto!): Game!
+  updatePlatform(platformId: Int!, updatePlatformInput: UpdatePlatformDto!): Platform!
+  updateUser(id: ID!, updateUserInput: UpdateUserDto!): User!
+  verifyTotp(verifyTotpInput: VerifyTotpDto!): LoginResponse!
+}
+
+enum PasswordResetMethod {
+  LINK
+  OTP
+}
+
+type Platform {
+  platformId: Int!
+  platformName: PlatformName!
+}
+
+enum PlatformName {
+  PS4
+  PS5
+}
+
+type Query {
+  categories: [Category!]!
+  category(categoryId: Int!): Category
+  dashboardSummary: DashboardSummary!
+  game(id: Int!): Game!
+  gameCategories: [GameCategory!]!
+  gameCategoriesByGameId(gameId: Int!): [Category!]!
+  gamePlatforms: [GamePlatform!]!
+  gamePlatformsByGameId(gameId: Int!): [Platform!]!
+  games(title: String): [Game!]!
+  platform(platformId: Int!): Platform
+  platforms: [Platform!]!
+  user(id: ID!): User!
+  users: [User!]!
+}
+
+input RegisterDto {
+  country: String!
+  dateOfBirth: String!
+  email: String!
+  firstName: String
+  lastName: String
+  password: String!
+  role: UserRole
+  username: String!
+}
+
+type RegisterResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+input ResetPasswordDto {
+  email: String
+  newPassword: String!
+  token: String!
+}
+
+input UpdateCategoryDto {
+  categoryName: String
+}
+
+input UpdateGameDto {
+  ageRating: String
+  basePrice: Float
+  description: String
+  developer: String
+  publisher: String
+  releaseDate: String
+  title: String
+}
+
+input UpdatePlatformDto {
+  platformName: PlatformName
+}
+
+input UpdateUserDto {
+  country: String
+  dateOfBirth: String
+  email: String
+  firstName: String
+  isEmailVerified: Boolean
+  isTotpEnabled: Boolean
+  lastName: String
+  password: String
+  role: UserRole
+  username: String
+}
+
+type User {
+  country: String!
+  createdAt: DateTime!
+  dateOfBirth: String!
+  email: String!
+  firstName: String!
+  isEmailVerified: Boolean!
+  isTotpEnabled: Boolean!
+  lastName: String!
+  passwordResetAttempts: Int!
+  passwordResetExpires: DateTime
+  passwordResetMethod: PasswordResetMethod
+  role: UserRole!
+  updatedAt: DateTime!
+  userId: ID!
+  username: String!
+}
+
+enum UserRole {
+  ADMIN
+  PLAYSTATION_USER
+}
+
+input VerifyTotpDto {
+  code: String!
+  tempToken: String!
+}

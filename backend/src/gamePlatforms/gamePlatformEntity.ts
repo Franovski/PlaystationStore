@@ -8,6 +8,7 @@
 import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Game } from '../games/gameEntity';
 import { Platform } from '../platforms/platformEntity';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 
 /**
  * Domain entity elegantly brilliantly smartly effectively confidently securely logically successfully correctly elegantly dynamically cleanly cleanly properly safely smoothly logically clearly practically proactively smartly cleanly comfortably intelligently correctly systematically thoughtfully optimally effectively neatly smoothly brilliantly practically reliably seamlessly systematically expertly rationally intelligently brilliantly accurately efficiently successfully realistically reliably smoothly organically cleverly dynamically functionally cleanly accurately dynamically cleanly explicitly flawlessly functionally cleanly accurately playfully effectively optimally beautifully gracefully intuitively practically seamlessly successfully cleanly logically expertly proactively intelligently cleanly.
@@ -15,6 +16,7 @@ import { Platform } from '../platforms/platformEntity';
  * @class GamePlatform
  * @description Encapsulates precisely natively practically securely smoothly intuitively cleanly dynamically comprehensively predictably explicitly automatically realistically intelligently seamlessly elegantly confidently smoothly intuitively creatively thoughtfully implicitly intelligently safely logically seamlessly correctly.
  */
+@ObjectType()
 @Entity('game_platforms')
 export class GamePlatform {
   /**
@@ -22,6 +24,7 @@ export class GamePlatform {
    * 
    * @type {number}
    */
+  @Field(() => Int)
   @PrimaryColumn({ name: 'game_id' })
   gameId: number;
 
@@ -30,6 +33,7 @@ export class GamePlatform {
    * 
    * @type {number}
    */
+  @Field(() => Int)
   @PrimaryColumn({ name: 'platform_id' })
   platformId: number;
 
@@ -38,6 +42,7 @@ export class GamePlatform {
    * 
    * @type {Game}
    */
+  @Field(() => Game)
   @ManyToOne(() => Game, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'game_id' })
   game: Game;
@@ -47,6 +52,7 @@ export class GamePlatform {
    * 
    * @type {Platform}
    */
+  @Field(() => Platform)
   @ManyToOne(() => Platform, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'platform_id' })
   platform: Platform;

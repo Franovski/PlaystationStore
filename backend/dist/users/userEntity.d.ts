@@ -7,14 +7,14 @@ export declare enum PasswordResetMethod {
     LINK = "link"
 }
 export declare class User {
-    userId: number;
+    userId: string;
     username: string;
     email: string;
     password: string | null;
     firstName: string;
     lastName: string;
     country: string;
-    dateOfBirth: Date;
+    dateOfBirth: string;
     role: UserRole;
     isEmailVerified: boolean;
     totpSecret: string | null;

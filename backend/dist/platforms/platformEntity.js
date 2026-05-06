@@ -11,23 +11,30 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Platform = exports.PlatformName = void 0;
 const typeorm_1 = require("typeorm");
+const graphql_1 = require("@nestjs/graphql");
 var PlatformName;
 (function (PlatformName) {
     PlatformName["PS4"] = "ps4";
     PlatformName["PS5"] = "ps5";
 })(PlatformName || (exports.PlatformName = PlatformName = {}));
+(0, graphql_1.registerEnumType)(PlatformName, {
+    name: 'PlatformName',
+});
 let Platform = class Platform {
 };
 exports.Platform = Platform;
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Platform.prototype, "platformId", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => PlatformName),
     (0, typeorm_1.Column)({ type: 'enum', enum: PlatformName, unique: true }),
     __metadata("design:type", String)
 ], Platform.prototype, "platformName", void 0);
 exports.Platform = Platform = __decorate([
+    (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)('platforms')
 ], Platform);
 //# sourceMappingURL=platformEntity.js.map

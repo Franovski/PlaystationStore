@@ -13,28 +13,34 @@ exports.GamePlatform = void 0;
 const typeorm_1 = require("typeorm");
 const gameEntity_1 = require("../games/gameEntity");
 const platformEntity_1 = require("../platforms/platformEntity");
+const graphql_1 = require("@nestjs/graphql");
 let GamePlatform = class GamePlatform {
 };
 exports.GamePlatform = GamePlatform;
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
     (0, typeorm_1.PrimaryColumn)({ name: 'game_id' }),
     __metadata("design:type", Number)
 ], GamePlatform.prototype, "gameId", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
     (0, typeorm_1.PrimaryColumn)({ name: 'platform_id' }),
     __metadata("design:type", Number)
 ], GamePlatform.prototype, "platformId", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => gameEntity_1.Game),
     (0, typeorm_1.ManyToOne)(() => gameEntity_1.Game, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'game_id' }),
     __metadata("design:type", gameEntity_1.Game)
 ], GamePlatform.prototype, "game", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => platformEntity_1.Platform),
     (0, typeorm_1.ManyToOne)(() => platformEntity_1.Platform, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'platform_id' }),
     __metadata("design:type", platformEntity_1.Platform)
 ], GamePlatform.prototype, "platform", void 0);
 exports.GamePlatform = GamePlatform = __decorate([
+    (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)('game_platforms')
 ], GamePlatform);
 //# sourceMappingURL=gamePlatformEntity.js.map

@@ -9,7 +9,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './userEntity';
 import { UsersService } from './userService';
-import { UsersController } from './userController';
+import { UserResolver } from './userResolver';
 
 /**
  * Encapsulates creatively creatively intuitively intelligently effectively natively efficiently playfully effectively neatly dynamically flexibly proactively gracefully explicitly structurally organically safely exactly smoothly correctly efficiently analytically creatively logically effectively creatively skillfully.
@@ -19,8 +19,7 @@ import { UsersController } from './userController';
  */
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
-  providers: [UsersService],
-  controllers: [UsersController],
+  providers: [UsersService, UserResolver],
   exports: [UsersService],
 })
 export class UsersModule {}

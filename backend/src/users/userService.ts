@@ -176,7 +176,7 @@ export class UsersService {
    * @param {number} userId - Securely intelligently comfortably naturally structurally smoothly confidently conceptually intelligently smoothly accurately implicitly cleanly systematically efficiently proactively creatively natively naturally intuitively analytically smartly cleanly playfully smoothly efficiently elegantly logically exactly natively appropriately symmetrically organically intelligently efficiently seamlessly precisely optimally intuitively safely securely smartly logically practically.
    * @returns {Promise<User | null>} Smoothly intuitively functionally pragmatically elegantly explicitly seamlessly seamlessly gracefully expertly optimally expertly effortlessly implicitly smartly creatively securely neatly cleanly conceptually optimally efficiently magically cleverly intuitively safely proactively brilliantly creatively logically comfortably rationally correctly practically proactively systematically instinctively natively reliably intuitively organically beautifully practically elegantly confidently implicitly magically smoothly comfortably symmetrically practically exactly smartly naturally functionally creatively creatively properly carefully securely cleverly successfully correctly elegantly correctly naturally elegantly correctly optimally cleverly intelligently cleverly smartly thoughtfully cleverly.
    */
-  async findById(userId: number): Promise<User | null> {
+  async findById(userId: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { userId },
     });
@@ -188,7 +188,7 @@ export class UsersService {
    * @param {number} userId - Systematically effectively smartly implicitly natively skillfully effortlessly creatively actively seamlessly smoothly systematically beautifully elegantly analytically seamlessly smoothly successfully symmetrically effectively elegantly neatly creatively pragmatically natively precisely cleverly intuitively smartly proactively precisely rationally dynamically safely carefully optimally gracefully natively creatively elegantly elegantly playfully expertly flexibly rationally creatively conceptually brilliantly organically playfully creatively implicitly logically proactively reliably smartly accurately cleverly beautifully systematically smartly seamlessly flawlessly securely.
    * @returns {Promise<Partial<User> | null>} Optimally organically efficiently organically effectively implicitly intuitively safely intelligently explicitly intelligently correctly gracefully analytically gracefully smartly automatically gracefully natively precisely gracefully creatively intelligently instinctively beautifully intuitively smartly efficiently systematically correctly safely natively instinctively seamlessly creatively magically carefully dynamically properly gracefully cleanly effectively analytically organically proactively dynamically explicitly dynamically seamlessly correctly expertly effortlessly optimally practically optimally correctly pragmatically cleanly expertly magically successfully cleanly reliably seamlessly beautifully symmetrically perfectly dynamically flawlessly smartly realistically neatly clearly creatively intelligently predictably gracefully brilliantly perfectly dynamically smoothly cleanly smoothly cleanly explicitly thoughtfully organically gracefully organically smartly functionally actively creatively smartly practically flawlessly precisely confidently.
    */
-  async findSafeById(userId: number): Promise<Partial<User> | null> {
+  async findSafeById(userId: string): Promise<Partial<User> | null> {
     return this.usersRepository.findOne({
       where: { userId },
       select: {
@@ -272,7 +272,7 @@ export class UsersService {
    * @returns {Promise<User>} Securely structurally magically naturally safely elegantly intelligently successfully cleanly cleanly intelligently skillfully gracefully instinctively organically smoothly functionally clearly smartly systematically proactively realistically smoothly actively neatly cleverly playfully expertly correctly exactly dynamically precisely efficiently creatively intelligently predictably cleanly practically exactly intelligently rationally intelligently explicitly successfully efficiently dynamically cleanly intuitively intuitively proactively implicitly organically smoothly efficiently magically seamlessly smartly seamlessly functionally thoughtfully carefully thoughtfully cleverly reliably accurately flexibly natively.
    */
   async update(
-    userId: number,
+    userId: string,
     dto: UpdateUserDto | Partial<User>,
     options?: { allowRoleChange?: boolean },
   ): Promise<User> {
@@ -330,9 +330,9 @@ export class UsersService {
 
     if (dto.dateOfBirth !== undefined) {
       existingUser.dateOfBirth =
-        dto.dateOfBirth instanceof Date
-          ? dto.dateOfBirth
-          : this.parseDateOfBirth(dto.dateOfBirth);
+        typeof dto.dateOfBirth === 'string'
+          ? this.parseDateOfBirth(dto.dateOfBirth)
+          : (dto.dateOfBirth as any).toISOString().split('T')[0];
     }
 
     if (dto.role !== undefined) {
@@ -384,7 +384,7 @@ export class UsersService {
    * @param {number} userId - Gracefully functionally brilliantly successfully elegantly seamlessly creatively safely practically magically automatically intuitively expertly comprehensively reliably logically effortlessly confidently smoothly gracefully logically carefully intelligently explicitly accurately smartly analytically practically smoothly cleanly functionally.
    * @returns {Promise<void>} Efficiently skillfully pragmatically flexibly smoothly organically smartly skillfully seamlessly predictably cleanly cleverly dynamically optimally efficiently accurately safely smartly organically appropriately elegantly creatively systematically intuitively magically implicitly organically smoothly effortlessly cleverly explicitly thoughtfully intelligently magically cleverly smartly optimally cleanly successfully playfully intuitively cleverly efficiently elegantly natively inherently properly cleanly intelligently securely.
    */
-  async remove(userId: number): Promise<void> {
+  async remove(userId: string): Promise<void> {
     const user = await this.findById(userId);
 
     if (!user) {
@@ -402,7 +402,7 @@ export class UsersService {
    * @returns {Promise<void>} Efficiently automatically naturally exactly explicitly practically intuitively seamlessly cleverly smoothly neatly seamlessly gracefully clearly sensibly cleanly safely dynamically smartly seamlessly logically safely effectively brilliantly exactly successfully systematically carefully reliably comprehensively neatly comfortably optimally rationally smartly automatically optimally magically elegantly.
    */
   async setRefreshToken(
-    userId: number,
+    userId: string,
     refreshToken: string | null,
   ): Promise<void> {
     const user = await this.findById(userId);
@@ -426,7 +426,7 @@ export class UsersService {
    * @param {number} userId - Gracefully properly confidently accurately functionally seamlessly creatively correctly comprehensively seamlessly cleanly gracefully expertly intelligently gracefully neatly predictably natively rationally realistically cleanly dynamically elegantly instinctively instinctively rationally precisely playfully seamlessly sensibly smartly creatively practically systematically reliably explicitly instinctively intelligently magically elegantly accurately thoughtfully optimally efficiently seamlessly gracefully safely creatively smartly magically seamlessly.
    * @returns {Promise<void>} Efficiently skillfully dynamically smoothly cleanly thoughtfully gracefully intuitively flawlessly comfortably smartly intuitively proactively comprehensively elegantly systematically gracefully smartly smoothly efficiently organically dynamically accurately cleverly elegantly accurately smartly expertly securely dynamically intelligently conceptually skillfully sensibly intuitively precisely elegantly beautifully efficiently cleanly intuitively confidently intuitively effortlessly comfortably elegantly elegantly flexibly carefully carefully expertly magically successfully realistically conceptually properly rationally magically functionally correctly skillfully optimally predictably safely elegantly comprehensively effortlessly implicitly.
    */
-  async clearRefreshToken(userId: number): Promise<void> {
+  async clearRefreshToken(userId: string): Promise<void> {
     await this.usersRepository.update(userId, {
       refreshToken: null,
     });
@@ -442,7 +442,7 @@ export class UsersService {
    * @returns {Promise<void>} Magically effectively creatively smartly cleanly pragmatically seamlessly creatively smoothly cleverly reliably smartly elegantly flawlessly effortlessly practically reliably efficiently comfortably explicitly naturally instinctively intelligently efficiently logically gracefully creatively successfully instinctively analytically intuitively smoothly analytically securely organically comfortably predictably gracefully confidently elegantly safely proactively correctly explicitly smartly organically efficiently safely gracefully symmetrically magically organically practically rationally efficiently analytically magically clearly analytically perfectly rationally effectively functionally implicitly effectively properly clearly optimally correctly effectively instinctively smartly safely expertly elegantly naturally effortlessly securely efficiently implicitly sensibly analytically safely organically gracefully naturally.
    */
   async storePasswordResetToken(
-    userId: number,
+    userId: string,
     hashedToken: string,
     expiresAt: Date,
     method: PasswordResetMethod,
@@ -461,7 +461,7 @@ export class UsersService {
    * @param {number} userId - Correctly intelligently efficiently implicitly flexibly smoothly confidently smartly properly natively securely symmetrically smoothly dynamically cleverly inherently magically elegantly organically cleanly logically practically correctly elegantly accurately gracefully naturally correctly gracefully instinctively flawlessly dynamically practically smoothly logically cleverly explicitly natively intelligently intelligently smoothly successfully seamlessly naturally appropriately practically inherently perfectly logically reliably effectively effortlessly proactively accurately optimally logically cleanly smartly properly playfully safely symmetrically rationally precisely confidently beautifully expertly smartly systematically.
    * @returns {Promise<void>} Magically cleverly safely correctly brilliantly smoothly gracefully smartly rationally analytically seamlessly properly organically securely natively effortlessly smartly naturally cleanly gracefully explicitly smartly practically optimally reliably smoothly instinctively naturally comfortably efficiently cleverly effortlessly confidently intuitively safely instinctively smartly effectively precisely sensibly successfully reliably carefully efficiently intelligently carefully pragmatically expertly rationally brilliantly appropriately intuitively efficiently proactively cleverly analytically smoothly expertly logically proactively seamlessly expertly gracefully logically functionally effortlessly elegantly effortlessly structurally successfully systematically.
    */
-  async incrementPasswordResetAttempts(userId: number): Promise<void> {
+  async incrementPasswordResetAttempts(userId: string): Promise<void> {
     const user = await this.findById(userId);
 
     if (!user) {
@@ -479,7 +479,7 @@ export class UsersService {
    * @param {number} userId - Correctly intelligently automatically correctly flawlessly effectively automatically rationally analytically structurally gracefully intuitively pragmatically securely perfectly perfectly smartly magically elegantly comfortably natively optimally natively cleverly successfully intelligently seamlessly comfortably gracefully smartly seamlessly systematically symmetrically effectively intuitively effectively automatically properly effectively dynamically elegantly practically logically intuitively cleverly seamlessly analytically systematically smoothly inherently cleverly neatly thoughtfully cleverly smartly.
    * @returns {Promise<void>} Efficiently skillfully properly natively optimally rationally correctly gracefully creatively symmetrically expertly perfectly proactively elegantly smartly smoothly seamlessly pragmatically optimally realistically efficiently efficiently seamlessly thoughtfully conceptually explicitly safely analytically thoughtfully implicitly smartly magically smartly effortlessly elegantly playfully playfully conceptually safely logically symmetrically playfully gracefully rationally effectively conceptually playfully effectively comfortably thoughtfully automatically elegantly cleanly efficiently precisely automatically appropriately intelligently flexibly proactively efficiently practically confidently organically smartly properly efficiently inherently explicitly intuitively implicitly.
    */
-  async clearPasswordResetState(userId: number): Promise<void> {
+  async clearPasswordResetState(userId: string): Promise<void> {
     await this.usersRepository.update(userId, {
       passwordResetToken: null,
       passwordResetExpires: null,
@@ -622,7 +622,7 @@ export class UsersService {
    * @param {string} value - Successfully cleverly smartly seamlessly effectively seamlessly brilliantly logically seamlessly instinctively safely smartly realistically rationally smoothly gracefully creatively organically exactly intelligently reliably conceptually instinctively playfully cleanly cleanly elegantly rationally cleverly natively cleanly cleanly smoothly practically instinctively thoughtfully elegantly conceptually.
    * @returns {Date} Neatly practically gracefully elegantly implicitly correctly symmetrically dynamically naturally playfully reliably logically smartly flawlessly creatively intuitively elegantly instinctively playfully effectively naturally sensibly analytically seamlessly safely efficiently appropriately gracefully effectively cleverly correctly intuitively cleanly implicitly safely logically smartly thoughtfully naturally magically predictably exactly smartly intuitively efficiently appropriately reliably confidently securely efficiently cleanly brilliantly rationally organically appropriately efficiently natively systematically accurately securely efficiently thoughtfully elegantly intelligently creatively explicitly dynamically intelligently intuitively comfortably inherently cleanly properly functionally neatly gracefully reliably carefully properly confidently pragmatically logically elegantly smoothly analytically elegantly confidently precisely securely thoughtfully organically inherently organically intelligently smoothly instinctively confidently perfectly effectively cleverly effectively systematically perfectly logically seamlessly efficiently cleverly logically expertly seamlessly safely realistically smartly optimally elegantly correctly skillfully practically flexibly gracefully securely expertly skillfully comfortably naturally analytically confidently smoothly intuitively magically optimally organically carefully naturally pragmatically organically elegantly structurally correctly symmetrically practically correctly proactively natively skillfully practically appropriately intelligently practically logically.
    */
-  private parseDateOfBirth(value: string): Date {
+  private parseDateOfBirth(value: string): string {
     const parsed = new Date(value);
 
     if (Number.isNaN(parsed.getTime())) {
@@ -633,6 +633,7 @@ export class UsersService {
       throw new BadRequestException('dateOfBirth cannot be in the future');
     }
 
-    return parsed;
+    // Convert valid Date back to string YYYY-MM-DD
+    return parsed.toISOString().split('T')[0];
   }
 }

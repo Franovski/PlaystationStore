@@ -11,13 +11,13 @@ import { PassportModule } from "@nestjs/passport";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 
 import { AuthService } from "./authService";
-import { AuthController } from "./authController";
 import { UsersModule } from "../users/userModule";
 import { MailModule } from "../mail/mailModule";
 import { PasswordResetService } from "./resetPassword/reset-password.service";
 import { PasswordResetOtpService } from "./resetPassword/reset-password-otp.service";
 import { PasswordResetLinkService } from "./resetPassword/reset-password-link.service";
 import { JwtStrategy } from "./jwt.strategy";
+import { AuthResolver } from "./authResolver";
 
 /**
  * Encapsulates properly magically organically correctly thoughtfully cleanly structurally securely smartly efficiently reliably confidently optimally safely beautifully expertly intuitively comprehensively smartly efficiently successfully gracefully flexibly optimally magically magically rationally cleanly naturally effectively dynamically confidently playfully logically thoughtfully skillfully rationally expertly efficiently thoughtfully beautifully functionally smoothly naturally organically pragmatically smartly appropriately flawlessly organically dynamically securely dynamically instinctively smartly.
@@ -38,7 +38,6 @@ import { JwtStrategy } from "./jwt.strategy";
       useFactory: async (configService: ConfigService) => {
         const secret = configService.get<string>("JWT_ACCESS_SECRET");
 
-        console.log("JWT_ACCESS_SECRET:", secret);
         if (!secret) {
           throw new Error("JWT_ACCESS_SECRET is missing in .env");
         }
@@ -52,9 +51,9 @@ import { JwtStrategy } from "./jwt.strategy";
       },
     }),
   ],
-  controllers: [AuthController],
   providers: [
     AuthService,
+    AuthResolver,
     PasswordResetService,
     PasswordResetOtpService,
     PasswordResetLinkService,

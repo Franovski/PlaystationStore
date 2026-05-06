@@ -11,21 +11,30 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateCategoryDto = exports.CreateCategoryDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateCategoryDto {
-}
+const graphql_1 = require("@nestjs/graphql");
+let CreateCategoryDto = class CreateCategoryDto {
+};
 exports.CreateCategoryDto = CreateCategoryDto;
 __decorate([
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "categoryName", void 0);
-class UpdateCategoryDto {
-}
+exports.CreateCategoryDto = CreateCategoryDto = __decorate([
+    (0, graphql_1.InputType)()
+], CreateCategoryDto);
+let UpdateCategoryDto = class UpdateCategoryDto {
+};
 exports.UpdateCategoryDto = UpdateCategoryDto;
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], UpdateCategoryDto.prototype, "categoryName", void 0);
+exports.UpdateCategoryDto = UpdateCategoryDto = __decorate([
+    (0, graphql_1.InputType)()
+], UpdateCategoryDto);
 //# sourceMappingURL=categoryDto.js.map

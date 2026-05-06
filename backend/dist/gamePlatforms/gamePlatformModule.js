@@ -10,11 +10,11 @@ exports.GamePlatformModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const gamePlatformEntity_1 = require("./gamePlatformEntity");
-const gamePlatformController_1 = require("./gamePlatformController");
 const gamePlatformService_1 = require("./gamePlatformService");
 const gamePlatformRepository_1 = require("./gamePlatformRepository");
 const gameModule_1 = require("../games/gameModule");
 const platformModule_1 = require("../platforms/platformModule");
+const gamePlatformResolver_1 = require("./gamePlatformResolver");
 let GamePlatformModule = class GamePlatformModule {
 };
 exports.GamePlatformModule = GamePlatformModule;
@@ -25,8 +25,7 @@ exports.GamePlatformModule = GamePlatformModule = __decorate([
             gameModule_1.GameModule,
             platformModule_1.PlatformModule,
         ],
-        controllers: [gamePlatformController_1.GamePlatformController],
-        providers: [gamePlatformService_1.GamePlatformService, gamePlatformRepository_1.GamePlatformRepository],
+        providers: [gamePlatformService_1.GamePlatformService, gamePlatformRepository_1.GamePlatformRepository, gamePlatformResolver_1.GamePlatformResolver],
         exports: [gamePlatformService_1.GamePlatformService],
     })
 ], GamePlatformModule);

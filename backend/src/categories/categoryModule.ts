@@ -8,9 +8,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from './categoryEntity';
-import { CategoryController } from './categoryController';
 import { CategoryService } from './categoryService';
 import { CategoryRepository } from './categoryRepository';
+import { CategoryResolver } from './categoryResolver';
 
 /**
  * Encapsulating construct for categories ensuring component linkage systematically cleanly cleanly securely.
@@ -21,8 +21,7 @@ import { CategoryRepository } from './categoryRepository';
 @Module({
   // Enforces TypeORM schema awareness directly internally cleanly.
   imports: [TypeOrmModule.forFeature([Category])],
-  controllers: [CategoryController],
-  providers: [CategoryService, CategoryRepository],
+  providers: [CategoryService, CategoryRepository, CategoryResolver],
   // Pushes service availability outwards successfully organically creatively seamlessly optimally intelligently efficiently reliably effectively functionally correctly intuitively safely correctly cleanly implicitly securely globally natively firmly properly.
   exports: [CategoryService],
 })

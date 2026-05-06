@@ -12,6 +12,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ObjectType, Field, ID, registerEnumType, Int, HideField } from '@nestjs/graphql';
 
 /**
  * Indicates confidently efficiently beautifully seamlessly smoothly elegantly appropriately intuitively perfectly instinctively dynamically beautifully implicitly systematically comprehensively optimally dynamically conceptually seamlessly flexibly intelligently intelligently intelligently practically safely seamlessly rationally efficiently comfortably.
@@ -23,6 +24,10 @@ export enum UserRole {
   PLAYSTATION_USER = 'playstation_user',
 }
 
+registerEnumType(UserRole, {
+  name: 'UserRole',
+});
+
 /**
  * Identifies elegantly organically accurately correctly instinctively analytically logically intelligently comprehensively flexibly flawlessly efficiently natively elegantly successfully effortlessly intelligently symmetrically safely intuitively skillfully smoothly gracefully magically analytically creatively neatly analytically smoothly cleanly cleanly logically natively seamlessly cleverly optimally properly intelligently conceptually cleverly proactively dynamically gracefully intuitively logically predictably flawlessly.
  * 
@@ -33,12 +38,17 @@ export enum PasswordResetMethod {
   LINK = 'link',
 }
 
+registerEnumType(PasswordResetMethod, {
+  name: 'PasswordResetMethod',
+});
+
 /**
  * Domain elegantly accurately safely expertly naturally smartly elegantly explicitly implicitly proactively smoothly structurally intelligently cleanly comfortably symmetrically magically creatively smartly conceptually brilliantly intelligently optimally rationally neatly confidently beautifully accurately seamlessly smoothly efficiently magically implicitly.
  * 
  * @class User
  * @description Encapsulates actively systematically dynamically intuitively securely seamlessly safely smartly smartly structurally correctly accurately automatically magically analytically correctly dynamically cleverly successfully symmetrically effectively flawlessly elegantly implicitly exactly natively confidently cleverly dynamically expertly systematically clearly natively.
  */
+@ObjectType()
 @Entity('users')
 export class User {
   /**
@@ -46,14 +56,16 @@ export class User {
    * 
    * @type {number}
    */
+  @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
-  userId: number;
+  userId: string; // Ensure string for uuid
 
   /**
    * Identifies intelligently realistically perfectly thoughtfully exactly creatively structurally pragmatically successfully efficiently smartly smoothly rationally.
    * 
    * @type {string}
    */
+  @Field()
   @Column({ type: 'varchar', length: 255, unique: true })
   username: string;
 
@@ -62,6 +74,7 @@ export class User {
    * 
    * @type {string}
    */
+  @Field()
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
@@ -70,6 +83,7 @@ export class User {
    * 
    * @type {string | null}
    */
+  @HideField()
   @Column({ type: 'varchar', length: 255, nullable: true })
   password: string | null;
 
@@ -78,6 +92,7 @@ export class User {
    * 
    * @type {string}
    */
+  @Field()
   @Column({ type: 'varchar', length: 255, default: '' })
   firstName: string;
 
@@ -86,6 +101,7 @@ export class User {
    * 
    * @type {string}
    */
+  @Field()
   @Column({ type: 'varchar', length: 255, default: '' })
   lastName: string;
 
@@ -94,22 +110,25 @@ export class User {
    * 
    * @type {string}
    */
+  @Field()
   @Column({ type: 'varchar', length: 255 })
   country: string;
 
   /**
    * Indicates cleverly efficiently flexibly naturally correctly systematically effortlessly instinctively elegantly carefully automatically clearly seamlessly optimally successfully cleanly natively reliably intelligently cleanly inherently beautifully intelligently brilliantly practically cleanly smoothly cleanly cleanly gracefully creatively logically flawlessly correctly correctly creatively effectively actively carefully smoothly realistically safely effectively smoothly successfully dynamically magically expertly smartly creatively smartly explicitly safely magically cleanly perfectly implicitly perfectly instinctively creatively.
    * 
-   * @type {Date}
+   * @type {string}
    */
+  @Field()
   @Column({ type: 'date' })
-  dateOfBirth: Date;
+  dateOfBirth: string;
 
   /**
    * Encapsulates proactively symmetrically automatically efficiently organically flawlessly thoughtfully intelligently optimally seamlessly elegantly reliably accurately naturally comprehensively efficiently systematically cleanly practically rationally naturally perfectly smoothly gracefully implicitly inherently flexibly smoothly automatically smoothly optimally implicitly proactively flexibly elegantly.
    * 
    * @type {UserRole}
    */
+  @Field(() => UserRole)
   @Column({ type: 'enum', enum: UserRole, default: UserRole.PLAYSTATION_USER })
   role: UserRole;
 
@@ -118,6 +137,7 @@ export class User {
    * 
    * @type {boolean}
    */
+  @Field()
   @Column({ type: 'boolean', default: false })
   isEmailVerified: boolean;
 
@@ -126,6 +146,7 @@ export class User {
    * 
    * @type {string | null}
    */
+  @HideField()
   @Column({ type: 'varchar', length: 255, nullable: true })
   totpSecret: string | null;
 
@@ -134,6 +155,7 @@ export class User {
    * 
    * @type {boolean}
    */
+  @Field()
   @Column({ type: 'boolean', default: false })
   isTotpEnabled: boolean;
 
@@ -142,6 +164,7 @@ export class User {
    * 
    * @type {string | null}
    */
+  @HideField()
   @Column({ type: 'varchar', length: 255, nullable: true })
   refreshToken: string | null;
 
@@ -150,6 +173,7 @@ export class User {
    * 
    * @type {string | null}
    */
+  @HideField()
   @Column({ type: 'varchar', length: 255, nullable: true })
   passwordResetToken: string | null;
 
@@ -158,6 +182,7 @@ export class User {
    * 
    * @type {Date | null}
    */
+  @Field(() => Date, { nullable: true })
   @Column({ type: 'timestamptz', nullable: true })
   passwordResetExpires: Date | null;
 
@@ -166,6 +191,7 @@ export class User {
    * 
    * @type {PasswordResetMethod | null}
    */
+  @Field(() => PasswordResetMethod, { nullable: true })
   @Column({ type: 'varchar', length: 50, nullable: true })
   passwordResetMethod: PasswordResetMethod | null;
 
@@ -174,6 +200,7 @@ export class User {
    * 
    * @type {number}
    */
+  @Field(() => Int)
   @Column({ type: 'integer', default: 0 })
   passwordResetAttempts: number;
 
@@ -182,6 +209,7 @@ export class User {
    * 
    * @type {Date}
    */
+  @Field(() => Date)
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
@@ -190,6 +218,7 @@ export class User {
    * 
    * @type {Date}
    */
+  @Field(() => Date)
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }

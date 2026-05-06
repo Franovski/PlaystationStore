@@ -202,9 +202,9 @@ let UsersService = UsersService_1 = class UsersService {
         }
         if (dto.dateOfBirth !== undefined) {
             existingUser.dateOfBirth =
-                dto.dateOfBirth instanceof Date
-                    ? dto.dateOfBirth
-                    : this.parseDateOfBirth(dto.dateOfBirth);
+                typeof dto.dateOfBirth === 'string'
+                    ? this.parseDateOfBirth(dto.dateOfBirth)
+                    : dto.dateOfBirth.toISOString().split('T')[0];
         }
         if (dto.role !== undefined) {
             if (!options?.allowRoleChange) {
@@ -338,7 +338,7 @@ let UsersService = UsersService_1 = class UsersService {
         if (parsed > new Date()) {
             throw new common_1.BadRequestException('dateOfBirth cannot be in the future');
         }
-        return parsed;
+        return parsed.toISOString().split('T')[0];
     }
 };
 exports.UsersService = UsersService;

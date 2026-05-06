@@ -10,17 +10,16 @@ exports.GameModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const gameEntity_1 = require("./gameEntity");
-const gameController_1 = require("./gameController");
 const gameService_1 = require("./gameService");
 const gameRepository_1 = require("./gameRepository");
+const gameResolver_1 = require("./gameResolver");
 let GameModule = class GameModule {
 };
 exports.GameModule = GameModule;
 exports.GameModule = GameModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([gameEntity_1.Game])],
-        controllers: [gameController_1.GameController],
-        providers: [gameService_1.GameService, gameRepository_1.GameRepository],
+        providers: [gameService_1.GameService, gameRepository_1.GameRepository, gameResolver_1.GameResolver],
         exports: [gameService_1.GameService, gameRepository_1.GameRepository],
     })
 ], GameModule);

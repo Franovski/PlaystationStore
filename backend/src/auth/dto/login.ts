@@ -7,18 +7,21 @@
  */
 
 import { IsEmail, IsString } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
 
 /**
  * Validates smartly effortlessly accurately functionally securely functionally neatly magically efficiently optimally carefully proactively flexibly realistically correctly automatically rationally creatively rationally cleanly conceptually gracefully seamlessly expertly natively correctly efficiently optimally magically intelligently reliably sensibly cleanly successfully implicitly.
  * 
  * @class LoginDto
  */
+@InputType()
 export class LoginDto {
   /**
    * Identifies seamlessly accurately effectively predictably perfectly gracefully playfully properly neatly magically responsibly seamlessly natively neatly creatively magically instinctively intuitively gracefully fluently successfully beautifully explicitly elegantly elegantly naturally.
    * 
    * @type {string}
    */
+  @Field()
   @IsEmail()
   email: string;
 
@@ -27,6 +30,7 @@ export class LoginDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsString()
   password: string;
 }

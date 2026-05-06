@@ -11,18 +11,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Category = void 0;
 const typeorm_1 = require("typeorm");
+const graphql_1 = require("@nestjs/graphql");
 let Category = class Category {
 };
 exports.Category = Category;
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Category.prototype, "categoryId", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, unique: true }),
     __metadata("design:type", String)
 ], Category.prototype, "categoryName", void 0);
 exports.Category = Category = __decorate([
+    (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)('categories')
 ], Category);
 //# sourceMappingURL=categoryEntity.js.map

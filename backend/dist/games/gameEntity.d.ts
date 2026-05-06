@@ -2,7 +2,7 @@ export declare class Game {
     gameId: number;
     title: string;
     description: string;
-    releaseDate: Date;
+    releaseDate: string;
     basePrice: number;
     developer: string;
     publisher: string;

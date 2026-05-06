@@ -8,7 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminModule = void 0;
 const common_1 = require("@nestjs/common");
-const adminController_1 = require("./adminController");
+const adminResolver_1 = require("./adminResolver");
 const userModule_1 = require("../users/userModule");
 const gameModule_1 = require("../games/gameModule");
 const categoryModule_1 = require("../categories/categoryModule");
@@ -19,7 +19,7 @@ exports.AdminModule = AdminModule;
 exports.AdminModule = AdminModule = __decorate([
     (0, common_1.Module)({
         imports: [userModule_1.UsersModule, gameModule_1.GameModule, categoryModule_1.CategoryModule, platformModule_1.PlatformModule],
-        controllers: [adminController_1.AdminController],
+        providers: [adminResolver_1.AdminResolver],
     })
 ], AdminModule);
 //# sourceMappingURL=adminModule.js.map

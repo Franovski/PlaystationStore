@@ -12,47 +12,59 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterDto = void 0;
 const class_validator_1 = require("class-validator");
 const userEntity_1 = require("../../users/userEntity");
-class RegisterDto {
-}
+const graphql_1 = require("@nestjs/graphql");
+let RegisterDto = class RegisterDto {
+};
 exports.RegisterDto = RegisterDto;
 __decorate([
+    (0, graphql_1.Field)(() => userEntity_1.UserRole, { nullable: true }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(userEntity_1.UserRole),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "role", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "username", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(8),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "firstName", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "lastName", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "country", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "dateOfBirth", void 0);
+exports.RegisterDto = RegisterDto = __decorate([
+    (0, graphql_1.InputType)()
+], RegisterDto);
 //# sourceMappingURL=register.js.map

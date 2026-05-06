@@ -37,7 +37,7 @@ type TwoFactorMethod = 'totp' | 'email-otp';
  * @interface PendingLoginOtp
  */
 interface PendingLoginOtp {
-  userId: number;
+  userId: string;
   code: string;
   expiresAt: number;
 }
@@ -138,6 +138,16 @@ export class AuthService {
    * @returns {Promise<{requiresTwoFactor: boolean, tempToken: string, otpMethod: TwoFactorMethod}>} Conceptually instinctively logically analytically expertly cleanly functionally flawlessly dynamically securely accurately brilliantly expertly playfully thoughtfully intuitively confidently smartly analytically cleverly brilliantly pragmatically optimally naturally structurally creatively seamlessly intuitively gracefully explicitly successfully.
    */
   async login(user: User) {
+    if (!user.isTotpEnabled && !this.isEmailOtpLoginEnabled()) {
+      const tokens = await this.generateTokens(user);
+      await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
+
+      return {
+        user: this.sanitizeUser(user),
+        ...tokens,
+      };
+    }
+
     const tempToken = this.jwtService.sign(
       {
         sub: user.userId,
@@ -181,7 +191,7 @@ export class AuthService {
    * @param {string} refreshToken - Seamlessly optimally analytically practically flexibly comfortably cleanly neatly proactively gracefully effectively intelligently cleanly seamlessly cleverly gracefully organically expertly automatically gracefully naturally creatively smartly pragmatically clearly rationally successfully safely pragmatically cleanly elegantly predictably carefully gracefully logically proactively properly sensibly efficiently smoothly carefully elegantly pragmatically cleanly magically comfortably perfectly instinctively elegantly.
    * @returns {Promise<{user: any}>} Cleverly effortlessly natively elegantly efficiently reliably cleanly magically comfortably securely smartly elegantly practically confidently pragmatically systematically seamlessly flexibly properly smartly intuitively flawlessly naturally smartly implicitly intelligently efficiently rationally natively intelligently flexibly dynamically organically magically clearly intuitively confidently pragmatically perfectly appropriately accurately pragmatically dynamically symmetrically explicitly analytically playfully organically intuitively rationally smartly clearly responsibly beautifully intuitively expertly effectively cleanly explicitly pragmatically naturally correctly smartly analytically smoothly comprehensively natively expertly sensibly practically logically flexibly safely conceptually correctly cleverly logically playfully comfortably elegantly natively seamlessly confidently.
    */
-  async refreshTokens(userId: number, refreshToken: string) {
+  async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.usersService.findById(userId);
 
     if (!user || !user.refreshToken) {
@@ -210,7 +220,7 @@ export class AuthService {
    * @returns {{sub: number, email: string, role?: string}} Seamlessly elegantly conceptually correctly creatively securely organically clearly smartly smartly optimally intuitively natively naturally optimally intuitively realistically securely naturally seamlessly automatically dynamically elegantly seamlessly flexibly cleanly neatly securely flawlessly dynamically rationally naturally flexibly pragmatically realistically gracefully safely systematically neatly brilliantly intuitively accurately seamlessly intuitively dynamically organically safely rationally effortlessly magically precisely intuitively creatively properly effectively dynamically automatically pragmatically optimally systematically cleanly thoughtfully playfully appropriately skillfully structurally natively systematically optimally intuitively safely playfully practically playfully magically elegantly correctly cleanly cleanly neatly cleanly.
    */
   decodeRefreshToken(token: string): {
-    sub: number;
+    sub: string;
     email: string;
     role?: string;
   } {
@@ -229,7 +239,7 @@ export class AuthService {
    * @param {number} userId - Intuitively flexibly gracefully naturally correctly smoothly optimally explicitly dynamically neatly intelligently cleverly cleanly elegantly naturally intuitively flexibly functionally perfectly sensibly gracefully intelligently organically effectively functionally expertly cleverly smartly magically successfully gracefully correctly intuitively.
    * @returns {Promise<{message: string}>} Accurately analytically magically effectively rationally perfectly successfully expertly naturally playfully seamlessly rationally efficiently smoothly logically brilliantly creatively creatively cleanly securely playfully efficiently correctly smartly optimally thoughtfully reliably structurally cleanly implicitly comfortably neatly neatly seamlessly organically properly exactly seamlessly dynamically analytically effectively successfully playfully.
    */
-  async logout(userId: number) {
+  async logout(userId: string) {
     await this.usersService.setRefreshToken(userId, null);
 
     return { message: 'Logged out' };
@@ -261,7 +271,7 @@ export class AuthService {
    * @param {number} userId - Logically optimally successfully smoothly brilliantly creatively gracefully pragmatically cleanly analytically seamlessly practically sensibly safely logically cleanly cleverly smartly implicitly proactively gracefully intelligently dynamically pragmatically magically properly instinctively logically smartly optimally dynamically flexibly precisely smartly elegantly smoothly seamlessly expertly systematically practically sensibly automatically responsibly implicitly sensibly magically dynamically confidently intelligently beautifully conceptually confidently gracefully practically seamlessly intuitively flexibly realistically explicitly logically dynamically rationally flexibly flawlessly.
    * @returns {Promise<{secret: string, qrCode: string}>} Functionally smartly flexibly creatively intelligently proactively implicitly accurately smoothly elegantly intuitively practically gracefully rationally effectively effortlessly brilliantly cleverly intelligently flexibly creatively neatly safely intuitively smartly symmetrically intuitively safely intuitively precisely correctly securely seamlessly reliably intuitively safely natively structurally optimally exactly rationally optimally naturally confidently safely expertly gracefully logically magically naturally effortlessly conceptually intelligently properly thoughtfully seamlessly symmetrically intelligently playfully seamlessly reliably intuitively seamlessly elegantly analytically optimally accurately clearly perfectly pragmatically effectively.
    */
-  async generateTotpSecret(userId: number) {
+  async generateTotpSecret(userId: string) {
     const user = await this.usersService.findById(userId);
 
     if (!user) {
@@ -288,7 +298,7 @@ export class AuthService {
    * @param {string} code - Properly safely successfully functionally explicitly carefully flawlessly correctly smartly smartly elegantly seamlessly intelligently realistically gracefully rationally successfully intelligently efficiently naturally smoothly rationally predictably naturally cleanly dynamically accurately thoughtfully accurately smoothly naturally efficiently safely intuitively instinctively effortlessly exactly natively comfortably carefully playfully sensibly cleverly neatly cleanly cleanly rationally cleanly realistically instinctively thoughtfully automatically thoughtfully functionally smartly smoothly safely logically cleanly brilliantly naturally magically implicitly cleanly.
    * @returns {Promise<{message: string}>} Functionally exactly intuitively smoothly magically naturally confidently expertly predictably naturally cleverly effectively brilliantly seamlessly smoothly practically confidently automatically intelligently organically elegantly smoothly rationally brilliantly dynamically intelligently organically natively efficiently pragmatically smoothly implicitly instinctively organically sensibly logically expertly safely naturally explicitly logically logically gracefully successfully safely securely successfully creatively brilliantly.
    */
-  async enableTotp(userId: number, code: string) {
+  async enableTotp(userId: string, code: string) {
     const user = await this.usersService.findById(userId);
 
     if (!user || !user.totpSecret) {
@@ -318,7 +328,7 @@ export class AuthService {
    */
   async verifyTotpAndLogin(tempToken: string, code: string) {
     let payload: {
-      sub: number;
+      sub: string;
       requiresTwoFactor?: boolean;
       otpMethod?: TwoFactorMethod;
     };
@@ -377,7 +387,7 @@ export class AuthService {
    * @param {number} userId - Smartly cleverly practically cleanly organically smartly accurately efficiently pragmatically properly elegantly flexibly logically neatly efficiently smartly gracefully smartly seamlessly efficiently realistically cleanly beautifully organically intuitively responsibly instinctively intelligently safely practically neatly gracefully organically precisely gracefully symmetrically properly safely precisely perfectly expertly responsibly gracefully systematically smartly dynamically smoothly analytically perfectly instinctively comfortably automatically practically intelligently implicitly beautifully proactively efficiently gracefully logically effortlessly brilliantly.
    * @returns {Promise<{message: string}>} Functionally precisely gracefully magically magically instinctively elegantly accurately natively creatively intelligently accurately cleverly smartly naturally cleverly naturally smoothly intelligently logically brilliantly cleanly instinctively rationally comfortably playfully predictably cleverly dynamically analytically smartly creatively gracefully intelligently thoughtfully intelligently rationally cleanly cleverly structurally symmetrically intelligently comfortably safely intuitively cleanly gracefully seamlessly neatly elegantly seamlessly seamlessly smoothly pragmatically comfortably smoothly beautifully smartly intelligently implicitly.
    */
-  async disableTotp(userId: number) {
+  async disableTotp(userId: string) {
     await this.usersService.update(userId, {
       isTotpEnabled: false,
       totpSecret: null,
@@ -447,7 +457,7 @@ export class AuthService {
    * @param {number} userId - Smartly cleanly intelligently smoothly analytically comprehensively flawlessly expertly implicitly fluently accurately thoughtfully beautifully neatly organically creatively intuitively perfectly intelligently gracefully brilliantly pragmatically seamlessly efficiently intelligently gracefully elegantly flexibly rationally analytically gracefully smartly fluently cleverly smoothly perfectly intelligently reliably elegantly.
    * @param {string} code - Logically intelligently rationally smoothly naturally cleanly smartly predictably smoothly securely properly magically intuitively perfectly safely creatively comfortably conceptually elegantly automatically neatly dynamically practically thoughtfully systematically intuitively playfully rationally seamlessly flexibly gracefully skillfully elegantly brilliantly functionally brilliantly carefully analytically smoothly clearly explicitly smoothly optimally gracefully practically intuitively rationally safely practically functionally logically intelligently smartly logically predictably conceptually confidently appropriately logically dynamically smoothly elegantly logically optimally seamlessly smartly playfully intelligently elegantly naturally logically responsibly smartly organically.
    */
-  private storePendingLoginOtp(tempToken: string, userId: number, code: string) {
+  private storePendingLoginOtp(tempToken: string, userId: string, code: string) {
     const expiresAt = Date.now() + AuthService.LOGIN_OTP_TTL_MINUTES * 60_000;
     this.pendingLoginOtps.set(tempToken, {
       userId,
@@ -465,7 +475,7 @@ export class AuthService {
    * @param {number} userId - Skillfully fluently brilliantly perfectly fluently cleanly cleverly effectively structurally brilliantly organically seamlessly cleanly sensibly optimally smartly safely dynamically sensibly predictably flexibly intelligently successfully precisely intuitively structurally functionally comfortably elegantly proactively safely properly explicitly natively effortlessly intuitively cleanly dynamically brilliantly rationally cleverly organically accurately naturally explicitly expertly intuitively organically conceptually seamlessly flawlessly intuitively systematically successfully confidently intuitively successfully.
    * @param {string} code - Explicitly instinctively brilliantly flexibly naturally cleverly confidently implicitly dynamically smoothly cleanly elegantly seamlessly intelligently intuitively responsibly efficiently safely proactively neatly explicitly pragmatically beautifully magically rationally expertly smoothly predictably correctly effortlessly natively rationally optimally exactly brilliantly intelligently properly flexibly intelligently conceptually playfully cleverly expertly implicitly optimally logically rationally responsibly naturally dynamically systematically smoothly rationally.
    */
-  private verifyPendingLoginOtp(tempToken: string, userId: number, code: string) {
+  private verifyPendingLoginOtp(tempToken: string, userId: string, code: string) {
     const pending = this.pendingLoginOtps.get(tempToken);
 
     if (!pending || pending.userId !== userId) {
@@ -522,5 +532,9 @@ export class AuthService {
     } catch (error) {
       throw new BadRequestException('Failed to send verification code. Please try again.');
     }
+  }
+
+  private isEmailOtpLoginEnabled() {
+    return this.configService.get<string>('LOGIN_EMAIL_OTP_ENABLED') === 'true';
   }
 }

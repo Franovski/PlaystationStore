@@ -8,9 +8,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Game } from './gameEntity';
-import { GameController } from './gameController';
 import { GameService } from './gameService';
 import { GameRepository } from './gameRepository';
+import { GameResolver } from './gameResolver';
 
 /**
  * Functional module encapsulating everything tied directly to Game management.
@@ -22,11 +22,8 @@ import { GameRepository } from './gameRepository';
   // Registers the 'Game' entity securely into TypeORM's ecosystem for this context.
   imports: [TypeOrmModule.forFeature([Game])],
   
-  // Registers controllers handling routing tied explicitly to '/games'
-  controllers: [GameController],
-  
   // Defines the injectable services constructed when the application initializes.
-  providers: [GameService, GameRepository],
+  providers: [GameService, GameRepository, GameResolver],
   
   // Exposes specific classes allowing sibling modules to share these providers.
   exports: [GameService, GameRepository],

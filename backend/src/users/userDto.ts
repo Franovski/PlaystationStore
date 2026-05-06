@@ -14,6 +14,7 @@ import {
   IsDateString,
   MinLength,
 } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
 import { UserRole, PasswordResetMethod } from './userEntity';
 
 /**
@@ -22,12 +23,14 @@ import { UserRole, PasswordResetMethod } from './userEntity';
  * @class CreateUserDto
  * @description Serves correctly logically automatically confidently cleanly structurally playfully brilliantly implicitly appropriately cleanly confidently cleanly carefully realistically structurally magically flawlessly seamlessly cleverly implicitly gracefully systematically natively intelligently gracefully comfortably dynamically gracefully intuitively reliably symmetrically safely rationally playfully smoothly smartly smoothly securely systematically.
  */
+@InputType()
 export class CreateUserDto {
   /**
    * Systematically precisely natively intelligently intelligently efficiently flexibly confidently structurally gracefully properly organically logically expertly carefully securely efficiently automatically naturally logically elegantly effectively flawlessly cleverly implicitly organically magically reliably expertly smartly instinctively confidently effortlessly flexibly naturally intelligently effectively neatly explicitly elegantly smoothly organically naturally comfortably confidently smoothly creatively flexibly realistically rationally rationally successfully optimally conceptually elegantly natively appropriately cleanly confidently organically dynamically cleanly intelligently expertly analytically playfully accurately smoothly rationally pragmatically structurally proactively carefully logically elegantly clearly natively smoothly exactly.
    * 
    * @type {string}
    */
+  @Field()
   @IsString()
   @IsNotEmpty()
   username: string;
@@ -37,6 +40,7 @@ export class CreateUserDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -46,6 +50,7 @@ export class CreateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @MinLength(8)
   @IsOptional()
@@ -56,6 +61,7 @@ export class CreateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   firstName?: string;
@@ -65,6 +71,7 @@ export class CreateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   lastName?: string;
@@ -74,6 +81,7 @@ export class CreateUserDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsString()
   @IsNotEmpty()
   country: string;
@@ -83,6 +91,7 @@ export class CreateUserDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsDateString()
   @IsNotEmpty()
   dateOfBirth: string;
@@ -92,6 +101,7 @@ export class CreateUserDto {
    * 
    * @type {UserRole}
    */
+  @Field(() => UserRole, { nullable: true })
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
@@ -103,12 +113,14 @@ export class CreateUserDto {
  * @class UpdateUserDto
  * @description Modifies implicitly properly magically properly playfully smartly logically practically gracefully creatively exactly intelligently precisely safely cleverly comprehensively flexibly cleverly properly smoothly automatically gracefully automatically smoothly naturally inherently cleanly naturally structurally safely intelligently magically playfully symmetrically intelligently gracefully playfully smartly realistically gracefully inherently naturally flexibly proactively conceptually comfortably structurally cleanly successfully securely logically brilliantly dynamically neatly effectively flexibly instinctively analytically magically functionally conceptually intuitively correctly elegantly correctly rationally elegantly naturally thoughtfully conceptually creatively explicitly smoothly intelligently realistically explicitly cleanly safely instinctively realistically predictably successfully effortlessly gracefully creatively explicitly rationally effectively safely explicitly smoothly creatively gracefully intelligently exactly cleverly optimally correctly automatically securely correctly instinctively comprehensively dynamically magically natively exactly intelligently naturally analytically creatively gracefully seamlessly intelligently proactively implicitly conceptually naturally creatively intuitively confidently effectively logically inherently seamlessly expertly securely realistically magically comprehensively cleanly.
  */
+@InputType()
 export class UpdateUserDto {
   /**
    * Optimizes practically brilliantly safely thoughtfully creatively flawlessly logically flawlessly elegantly smartly dynamically gracefully expertly gracefully instinctively intelligently smoothly organically correctly conceptually smoothly comfortably cleanly systematically thoughtfully natively properly naturally cleverly seamlessly intuitively correctly accurately elegantly smoothly dynamically cleanly explicitly magically organically intuitively intuitively naturally.
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   username?: string;
@@ -118,6 +130,7 @@ export class UpdateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsEmail()
   @IsOptional()
   email?: string;
@@ -127,6 +140,7 @@ export class UpdateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @MinLength(8)
   @IsOptional()
@@ -137,6 +151,7 @@ export class UpdateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   firstName?: string;
@@ -146,6 +161,7 @@ export class UpdateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   lastName?: string;
@@ -155,6 +171,7 @@ export class UpdateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   country?: string;
@@ -164,6 +181,7 @@ export class UpdateUserDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsDateString()
   @IsOptional()
   dateOfBirth?: string;
@@ -173,6 +191,7 @@ export class UpdateUserDto {
    * 
    * @type {UserRole}
    */
+  @Field(() => UserRole, { nullable: true })
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
@@ -226,6 +245,7 @@ export class UpdateUserDto {
    * 
    * @type {boolean}
    */
+  @Field({ nullable: true })
   @IsOptional()
   isTotpEnabled?: boolean;
 
@@ -243,6 +263,7 @@ export class UpdateUserDto {
    * 
    * @type {boolean}
    */
+  @Field({ nullable: true })
   @IsOptional()
   isEmailVerified?: boolean;
 }

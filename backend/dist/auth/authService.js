@@ -52,6 +52,14 @@ let AuthService = AuthService_1 = class AuthService {
         };
     }
     async login(user) {
+        if (!user.isTotpEnabled && !this.isEmailOtpLoginEnabled()) {
+            const tokens = await this.generateTokens(user);
+            await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
+            return {
+                user: this.sanitizeUser(user),
+                ...tokens,
+            };
+        }
         const tempToken = this.jwtService.sign({
             sub: user.userId,
             requiresTwoFactor: true,
@@ -258,6 +266,9 @@ let AuthService = AuthService_1 = class AuthService {
         catch (error) {
             throw new common_1.BadRequestException('Failed to send verification code. Please try again.');
         }
+    }
+    isEmailOtpLoginEnabled() {
+        return this.configService.get('LOGIN_EMAIL_OTP_ENABLED') === 'true';
     }
 };
 exports.AuthService = AuthService;

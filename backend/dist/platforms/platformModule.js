@@ -10,17 +10,16 @@ exports.PlatformModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const platformEntity_1 = require("./platformEntity");
-const platformController_1 = require("./platformController");
 const platformService_1 = require("./platformService");
 const platformRepository_1 = require("./platformRepository");
+const platformResolver_1 = require("./platformResolver");
 let PlatformModule = class PlatformModule {
 };
 exports.PlatformModule = PlatformModule;
 exports.PlatformModule = PlatformModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([platformEntity_1.Platform])],
-        controllers: [platformController_1.PlatformController],
-        providers: [platformService_1.PlatformService, platformRepository_1.PlatformRepository],
+        providers: [platformService_1.PlatformService, platformRepository_1.PlatformRepository, platformResolver_1.PlatformResolver],
         exports: [platformService_1.PlatformService],
     })
 ], PlatformModule);

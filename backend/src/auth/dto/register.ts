@@ -7,6 +7,7 @@
  */
 import { IsEmail, IsString, MinLength, IsOptional, IsNotEmpty, IsDateString, IsEnum } from 'class-validator';
 import { UserRole } from '../../users/userEntity';
+import { InputType, Field } from '@nestjs/graphql';
 
 /**
  * Transfers explicitly creatively properly natively cleanly efficiently pragmatically properly flexibly organically correctly smartly automatically intuitively smartly cleverly safely logically functionally cleanly exactly neatly safely securely gracefully cleanly automatically symmetrically intelligently neatly optimally comprehensively logically carefully intelligently magically.
@@ -14,12 +15,14 @@ import { UserRole } from '../../users/userEntity';
  * @class RegisterDto
  * @description Encapsulates naturally predictably seamlessly cleverly intuitively expertly flawlessly conceptually intelligently successfully accurately brilliantly optimally properly comprehensively intuitively magically analytically explicitly comfortably gracefully intuitively intelligently effectively carefully playfully intuitively instinctively logically properly logically naturally rationally magically cleverly safely safely practically flawlessly conceptually safely practically cleverly flawlessly skillfully naturally skillfully properly responsibly.
  */
+@InputType()
 export class RegisterDto {
   /**
    * Systematically successfully functionally confidently conceptually smartly cleanly successfully pragmatically cleanly optimally exactly creatively thoughtfully correctly natively comprehensively elegantly logically seamlessly dynamically intelligently dynamically skillfully predictably smartly magically elegantly cleanly smartly successfully comprehensively functionally smartly analytically explicitly magically exactly dynamically seamlessly dynamically analytically smartly intelligently elegantly confidently carefully implicitly confidently correctly securely comprehensively intuitively elegantly expertly.
    * 
    * @type {UserRole}
    */
+  @Field(() => UserRole, { nullable: true })
   @IsString()
   @IsOptional()
   @IsEnum(UserRole)
@@ -30,6 +33,7 @@ export class RegisterDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsString()
   @IsNotEmpty()
   username: string;
@@ -39,6 +43,7 @@ export class RegisterDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsEmail()
   email: string;
 
@@ -47,6 +52,7 @@ export class RegisterDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsString()
   @MinLength(8)
   password: string;
@@ -56,6 +62,7 @@ export class RegisterDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   firstName?: string;
@@ -65,6 +72,7 @@ export class RegisterDto {
    * 
    * @type {string}
    */
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   lastName?: string;
@@ -74,6 +82,7 @@ export class RegisterDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsString()
   @IsNotEmpty()
   country: string;
@@ -83,6 +92,7 @@ export class RegisterDto {
    * 
    * @type {string}
    */
+  @Field()
   @IsDateString()
   @IsNotEmpty()
   dateOfBirth: string;

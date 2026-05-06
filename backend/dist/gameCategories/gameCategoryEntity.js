@@ -13,28 +13,34 @@ exports.GameCategory = void 0;
 const typeorm_1 = require("typeorm");
 const gameEntity_1 = require("../games/gameEntity");
 const categoryEntity_1 = require("../categories/categoryEntity");
+const graphql_1 = require("@nestjs/graphql");
 let GameCategory = class GameCategory {
 };
 exports.GameCategory = GameCategory;
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
     (0, typeorm_1.PrimaryColumn)({ name: 'game_id' }),
     __metadata("design:type", Number)
 ], GameCategory.prototype, "gameId", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
     (0, typeorm_1.PrimaryColumn)({ name: 'category_id' }),
     __metadata("design:type", Number)
 ], GameCategory.prototype, "categoryId", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => gameEntity_1.Game),
     (0, typeorm_1.ManyToOne)(() => gameEntity_1.Game, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'game_id' }),
     __metadata("design:type", gameEntity_1.Game)
 ], GameCategory.prototype, "game", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => categoryEntity_1.Category),
     (0, typeorm_1.ManyToOne)(() => categoryEntity_1.Category, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'category_id' }),
     __metadata("design:type", categoryEntity_1.Category)
 ], GameCategory.prototype, "category", void 0);
 exports.GameCategory = GameCategory = __decorate([
+    (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)('game_categories')
 ], GameCategory);
 //# sourceMappingURL=gameCategoryEntity.js.map

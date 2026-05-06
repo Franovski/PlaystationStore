@@ -6,6 +6,7 @@
  * @interaction GameController heavily relies on these DTOs to bind and validate `@Body()` parameters.
  */
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDateString, Min } from 'class-validator';
+import { InputType, Field, Float } from '@nestjs/graphql';
 
 /**
  * Data Transfer Object utilized for the creation of a new Game entity.
@@ -13,11 +14,13 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDateString, Min } from 'c
  * @class CreateGameDto
  * @description Specifies the exact properties, data types, and validation rules required to establish a valid Game entry in the system.
  */
+@InputType()
 export class CreateGameDto {
   /**
    * The required official title for the new game.
    * @type {string}
    */
+  @Field()
   @IsString()
   @IsNotEmpty()
   title: string;
@@ -26,22 +29,25 @@ export class CreateGameDto {
    * An optional text summary or description representing the game's contents.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   description?: string;
 
   /**
    * An optional release date; validated as a valid ISO-8601 date string.
-   * @type {Date | undefined}
+   * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsDateString()
-  releaseDate?: Date;
+  releaseDate?: string;
 
   /**
    * The required standard price of the game. It cannot drop below 0.
    * @type {number}
    */
+  @Field(() => Float)
   @IsNumber()
   @Min(0)
   basePrice: number;
@@ -50,6 +56,7 @@ export class CreateGameDto {
    * Optional name of the development studio behind the game.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   developer?: string;
@@ -58,6 +65,7 @@ export class CreateGameDto {
    * Optional name of the publishing company pushing the game to market.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   publisher?: string;
@@ -66,6 +74,7 @@ export class CreateGameDto {
    * Optional age classification rating, such as "E" for Everyone or "M" for Mature.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   ageRating?: string;
@@ -77,11 +86,13 @@ export class CreateGameDto {
  * @class UpdateGameDto
  * @description Mirrors `CreateGameDto`, but explicitly marks every property as optional, allowing clients to send only the fields that require mutation.
  */
+@InputType()
 export class UpdateGameDto {
   /**
    * The updated title for the game, if substituting the existing one.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
@@ -91,22 +102,25 @@ export class UpdateGameDto {
    * The updated description for the game.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   description?: string;
 
   /**
    * An updated ISO-8601 release date.
-   * @type {Date | undefined}
+   * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsDateString()
-  releaseDate?: Date;
+  releaseDate?: string;
 
   /**
    * An updated standard price; enforced to be greater than or equal to 0.
    * @type {number | undefined}
    */
+  @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -116,6 +130,7 @@ export class UpdateGameDto {
    * An updated developer studio identity.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   developer?: string;
@@ -124,6 +139,7 @@ export class UpdateGameDto {
    * An updated publishing entity identity.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   publisher?: string;
@@ -132,6 +148,7 @@ export class UpdateGameDto {
    * An updated age classification rating string.
    * @type {string | undefined}
    */
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   ageRating?: string;

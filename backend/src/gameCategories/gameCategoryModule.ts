@@ -8,11 +8,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameCategory } from './gameCategoryEntity';
-import { GameCategoryController } from './gameCategoryController';
 import { GameCategoryService } from './gameCategoryService';
 import { GameCategoryRepository } from './gameCategoryRepository';
 import { GameModule } from '../games/gameModule';
 import { CategoryModule } from '../categories/categoryModule';
+import { GameCategoryResolver } from './gameCategoryResolver';
 
 /**
  * Encapsulates naturally securely realistically effectively actively flawlessly accurately actively systematically smartly gracefully practically smoothly seamlessly natively perfectly smoothly elegantly logically appropriately seamlessly confidently correctly precisely cleanly instinctively organically creatively elegantly symmetrically brilliantly securely analytically naturally playfully.
@@ -27,8 +27,7 @@ import { CategoryModule } from '../categories/categoryModule';
     GameModule,
     CategoryModule,
   ],
-  controllers: [GameCategoryController],
-  providers: [GameCategoryService, GameCategoryRepository],
+  providers: [GameCategoryService, GameCategoryRepository, GameCategoryResolver],
   exports: [GameCategoryService],
 })
 export class GameCategoryModule {}

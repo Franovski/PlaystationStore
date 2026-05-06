@@ -11,42 +11,52 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Game = void 0;
 const typeorm_1 = require("typeorm");
+const graphql_1 = require("@nestjs/graphql");
 let Game = class Game {
 };
 exports.Game = Game;
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Game.prototype, "gameId", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
     __metadata("design:type", String)
 ], Game.prototype, "title", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], Game.prototype, "description", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, typeorm_1.Column)({ type: 'date', nullable: true }),
-    __metadata("design:type", Date)
+    __metadata("design:type", String)
 ], Game.prototype, "releaseDate", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Float),
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2 }),
     __metadata("design:type", Number)
 ], Game.prototype, "basePrice", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", String)
 ], Game.prototype, "developer", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", String)
 ], Game.prototype, "publisher", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 50, nullable: true }),
     __metadata("design:type", String)
 ], Game.prototype, "ageRating", void 0);
 exports.Game = Game = __decorate([
+    (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)('games')
 ], Game);
 //# sourceMappingURL=gameEntity.js.map

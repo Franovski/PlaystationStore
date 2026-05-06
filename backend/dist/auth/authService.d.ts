@@ -21,13 +21,13 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
         user: {
-            userId: number;
+            userId: string;
             username: string;
             email: string;
             firstName: string;
             lastName: string;
             country: string;
-            dateOfBirth: Date;
+            dateOfBirth: string;
             role: import("../users/userEntity").UserRole;
             isEmailVerified: boolean;
             isTotpEnabled: boolean;
@@ -36,21 +36,41 @@ export declare class AuthService {
         };
     }>;
     login(user: User): Promise<{
-        requiresTwoFactor: boolean;
-        tempToken: string;
-        otpMethod: TwoFactorMethod;
-    }>;
-    refreshTokens(userId: number, refreshToken: string): Promise<{
         accessToken: string;
         refreshToken: string;
         user: {
-            userId: number;
+            userId: string;
             username: string;
             email: string;
             firstName: string;
             lastName: string;
             country: string;
-            dateOfBirth: Date;
+            dateOfBirth: string;
+            role: import("../users/userEntity").UserRole;
+            isEmailVerified: boolean;
+            isTotpEnabled: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        requiresTwoFactor?: undefined;
+        tempToken?: undefined;
+        otpMethod?: undefined;
+    } | {
+        requiresTwoFactor: boolean;
+        tempToken: string;
+        otpMethod: TwoFactorMethod;
+    }>;
+    refreshTokens(userId: string, refreshToken: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        user: {
+            userId: string;
+            username: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            country: string;
+            dateOfBirth: string;
             role: import("../users/userEntity").UserRole;
             isEmailVerified: boolean;
             isTotpEnabled: boolean;
@@ -59,35 +79,35 @@ export declare class AuthService {
         };
     }>;
     decodeRefreshToken(token: string): {
-        sub: number;
+        sub: string;
         email: string;
         role?: string;
     };
-    logout(userId: number): Promise<{
+    logout(userId: string): Promise<{
         message: string;
     }>;
     forgotPassword(email: string): Promise<import("./resetPassword/reset-password.types").PasswordResetRequestResult>;
     resetPassword(dto: ResetPasswordDto): Promise<{
         message: string;
     }>;
-    generateTotpSecret(userId: number): Promise<{
+    generateTotpSecret(userId: string): Promise<{
         secret: string;
         qrCode: string;
     }>;
-    enableTotp(userId: number, code: string): Promise<{
+    enableTotp(userId: string, code: string): Promise<{
         message: string;
     }>;
     verifyTotpAndLogin(tempToken: string, code: string): Promise<{
         accessToken: string;
         refreshToken: string;
         user: {
-            userId: number;
+            userId: string;
             username: string;
             email: string;
             firstName: string;
             lastName: string;
             country: string;
-            dateOfBirth: Date;
+            dateOfBirth: string;
             role: import("../users/userEntity").UserRole;
             isEmailVerified: boolean;
             isTotpEnabled: boolean;
@@ -95,7 +115,7 @@ export declare class AuthService {
             updatedAt: Date;
         };
     }>;
-    disableTotp(userId: number): Promise<{
+    disableTotp(userId: string): Promise<{
         message: string;
     }>;
     private generateTokens;
@@ -105,5 +125,6 @@ export declare class AuthService {
     private cleanupExpiredPendingOtps;
     private generateNumericOtp;
     private sendLoginOtp;
+    private isEmailOtpLoginEnabled;
 }
 export {};

@@ -1,7 +1,7 @@
 export declare class CreateGameDto {
     title: string;
     description?: string;
-    releaseDate?: Date;
+    releaseDate?: string;
     basePrice: number;
     developer?: string;
     publisher?: string;
@@ -10,7 +10,7 @@ export declare class CreateGameDto {
 export declare class UpdateGameDto {
     title?: string;
     description?: string;
-    releaseDate?: Date;
+    releaseDate?: string;
     basePrice?: number;
     developer?: string;
     publisher?: string;

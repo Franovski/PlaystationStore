@@ -6,6 +6,7 @@
  * @interaction Interacts tightly with PlatformRepository and type-checks platform enumerations across the platform module.
  */
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
 
 /**
  * Enumeration of statically supported platform target names.
@@ -16,18 +17,24 @@ export enum PlatformName {
   PS5 = 'ps5',
 }
 
+registerEnumType(PlatformName, {
+  name: 'PlatformName',
+});
+
 /**
  * Target database entity for platforms.
  * 
  * @class Platform
  * @description Provides the data schema corresponding to the `platforms` table, supporting the association of products with supported gaming systems.
  */
+@ObjectType()
 @Entity('platforms')
 export class Platform {
   /**
    * The automatically generated unique identifier for the targeted platform.
    * @type {number}
    */
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   platformId: number;
 
@@ -36,6 +43,7 @@ export class Platform {
    * Restricted dynamically directly at the database column layer ensuring it mirrors standard domain values.
    * @type {PlatformName}
    */
+  @Field(() => PlatformName)
   @Column({ type: 'enum', enum: PlatformName, unique: true })
   platformName: PlatformName;
 }

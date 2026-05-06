@@ -9,20 +9,20 @@ export declare class UsersService {
     create(dto: CreateUserDto): Promise<User>;
     createPublicUser(dto: RegisterDto): Promise<User>;
     findAll(): Promise<Partial<User>[]>;
-    findById(userId: number): Promise<User | null>;
-    findSafeById(userId: number): Promise<Partial<User> | null>;
+    findById(userId: string): Promise<User | null>;
+    findSafeById(userId: string): Promise<Partial<User> | null>;
     findByEmail(email: string): Promise<User | null>;
     findByUsername(username: string): Promise<User | null>;
     findByResetToken(hashedToken: string, method?: PasswordResetMethod): Promise<User | null>;
-    update(userId: number, dto: UpdateUserDto | Partial<User>, options?: {
+    update(userId: string, dto: UpdateUserDto | Partial<User>, options?: {
         allowRoleChange?: boolean;
     }): Promise<User>;
-    remove(userId: number): Promise<void>;
-    setRefreshToken(userId: number, refreshToken: string | null): Promise<void>;
-    clearRefreshToken(userId: number): Promise<void>;
-    storePasswordResetToken(userId: number, hashedToken: string, expiresAt: Date, method: PasswordResetMethod): Promise<void>;
-    incrementPasswordResetAttempts(userId: number): Promise<void>;
-    clearPasswordResetState(userId: number): Promise<void>;
+    remove(userId: string): Promise<void>;
+    setRefreshToken(userId: string, refreshToken: string | null): Promise<void>;
+    clearRefreshToken(userId: string): Promise<void>;
+    storePasswordResetToken(userId: string, hashedToken: string, expiresAt: Date, method: PasswordResetMethod): Promise<void>;
+    incrementPasswordResetAttempts(userId: string): Promise<void>;
+    clearPasswordResetState(userId: string): Promise<void>;
     sanitizeUser(user: User): Omit<User, 'password' | 'refreshToken' | 'totpSecret' | 'passwordResetToken' | 'passwordResetExpires' | 'passwordResetMethod' | 'passwordResetAttempts'>;
     private ensureEmailAvailable;
     private ensureUsernameAvailable;

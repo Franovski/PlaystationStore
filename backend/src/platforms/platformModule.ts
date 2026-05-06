@@ -8,9 +8,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Platform } from './platformEntity';
-import { PlatformController } from './platformController';
 import { PlatformService } from './platformService';
 import { PlatformRepository } from './platformRepository';
+import { PlatformResolver } from './platformResolver';
 
 /**
  * Encapsulating construct for platforms ensuring component linkage securely.
@@ -21,8 +21,7 @@ import { PlatformRepository } from './platformRepository';
 @Module({
   // Enforces TypeORM schema awareness directly internally cleanly.
   imports: [TypeOrmModule.forFeature([Platform])],
-  controllers: [PlatformController],
-  providers: [PlatformService, PlatformRepository],
+  providers: [PlatformService, PlatformRepository, PlatformResolver],
   // Pushes service availability outwards successfully so other domains can rely on platforms.
   exports: [PlatformService],
 })

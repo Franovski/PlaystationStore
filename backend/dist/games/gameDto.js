@@ -11,82 +11,103 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateGameDto = exports.CreateGameDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateGameDto {
-}
+const graphql_1 = require("@nestjs/graphql");
+let CreateGameDto = class CreateGameDto {
+};
 exports.CreateGameDto = CreateGameDto;
 __decorate([
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateGameDto.prototype, "title", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateGameDto.prototype, "description", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", Date)
+    __metadata("design:type", String)
 ], CreateGameDto.prototype, "releaseDate", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Float),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateGameDto.prototype, "basePrice", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateGameDto.prototype, "developer", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateGameDto.prototype, "publisher", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateGameDto.prototype, "ageRating", void 0);
-class UpdateGameDto {
-}
+exports.CreateGameDto = CreateGameDto = __decorate([
+    (0, graphql_1.InputType)()
+], CreateGameDto);
+let UpdateGameDto = class UpdateGameDto {
+};
 exports.UpdateGameDto = UpdateGameDto;
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], UpdateGameDto.prototype, "title", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateGameDto.prototype, "description", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", Date)
+    __metadata("design:type", String)
 ], UpdateGameDto.prototype, "releaseDate", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], UpdateGameDto.prototype, "basePrice", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateGameDto.prototype, "developer", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateGameDto.prototype, "publisher", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateGameDto.prototype, "ageRating", void 0);
+exports.UpdateGameDto = UpdateGameDto = __decorate([
+    (0, graphql_1.InputType)()
+], UpdateGameDto);
 //# sourceMappingURL=gameDto.js.map

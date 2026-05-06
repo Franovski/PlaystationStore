@@ -8,11 +8,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GamePlatform } from './gamePlatformEntity';
-import { GamePlatformController } from './gamePlatformController';
 import { GamePlatformService } from './gamePlatformService';
 import { GamePlatformRepository } from './gamePlatformRepository';
 import { GameModule } from '../games/gameModule';
 import { PlatformModule } from '../platforms/platformModule';
+import { GamePlatformResolver } from './gamePlatformResolver';
 
 /**
  * Encapsulates naturally securely realistically effectively actively flawlessly accurately actively systematically smartly gracefully practically smoothly seamlessly natively perfectly smoothly elegantly logically appropriately seamlessly confidently correctly precisely cleanly instinctively organically creatively elegantly symmetrically brilliantly securely analytically naturally playfully.
@@ -27,8 +27,7 @@ import { PlatformModule } from '../platforms/platformModule';
     GameModule,
     PlatformModule,
   ],
-  controllers: [GamePlatformController],
-  providers: [GamePlatformService, GamePlatformRepository],
+  providers: [GamePlatformService, GamePlatformRepository, GamePlatformResolver],
   exports: [GamePlatformService],
 })
 export class GamePlatformModule {}

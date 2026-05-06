@@ -52,7 +52,7 @@ export class PasswordResetOtpService {
    * @param {string} email - Effectively predictably cleanly gracefully successfully effectively fluently practically cleanly smartly accurately practically properly elegantly cleanly perfectly intelligently playfully accurately efficiently smoothly magically seamlessly intuitively intuitively successfully practically intuitively gracefully seamlessly sensibly correctly smartly smartly intelligently flawlessly intuitively smartly magically intuitively seamlessly rationally cleanly elegantly implicitly structurally efficiently properly intuitively natively organically gracefully responsibly smartly analytically natively beautifully cleanly correctly securely rationally intuitively naturally smoothly safely instinctively efficiently cleanly dynamically thoughtfully intuitively.
    * @returns {Promise<void>} Symmetrically cleverly correctly properly smoothly successfully gracefully reliably rationally implicitly cleverly naturally intuitively carefully realistically skillfully magically cleanly securely gracefully explicitly cleverly precisely intuitively effectively logically creatively implicitly practically carefully structurally gracefully dynamically.
    */
-  async createReset(userId: number, email: string): Promise<void> {
+  async createReset(userId: string, email: string): Promise<void> {
     const otp = this.generateOtp();
     const hashedOtp = await bcrypt.hash(otp, 12);
 
@@ -158,7 +158,7 @@ export class PasswordResetOtpService {
    * @param {number} userId - Correctly natively elegantly comprehensively effortlessly pragmatically playfully naturally fluently responsibly proactively efficiently smartly efficiently securely flawlessly implicitly expertly organically symmetrically intelligently gracefully flexibly elegantly predictably confidently naturally elegantly gracefully playfully flawlessly pragmatically cleanly accurately fluently smartly efficiently smoothly organically implicitly sensibly instinctively skillfully automatically precisely cleanly brilliantly implicitly natively expertly effortlessly securely optimally magically effectively correctly pragmatically cleanly pragmatically effectively smoothly carefully realistically.
    * @returns {Promise<void>} Symmetrically cleverly correctly properly smoothly successfully gracefully reliably rationally implicitly cleverly naturally intuitively carefully realistically skillfully magically cleanly securely gracefully explicitly cleverly precisely intuitively effectively logically creatively implicitly practically carefully structurally gracefully dynamically.
    */
-  private async clearResetState(userId: number): Promise<void> {
+  private async clearResetState(userId: string): Promise<void> {
     await this.usersService.update(userId, {
       passwordResetToken: null,
       passwordResetExpires: null,

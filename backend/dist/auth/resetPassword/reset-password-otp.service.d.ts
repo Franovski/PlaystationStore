@@ -7,7 +7,7 @@ export declare class PasswordResetOtpService {
     private readonly configService;
     private readonly logger;
     constructor(usersService: UsersService, mailService: MailService, configService: ConfigService);
-    createReset(userId: number, email: string): Promise<void>;
+    createReset(userId: string, email: string): Promise<void>;
     resetPassword(email: string, otp: string, newPassword: string): Promise<{
         message: string;
     }>;

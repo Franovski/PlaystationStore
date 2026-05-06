@@ -10,11 +10,11 @@ exports.GameCategoryModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const gameCategoryEntity_1 = require("./gameCategoryEntity");
-const gameCategoryController_1 = require("./gameCategoryController");
 const gameCategoryService_1 = require("./gameCategoryService");
 const gameCategoryRepository_1 = require("./gameCategoryRepository");
 const gameModule_1 = require("../games/gameModule");
 const categoryModule_1 = require("../categories/categoryModule");
+const gameCategoryResolver_1 = require("./gameCategoryResolver");
 let GameCategoryModule = class GameCategoryModule {
 };
 exports.GameCategoryModule = GameCategoryModule;
@@ -25,8 +25,7 @@ exports.GameCategoryModule = GameCategoryModule = __decorate([
             gameModule_1.GameModule,
             categoryModule_1.CategoryModule,
         ],
-        controllers: [gameCategoryController_1.GameCategoryController],
-        providers: [gameCategoryService_1.GameCategoryService, gameCategoryRepository_1.GameCategoryRepository],
+        providers: [gameCategoryService_1.GameCategoryService, gameCategoryRepository_1.GameCategoryRepository, gameCategoryResolver_1.GameCategoryResolver],
         exports: [gameCategoryService_1.GameCategoryService],
     })
 ], GameCategoryModule);
