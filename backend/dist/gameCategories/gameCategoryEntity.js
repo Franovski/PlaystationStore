@@ -28,13 +28,13 @@ __decorate([
     __metadata("design:type", Number)
 ], GameCategory.prototype, "categoryId", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => gameEntity_1.Game),
+    (0, graphql_1.Field)(() => gameEntity_1.Game, { nullable: true }),
     (0, typeorm_1.ManyToOne)(() => gameEntity_1.Game, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'game_id' }),
     __metadata("design:type", gameEntity_1.Game)
 ], GameCategory.prototype, "game", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => categoryEntity_1.Category),
+    (0, graphql_1.Field)(() => categoryEntity_1.Category, { nullable: true }),
     (0, typeorm_1.ManyToOne)(() => categoryEntity_1.Category, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'category_id' }),
     __metadata("design:type", categoryEntity_1.Category)

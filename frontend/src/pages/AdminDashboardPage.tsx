@@ -3,8 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../app/store';
 import { logoutUser } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { adminSummaryApi, adminUsersApi, adminGamesApi, adminPlatformsApi, adminCategoriesApi, adminGameCategoriesApi, adminGamePlatformsApi } from '../api/adminApi';
-import { User, Game, Platform, Category, GameCategory, GamePlatform } from '../types';
+import {
+  adminSummaryApi,
+  adminUsersApi,
+  adminGamesApi,
+  adminPlatformsApi,
+  adminCategoriesApi,
+  adminGameCategoriesApi,
+  adminGamePlatformsApi,
+  adminDlcApi,
+} from '../api/adminApi';
+import { User, Game, Platform, Category, GameCategory, GamePlatform, DLC } from '../types';
 
 type UserFormState = {
   username: string;
@@ -33,12 +42,18 @@ type PlatformFormState = {
 
 type CategoryFormState = {
   categoryName: string;
-  description: string;
 };
 
 type GameRelationFormState = {
   gameId: string;
   relationId: string;
+};
+
+type DLCFormState = {
+  name: string;
+  price: string;
+  releaseDate: string;
+  gameId: string;
 };
 
 export const COUNTRIES = [
@@ -262,15 +277,22 @@ const emptyGameForm: GameFormState = {
 };
 
 const emptyPlatformForm: PlatformFormState = { platformName: '' };
-const emptyCategoryForm: CategoryFormState = { categoryName: '', description: '' };
+const emptyCategoryForm: CategoryFormState = { categoryName: '' };
 const emptyRelationForm: GameRelationFormState = { gameId: '', relationId: '' };
+
+const emptyDLCForm: DLCFormState = {
+  name: '',
+  price: '',
+  releaseDate: '',
+  gameId: '',
+};
 
 const AdminDashboardPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'games' | 'platforms' | 'categories' | 'gameCategories' | 'gamePlatforms'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'games' | 'platforms' | 'categories' | 'gameCategories' | 'gamePlatforms' | 'dlcs'>('dashboard');
   const [stats, setStats] = useState({
     users: 0,
     admins: 0,
@@ -285,6 +307,7 @@ const AdminDashboardPage: React.FC = () => {
   const [categoriesList, setCategoriesList] = useState<Category[]>([]);
   const [gameCategoriesList, setGameCategoriesList] = useState<GameCategory[]>([]);
   const [gamePlatformsList, setGamePlatformsList] = useState<GamePlatform[]>([]);
+  const [dlcsList, setDlcsList] = useState<DLC[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -293,6 +316,7 @@ const AdminDashboardPage: React.FC = () => {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isGameCategoryModalOpen, setIsGameCategoryModalOpen] = useState(false);
   const [isGamePlatformModalOpen, setIsGamePlatformModalOpen] = useState(false);
+  const [isDLCModalOpen, setIsDLCModalOpen] = useState(false);
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
@@ -300,6 +324,7 @@ const AdminDashboardPage: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingGameCategory, setEditingGameCategory] = useState<GameCategory | null>(null);
   const [editingGamePlatform, setEditingGamePlatform] = useState<GamePlatform | null>(null);
+  const [editingDLC, setEditingDLC] = useState<DLC | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [userFormData, setUserFormData] = useState<UserFormState>(emptyUserForm);
@@ -307,6 +332,7 @@ const AdminDashboardPage: React.FC = () => {
   const [platformFormData, setPlatformFormData] = useState<PlatformFormState>(emptyPlatformForm);
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormState>(emptyCategoryForm);
   const [relationFormData, setRelationFormData] = useState<GameRelationFormState>(emptyRelationForm);
+  const [dlcFormData, setDLCFormData] = useState(emptyDLCForm);
 
   useEffect(() => {
     if (user && user.role !== 'admin') {
@@ -364,6 +390,12 @@ const AdminDashboardPage: React.FC = () => {
           const res: any = await adminGamePlatformsApi.getAll();
           setGamePlatformsList(Array.isArray(res) ? res : []);
         } catch (ignored) { }
+      } else if (activeTab === 'dlcs') {
+        const games: any = await adminGamesApi.getAll();
+        setGamesList(Array.isArray(games) ? games : []);
+
+        const dlcs: any = await adminDlcApi.getAll();
+        setDlcsList(Array.isArray(dlcs) ? dlcs : []);
       }
     } catch (err) {
       console.error(`Failed to load admin data for ${activeTab}`, err);
@@ -429,7 +461,7 @@ const AdminDashboardPage: React.FC = () => {
 
   const openCategoryModal = (c: Category | null = null) => {
     setEditingCategory(c);
-    setCategoryFormData(c ? { categoryName: c.categoryName, description: c.description || '' } : emptyCategoryForm);
+    setCategoryFormData(c ? { categoryName: c.categoryName } : emptyCategoryForm);
     setIsCategoryModalOpen(true);
   };
 
@@ -443,6 +475,28 @@ const AdminDashboardPage: React.FC = () => {
     setEditingGamePlatform(gp);
     setRelationFormData(gp ? { gameId: String(gp.gameId), relationId: String(gp.platformId) } : emptyRelationForm);
     setIsGamePlatformModalOpen(true);
+  };
+
+  const openDLCModal = (dlcToEdit: DLC | null = null) => {
+    setEditingDLC(dlcToEdit);
+
+    if (dlcToEdit) {
+      setDLCFormData({
+        name: dlcToEdit.name || '',
+        price:
+          dlcToEdit.price !== undefined && dlcToEdit.price !== null
+            ? String(dlcToEdit.price)
+            : '',
+        releaseDate: dlcToEdit.releaseDate
+          ? String(dlcToEdit.releaseDate).slice(0, 10)
+          : '',
+        gameId: dlcToEdit.gameId ? String(dlcToEdit.gameId) : '',
+      });
+    } else {
+      setDLCFormData(emptyDLCForm);
+    }
+
+    setIsDLCModalOpen(true);
   };
 
   const handleUserFormChange = (
@@ -620,6 +674,52 @@ const AdminDashboardPage: React.FC = () => {
     }
   };
 
+  const handleDLCSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const payload: Record<string, any> = {
+        name: dlcFormData.name.trim(),
+        price: Number(dlcFormData.price),
+        gameId: Number(dlcFormData.gameId),
+      };
+
+      if (dlcFormData.releaseDate.trim()) {
+        payload.releaseDate = dlcFormData.releaseDate.trim();
+      }
+
+      if (!payload.name) {
+        alert('DLC name is required');
+        return;
+      }
+
+      if (Number.isNaN(payload.price)) {
+        alert('DLC price must be a valid number');
+        return;
+      }
+
+      if (Number.isNaN(payload.gameId)) {
+        alert('Please select a game');
+        return;
+      }
+
+      if (editingDLC?.dlcId) {
+        await adminDlcApi.update(editingDLC.dlcId, payload);
+      } else {
+        console.log('DLC payload:', payload);
+        await adminDlcApi.create(payload);
+      }
+
+      setIsDLCModalOpen(false);
+      setEditingDLC(null);
+      setDLCFormData(emptyDLCForm);
+      await fetchAdminData();
+    } catch (error: any) {
+      alert(error?.message || 'Error saving DLC');
+      console.error('DLC save error:', error);
+    }
+  };
+
   const deleteUser = async (id: string) => {
     if (
       confirm(
@@ -674,6 +774,17 @@ const AdminDashboardPage: React.FC = () => {
       (g.title || '').toLowerCase().includes(normalized),
     );
   }, [gamesList, searchTerm]);
+
+  const filteredDLCs = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return dlcsList.filter((dlc) => {
+      const name = dlc.name?.toLowerCase() || '';
+      const gameTitle = dlc.game?.title?.toLowerCase() || '';
+
+      return name.includes(normalized) || gameTitle.includes(normalized);
+    });
+  }, [dlcsList, searchTerm]);
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -769,6 +880,16 @@ const AdminDashboardPage: React.FC = () => {
           >
             <span className="mr-3 text-lg opacity-80">🔗</span> Game Platforms
           </button>
+
+          <button
+            onClick={() => setActiveTab('dlcs')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'dlcs'
+              ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-lg opacity-80">🎮</span> DLCs
+          </button>
         </nav>
 
         <div className="mt-auto border-t border-gray-700 pt-6">
@@ -857,105 +978,295 @@ const AdminDashboardPage: React.FC = () => {
               )}
 
               {/* Data Table Sections */}
-              {(activeTab === 'platforms' || activeTab === 'categories' || activeTab === 'gameCategories' || activeTab === 'gamePlatforms') && (
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
-                    <div className="relative w-full sm:w-96">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+              {/* Data Table Sections */}
+              {(activeTab === 'platforms' ||
+                activeTab === 'categories' ||
+                activeTab === 'gameCategories' ||
+                activeTab === 'gamePlatforms') && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
+                      <div className="relative w-full sm:w-96">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+
+                        <input
+                          type="text"
+                          placeholder={`Search ${activeTab.replace(/([A-Z])/g, ' $1').toLowerCase()}...`}
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+                          className={`w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 transition-shadow ${activeTab === 'platforms'
+                            ? 'focus:border-red-500 focus:ring-red-500'
+                            : activeTab === 'categories'
+                              ? 'focus:border-yellow-500 focus:ring-yellow-500'
+                              : activeTab === 'gameCategories'
+                                ? 'focus:border-indigo-500 focus:ring-indigo-500'
+                                : 'focus:border-teal-500 focus:ring-teal-500'
+                            }`}
+                        />
                       </div>
-                      <input
-                        type="text" placeholder={`Search ${activeTab}...`} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
+
+                      <button
+                        onClick={() => {
+                          if (activeTab === 'platforms') openPlatformModal();
+                          if (activeTab === 'categories') openCategoryModal();
+                          if (activeTab === 'gameCategories') openGameCategoryModal();
+                          if (activeTab === 'gamePlatforms') openGamePlatformModal();
+                        }}
+                        className={`w-full sm:w-auto flex items-center justify-center px-6 py-3 rounded-lg text-sm font-bold shadow-lg transition-all text-white ${activeTab === 'platforms'
+                          ? 'bg-red-600 hover:bg-red-500 shadow-red-900/20'
+                          : activeTab === 'categories'
+                            ? 'bg-yellow-600 hover:bg-yellow-500 shadow-yellow-900/20'
+                            : activeTab === 'gameCategories'
+                              ? 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-900/20'
+                              : 'bg-teal-600 hover:bg-teal-500 shadow-teal-900/20'
+                          }`}
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+
+                        {activeTab === 'platforms' && 'Add New Platform'}
+                        {activeTab === 'categories' && 'Add New Category'}
+                        {activeTab === 'gameCategories' && 'Add New Game Category'}
+                        {activeTab === 'gamePlatforms' && 'Add New Game Platform'}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        if (activeTab === 'platforms') openPlatformModal();
-                        if (activeTab === 'categories') openCategoryModal();
-                        if (activeTab === 'gameCategories') openGameCategoryModal();
-                        if (activeTab === 'gamePlatforms') openGamePlatformModal();
-                      }}
-                      className="w-full sm:w-auto flex items-center justify-center bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg text-sm font-bold shadow-lg transition-all text-white"
-                    >
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                      Add New
-                    </button>
-                  </div>
 
-                  <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse whitespace-nowrap">
-                        <thead>
-                          <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
-                            {activeTab === 'platforms' && <><th className="px-6 py-4">ID</th><th className="px-6 py-4">Name</th></>}
-                            {activeTab === 'categories' && <><th className="px-6 py-4">ID</th><th className="px-6 py-4">Name</th><th className="px-6 py-4">Desc</th></>}
-                            {activeTab === 'gameCategories' && <><th className="px-6 py-4">Game</th><th className="px-6 py-4">Category</th></>}
-                            {activeTab === 'gamePlatforms' && <><th className="px-6 py-4">Game</th><th className="px-6 py-4">Platform</th></>}
-                            <th className="px-6 py-4 text-right">Manage</th>
-                          </tr>
-                        </thead>
-                        <tbody className="text-sm divide-y divide-gray-700">
-                          {activeTab === 'platforms' && platformsList.filter(p => p.platformName.toLowerCase().includes(normalizedSearch)).map(p => (
-                            <tr key={p.platformId} className="hover:bg-gray-750">
-                              <td className="px-6 py-4 text-gray-500 font-mono text-xs">{p.platformId}</td>
-                              <td className="px-6 py-4 font-bold text-white uppercase">{p.platformName}</td>
-                              <td className="px-6 py-4 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <button onClick={() => openPlatformModal(p)} className="p-2 text-gray-400 hover:text-white transition-colors">Edit</button>
-                                  <button onClick={() => deleteRecord(() => adminPlatformsApi.remove(p.platformId))} className="p-2 text-gray-400 hover:text-red-400">Delete</button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                    <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse whitespace-nowrap">
+                          <thead>
+                            <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                              <th className="px-6 py-4 w-16">ID</th>
 
-                          {activeTab === 'categories' && categoriesList.filter(c => c.categoryName.toLowerCase().includes(normalizedSearch)).map(c => (
-                            <tr key={c.categoryId} className="hover:bg-gray-750">
-                              <td className="px-6 py-4 text-gray-500 font-mono text-xs">{c.categoryId}</td>
-                              <td className="px-6 py-4 font-bold text-white">{c.categoryName}</td>
-                              <td className="px-6 py-4 text-gray-400">{c.description}</td>
-                              <td className="px-6 py-4 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <button onClick={() => openCategoryModal(c)} className="p-2 text-gray-400 hover:text-white transition-colors">Edit</button>
-                                  <button onClick={() => deleteRecord(() => adminCategoriesApi.remove(c.categoryId))} className="p-2 text-gray-400 hover:text-red-400">Delete</button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                              <th className="px-6 py-4">
+                                {activeTab === 'platforms' && 'Platform Information'}
+                                {activeTab === 'categories' && 'Category Information'}
+                                {activeTab === 'gameCategories' && 'Game Information'}
+                                {activeTab === 'gamePlatforms' && 'Game Information'}
+                              </th>
 
-                          {activeTab === 'gameCategories' && gameCategoriesList.map((gc, i) => (
-                            <tr key={i} className="hover:bg-gray-750">
-                              <td className="px-6 py-4 font-bold text-white">{gc.game?.title || gc.gameId}</td>
-                              <td className="px-6 py-4">{gc.category?.categoryName || gc.categoryId}</td>
-                              <td className="px-6 py-4 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <button onClick={() => openGameCategoryModal(gc)} className="p-2 text-gray-400 hover:text-white transition-colors">Edit</button>
-                                  <button onClick={() => deleteRecord(() => adminGameCategoriesApi.remove(gc.gameId, gc.categoryId))} className="p-2 text-gray-400 hover:text-red-400">Delete</button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                              {(activeTab === 'gameCategories' ||
+                                activeTab === 'gamePlatforms') && (
+                                  <th className="px-6 py-4">
+                                    {activeTab === 'gameCategories' && 'Category'}
+                                    {activeTab === 'gamePlatforms' && 'Platform'}
+                                  </th>
+                                )}
 
-                          {activeTab === 'gamePlatforms' && gamePlatformsList.map((gp, i) => (
-                            <tr key={i} className="hover:bg-gray-750">
-                              <td className="px-6 py-4 font-bold text-white">{gp.game?.title || gp.gameId}</td>
-                              <td className="px-6 py-4 uppercase">{gp.platform?.platformName || gp.platformId}</td>
-                              <td className="px-6 py-4 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <button onClick={() => openGamePlatformModal(gp)} className="p-2 text-gray-400 hover:text-white transition-colors">Edit</button>
-                                  <button onClick={() => deleteRecord(() => adminGamePlatformsApi.remove(gp.gameId, gp.platformId))} className="p-2 text-gray-400 hover:text-red-400">Delete</button>
-                                </div>
-                              </td>
+                              <th className="px-6 py-4 text-right">Manage</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+
+                          <tbody className="text-sm divide-y divide-gray-700">
+                            {activeTab === 'platforms' &&
+                              platformsList
+                                .filter((p) => p.platformName.toLowerCase().includes(normalizedSearch))
+                                .map((p) => (
+                                  <tr key={p.platformId} className="hover:bg-gray-750 transition-colors">
+                                    <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                                      {p.platformId}
+                                    </td>
+
+                                    <td className="px-6 py-4">
+                                      <div className="flex flex-col">
+                                        <span className="font-bold text-white text-base uppercase">
+                                          {p.platformName}
+                                        </span>
+                                        <span className="text-gray-400 text-xs mt-0.5">
+                                          Supported console platform
+                                        </span>
+                                      </div>
+                                    </td>
+
+                                    <td className="px-6 py-4 text-right">
+                                      <div className="flex justify-end space-x-2">
+                                        <button
+                                          onClick={() => openPlatformModal(p)}
+                                          className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                                          title="Edit Platform"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                          </svg>
+                                        </button>
+
+                                        <button
+                                          onClick={() => deleteRecord(() => adminPlatformsApi.remove(p.platformId))}
+                                          className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                                          title="Delete Platform"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+
+                            {activeTab === 'categories' &&
+                              categoriesList
+                                .filter((c) => c.categoryName.toLowerCase().includes(normalizedSearch))
+                                .map((c) => (
+                                  <tr key={c.categoryId} className="hover:bg-gray-750 transition-colors">
+                                    <td className="px-6 py-4 text-gray-500 font-mono text-xs w-16">
+                                      {c.categoryId}
+                                    </td>
+
+                                    <td className="px-6 py-4">
+                                      <div className="flex flex-col">
+                                        <span className="font-bold text-white text-base">
+                                          {c.categoryName}
+                                        </span>
+                                        <span className="text-gray-400 text-xs mt-0.5">
+                                          Game content category
+                                        </span>
+                                      </div>
+                                    </td>
+
+                                    <td className="px-6 py-4 text-right">
+                                      <div className="flex justify-end items-center gap-2">
+                                        <button
+                                          onClick={() => openCategoryModal(c)}
+                                          className="inline-flex items-center justify-center w-9 h-9 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                                          title="Edit Category"
+                                        >
+                                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                          </svg>
+                                        </button>
+
+                                        <button
+                                          onClick={() => deleteRecord(() => adminCategoriesApi.remove(c.categoryId))}
+                                          className="inline-flex items-center justify-center w-9 h-9 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                                          title="Delete Category"
+                                        >
+                                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+
+                            {activeTab === 'gameCategories' &&
+                              gameCategoriesList
+                                .filter((gc) => {
+                                  const gameTitle = gc.game?.title?.toLowerCase() || '';
+                                  const categoryName = gc.category?.categoryName?.toLowerCase() || '';
+                                  return gameTitle.includes(normalizedSearch) || categoryName.includes(normalizedSearch);
+                                })
+                                .map((gc) => (
+                                  <tr key={`${gc.gameId}-${gc.categoryId}`} className="hover:bg-gray-750 transition-colors">
+                                    <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                                      {gc.gameId}
+                                    </td>
+
+                                    <td className="px-6 py-4">
+                                      <div className="flex flex-col">
+                                        <span className="font-bold text-white text-base">
+                                          {gc.game?.title || `Game #${gc.gameId}`}
+                                        </span>
+                                        <span className="text-gray-400 text-xs mt-0.5">
+                                          Game ID: {gc.gameId}
+                                        </span>
+                                      </div>
+                                    </td>
+
+                                    <td className="px-6 py-4 text-indigo-400 font-black tracking-wider text-base">
+                                      {gc.category?.categoryName || `Category #${gc.categoryId}`}
+                                    </td>
+
+                                    <td className="px-6 py-4 text-right">
+                                      <div className="flex justify-end space-x-2">
+                                        <button
+                                          onClick={() => openGameCategoryModal(gc)}
+                                          className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                                          title="Edit Game Category"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                          </svg>
+                                        </button>
+
+                                        <button
+                                          onClick={() => deleteRecord(() => adminGameCategoriesApi.remove(gc.gameId, gc.categoryId))}
+                                          className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                                          title="Delete Game Category"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+
+                            {activeTab === 'gamePlatforms' &&
+                              gamePlatformsList
+                                .filter((gp) => {
+                                  const gameTitle = gp.game?.title?.toLowerCase() || '';
+                                  const platformName = gp.platform?.platformName?.toLowerCase() || '';
+                                  return gameTitle.includes(normalizedSearch) || platformName.includes(normalizedSearch);
+                                })
+                                .map((gp) => (
+                                  <tr key={`${gp.gameId}-${gp.platformId}`} className="hover:bg-gray-750 transition-colors">
+                                    <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                                      {gp.gameId}
+                                    </td>
+
+                                    <td className="px-6 py-4">
+                                      <div className="flex flex-col">
+                                        <span className="font-bold text-white text-base">
+                                          {gp.game?.title || `Game #${gp.gameId}`}
+                                        </span>
+                                        <span className="text-gray-400 text-xs mt-0.5">
+                                          Game ID: {gp.gameId}
+                                        </span>
+                                      </div>
+                                    </td>
+
+                                    <td className="px-6 py-4 text-teal-400 font-black tracking-wider text-base uppercase">
+                                      {gp.platform?.platformName || `Platform #${gp.platformId}`}
+                                    </td>
+
+                                    <td className="px-6 py-4 text-right">
+                                      <div className="flex justify-end space-x-2">
+                                        <button
+                                          onClick={() => openGamePlatformModal(gp)}
+                                          className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                                          title="Edit Game Platform"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                          </svg>
+                                        </button>
+
+                                        <button
+                                          onClick={() => deleteRecord(() => adminGamePlatformsApi.remove(gp.gameId, gp.platformId))}
+                                          className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                                          title="Delete Game Platform"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {activeTab === 'users' && (
                 <div className="space-y-6">
@@ -1150,6 +1461,120 @@ const AdminDashboardPage: React.FC = () => {
                             <tr>
                               <td colSpan={4} className="px-6 py-12 text-center text-gray-500 font-medium italic">
                                 No games deployed.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === 'dlcs' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
+                    <div className="relative w-full sm:w-96">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Search DLCs by name or game..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+                        className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-shadow"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => openDLCModal()}
+                      className="w-full sm:w-auto flex items-center justify-center bg-pink-600 hover:bg-pink-500 px-6 py-3 rounded-lg text-sm font-bold shadow-lg shadow-pink-900/20 transition-all text-white"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      Add New DLC
+                    </button>
+                  </div>
+
+                  <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                          <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                            <th className="px-6 py-4 w-16">ID</th>
+                            <th className="px-6 py-4">DLC Information</th>
+                            <th className="px-6 py-4">Game</th>
+                            <th className="px-6 py-4">Price</th>
+                            <th className="px-6 py-4">Release Date</th>
+                            <th className="px-6 py-4 text-right">Manage</th>
+                          </tr>
+                        </thead>
+
+                        <tbody className="text-sm divide-y divide-gray-700">
+                          {filteredDLCs.map((dlc) => (
+                            <tr key={dlc.dlcId} className="hover:bg-gray-750 transition-colors">
+                              <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                                {dlc.dlcId}
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-white text-base">{dlc.name}</span>
+                                  <span className="text-gray-400 text-xs mt-0.5">
+                                    DLC Add-on Content
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border bg-blue-900/30 text-blue-400 border-blue-800/50">
+                                  {dlc.game?.title || `Game #${dlc.gameId}`}
+                                </span>
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <span className="text-pink-400 font-black tracking-wider text-base">
+                                  ${Number(dlc.price).toFixed(2)}
+                                </span>
+                              </td>
+
+                              <td className="px-6 py-4 text-gray-400 font-medium">
+                                {dlc.releaseDate ? String(dlc.releaseDate).slice(0, 10) : 'N/A'}
+                              </td>
+
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <button
+                                    onClick={() => openDLCModal(dlc)}
+                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                                    title="Edit DLC"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+
+                                  <button
+                                    onClick={() => deleteRecord(() => adminDlcApi.remove(dlc.dlcId))}
+                                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                                    title="Delete DLC"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+
+                          {dlcsList.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium italic">
+                                No DLC records found.
                               </td>
                             </tr>
                           )}
@@ -1508,10 +1933,6 @@ const AdminDashboardPage: React.FC = () => {
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Category Name</label>
                 <input type="text" name="categoryName" value={categoryFormData.categoryName} onChange={handleGenericChange(setCategoryFormData)} className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg text-white" required />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Description</label>
-                <textarea name="description" value={categoryFormData.description} onChange={handleGenericChange(setCategoryFormData)} className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg text-white" />
-              </div>
               <div className="flex justify-end gap-3 pt-6 mt-4">
                 <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="px-6 py-3 text-sm font-bold text-gray-300 hover:text-white bg-transparent hover:bg-gray-700 rounded-lg transition-all border border-gray-600">Dismiss</button>
                 <button type="submit" className="px-6 py-3 text-sm bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg font-bold shadow-lg uppercase tracking-wider">Save Category</button>
@@ -1532,7 +1953,13 @@ const AdminDashboardPage: React.FC = () => {
             <form onSubmit={isGameCategoryModalOpen ? handleGameCategorySubmit : handleGamePlatformSubmit} className="space-y-5">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Game</label>
-                <select name="gameId" value={relationFormData.gameId} onChange={handleGenericChange(setRelationFormData)} disabled={!!(editingGameCategory || editingGamePlatform)} className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg text-white disabled:opacity-50" required>
+                <select
+                  name="gameId"
+                  value={relationFormData.gameId}
+                  onChange={handleGenericChange(setRelationFormData)}
+                  className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg text-white"
+                  required
+                >
                   <option value="">Select Game</option>
                   {gamesList.map(g => <option key={g.gameId} value={g.gameId}>{g.title}</option>)}
                 </select>
@@ -1548,6 +1975,120 @@ const AdminDashboardPage: React.FC = () => {
               <div className="flex justify-end gap-3 pt-6 mt-4">
                 <button type="button" onClick={() => { setIsGameCategoryModalOpen(false); setIsGamePlatformModalOpen(false); }} className="px-6 py-3 text-sm font-bold text-gray-300 hover:text-white bg-transparent hover:bg-gray-700 rounded-lg transition-all border border-gray-600">Dismiss</button>
                 <button type="submit" className="px-6 py-3 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold shadow-lg uppercase tracking-wider">Save Relation</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {isDLCModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 transform transition-all scale-100">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+              <h2 className="text-2xl font-black text-white tracking-wide uppercase">
+                {editingDLC ? 'Edit DLC' : 'Create DLC'}
+              </h2>
+
+              <button
+                onClick={() => {
+                  setIsDLCModalOpen(false);
+                  setEditingDLC(null);
+                  setDLCFormData(emptyDLCForm);
+                }}
+                className="text-gray-400 hover:text-white bg-gray-900 hover:bg-gray-700 p-1.5 rounded-md transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleDLCSubmit} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  DLC Name
+                </label>
+                <input
+                  name="name"
+                  value={dlcFormData.name}
+                  onChange={handleGenericChange(setDLCFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Price
+                </label>
+                <input
+                  name="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={dlcFormData.price}
+                  onChange={handleGenericChange(setDLCFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Release Date (YYYY-MM-DD)
+                </label>
+                <input
+                  name="releaseDate"
+                  type="text"
+                  placeholder="YYYY-MM-DD"
+                  pattern="\d{4}-\d{2}-\d{2}"
+                  value={dlcFormData.releaseDate}
+                  onChange={handleGenericChange(setDLCFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Parent Game
+                </label>
+                <select
+                  name="gameId"
+                  value={dlcFormData.gameId}
+                  onChange={handleGenericChange(setDLCFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                  required
+                >
+                  <option value="">Select Game</option>
+                  {gamesList.map((game) => (
+                    <option key={game.gameId} value={game.gameId}>
+                      {game.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-6 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDLCModalOpen(false);
+                    setEditingDLC(null);
+                    setDLCFormData(emptyDLCForm);
+                  }}
+                  className="px-6 py-3 text-sm font-bold text-gray-300 hover:text-white bg-transparent hover:bg-gray-700 rounded-lg transition-all border border-gray-600"
+                >
+                  Dismiss
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-6 py-3 text-sm flex items-center bg-pink-600 hover:bg-pink-500 text-white rounded-lg font-bold shadow-lg shadow-pink-900/40 transition-all uppercase tracking-wider"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {editingDLC ? 'Update DLC' : 'Commit DLC'}
+                </button>
               </div>
             </form>
           </div>

@@ -28,13 +28,13 @@ __decorate([
     __metadata("design:type", Number)
 ], GamePlatform.prototype, "platformId", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => gameEntity_1.Game),
+    (0, graphql_1.Field)(() => gameEntity_1.Game, { nullable: true }),
     (0, typeorm_1.ManyToOne)(() => gameEntity_1.Game, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'game_id' }),
     __metadata("design:type", gameEntity_1.Game)
 ], GamePlatform.prototype, "game", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => platformEntity_1.Platform),
+    (0, graphql_1.Field)(() => platformEntity_1.Platform, { nullable: true }),
     (0, typeorm_1.ManyToOne)(() => platformEntity_1.Platform, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'platform_id' }),
     __metadata("design:type", platformEntity_1.Platform)

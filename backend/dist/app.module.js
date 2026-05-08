@@ -24,6 +24,7 @@ const userModule_1 = require("./users/userModule");
 const authModule_1 = require("./auth/authModule");
 const mailModule_1 = require("./mail/mailModule");
 const adminModule_1 = require("./admin/adminModule");
+const dlcModule_1 = require("./dlc/dlcModule");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -42,16 +43,20 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
-                useFactory: (configService) => ({
-                    type: 'postgres',
-                    host: configService.get('DB_HOST', 'localhost'),
-                    port: configService.get('DB_PORT', 5432),
-                    username: configService.get('DB_USERNAME', 'postgres'),
-                    password: configService.get('DB_PASSWORD', 'postgres'),
-                    database: configService.get('DB_NAME', 'playstation_store'),
-                    autoLoadEntities: true,
-                    synchronize: true,
-                }),
+                useFactory: (configService) => {
+                    const synchronize = String(configService.get('DATABASE_SYNCHRONIZE', 'false')).toLowerCase() ===
+                        'true';
+                    return {
+                        type: 'postgres',
+                        host: configService.get('DB_HOST', 'localhost'),
+                        port: configService.get('DB_PORT', 5432),
+                        username: configService.get('DB_USERNAME', 'postgres'),
+                        password: configService.get('DB_PASSWORD', 'postgres'),
+                        database: configService.get('DB_NAME', 'playstation_store'),
+                        autoLoadEntities: true,
+                        synchronize,
+                    };
+                },
             }),
             categoryModule_1.CategoryModule,
             platformModule_1.PlatformModule,
@@ -62,6 +67,7 @@ exports.AppModule = AppModule = __decorate([
             authModule_1.AuthModule,
             mailModule_1.MailModule,
             adminModule_1.AdminModule,
+            dlcModule_1.DLCModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

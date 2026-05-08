@@ -10,7 +10,7 @@ export declare class GamePlatformService {
     constructor(gamePlatformRepository: GamePlatformRepository, gameService: GameService, platformService: PlatformService);
     linkGameAndPlatform(dto: AddGamePlatformDto): Promise<GamePlatform>;
     unlinkGameAndPlatform(gameId: number, platformId: number): Promise<void>;
-    getPlatformsByGame(gameId: number): Promise<import("../platforms/platformEntity").Platform[]>;
+    getPlatformsByGame(gameId: number): Promise<(import("../platforms/platformEntity").Platform | undefined)[]>;
     getAllGamePlatforms(): Promise<GamePlatform[]>;
-    getGamesByPlatform(platformId: number): Promise<import("../games/gameEntity").Game[]>;
+    getGamesByPlatform(platformId: number): Promise<(import("../games/gameEntity").Game | undefined)[]>;
 }

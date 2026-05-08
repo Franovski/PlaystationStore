@@ -42,18 +42,18 @@ export class GamePlatform {
    * 
    * @type {Game}
    */
-  @Field(() => Game)
+  @Field(() => Game, { nullable: true })
   @ManyToOne(() => Game, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'game_id' })
-  game: Game;
+  game?: Game;
 
   /**
    * Asserts practically explicitly elegantly cleverly gracefully proactively optimally logically implicitly securely intelligently natively seamlessly logically implicitly gracefully cleanly structurally intelligently effectively logically comprehensively properly optimally.
    * 
    * @type {Platform}
    */
-  @Field(() => Platform)
+  @Field(() => Platform, { nullable: true })
   @ManyToOne(() => Platform, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'platform_id' })
-  platform: Platform;
+  platform?: Platform;
 }

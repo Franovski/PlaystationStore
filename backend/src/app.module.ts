@@ -15,7 +15,7 @@ import { UsersModule } from './users/userModule';
 import { AuthModule } from './auth/authModule';
 import { MailModule } from './mail/mailModule';
 import { AdminModule } from './admin/adminModule';
-
+import { DLCModule } from './dlc/dlcModule';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,16 +30,22 @@ import { AdminModule } from './admin/adminModule';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
-        username: configService.get<string>('DB_USERNAME', 'postgres'),
-        password: configService.get<string>('DB_PASSWORD', 'postgres'),
-        database: configService.get<string>('DB_NAME', 'playstation_store'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const synchronize =
+          String(configService.get('DATABASE_SYNCHRONIZE', 'false')).toLowerCase() ===
+          'true';
+
+        return {
+          type: 'postgres',
+          host: configService.get<string>('DB_HOST', 'localhost'),
+          port: configService.get<number>('DB_PORT', 5432),
+          username: configService.get<string>('DB_USERNAME', 'postgres'),
+          password: configService.get<string>('DB_PASSWORD', 'postgres'),
+          database: configService.get<string>('DB_NAME', 'playstation_store'),
+          autoLoadEntities: true,
+          synchronize,
+        };
+      },
     }),
     CategoryModule,
     PlatformModule,
@@ -50,6 +56,7 @@ import { AdminModule } from './admin/adminModule';
     AuthModule,
     MailModule,
     AdminModule,
+    DLCModule,
   ],
   controllers: [AppController],
   providers: [AppService],

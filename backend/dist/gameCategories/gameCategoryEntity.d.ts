@@ -3,6 +3,6 @@ import { Category } from '../categories/categoryEntity';
 export declare class GameCategory {
     gameId: number;
     categoryId: number;
-    game: Game;
-    category: Category;
+    game?: Game;
+    category?: Category;
 }

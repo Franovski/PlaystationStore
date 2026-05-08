@@ -62,3 +62,12 @@ export interface AuthState {
   otpMethod: 'totp' | 'email-otp' | null;
   msg: string | null;
 }
+
+export interface DLC {
+  dlcId: string | number;
+  name: string;
+  price: number;
+  releaseDate?: string;
+  gameId: string | number;
+  game?: Game;
+}

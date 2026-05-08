@@ -11,6 +11,13 @@ input CreateCategoryDto {
   categoryName: String!
 }
 
+input CreateDLCDto {
+  gameId: Int!
+  name: String!
+  price: Float!
+  releaseDate: String
+}
+
 input CreateGameDto {
   ageRating: String
   basePrice: Float!
@@ -34,6 +41,15 @@ input CreateUserDto {
   password: String
   role: UserRole
   username: String!
+}
+
+type DLC {
+  dlcId: Int!
+  game: Game
+  gameId: Int!
+  name: String!
+  price: Float!
+  releaseDate: String
 }
 
 type DashboardSummary {
@@ -66,16 +82,16 @@ type Game {
 }
 
 type GameCategory {
-  category: Category!
+  category: Category
   categoryId: Int!
-  game: Game!
+  game: Game
   gameId: Int!
 }
 
 type GamePlatform {
-  game: Game!
+  game: Game
   gameId: Int!
-  platform: Platform!
+  platform: Platform
   platformId: Int!
 }
 
@@ -97,10 +113,12 @@ type Mutation {
   addCategoryToGame(categoryId: Int!, gameId: Int!): GameCategory!
   addPlatformToGame(gameId: Int!, platformId: Int!): GamePlatform!
   createCategory(createCategoryInput: CreateCategoryDto!): Category!
+  createDLC(createDLCInput: CreateDLCDto!): DLC!
   createGame(createGameInput: CreateGameDto!): Game!
   createPlatform(createPlatformInput: CreatePlatformDto!): Platform!
   createUser(createUserInput: CreateUserDto!): User!
   deleteCategory(categoryId: Int!): Boolean!
+  deleteDLC(id: Int!): Boolean!
   deleteGame(id: Int!): Boolean!
   deletePlatform(platformId: Int!): Boolean!
   deleteUser(id: ID!): Boolean!
@@ -111,6 +129,7 @@ type Mutation {
   removePlatformFromGame(gameId: Int!, platformId: Int!): Boolean!
   resetPassword(resetPasswordInput: ResetPasswordDto!): Boolean!
   updateCategory(categoryId: Int!, updateCategoryInput: UpdateCategoryDto!): Category!
+  updateDLC(id: Int!, updateDLCInput: UpdateDLCDto!): DLC!
   updateGame(id: Int!, updateGameInput: UpdateGameDto!): Game!
   updatePlatform(platformId: Int!, updatePlatformInput: UpdatePlatformDto!): Platform!
   updateUser(id: ID!, updateUserInput: UpdateUserDto!): User!
@@ -136,6 +155,10 @@ type Query {
   categories: [Category!]!
   category(categoryId: Int!): Category
   dashboardSummary: DashboardSummary!
+  dlc(id: Int!): DLC!
+  dlcWithGame(id: Int!): DLC!
+  dlcs(gameId: Int, name: String): [DLC!]!
+  dlcsWithGames: [DLC!]!
   game(id: Int!): Game!
   gameCategories: [GameCategory!]!
   gameCategoriesByGameId(gameId: Int!): [Category!]!
@@ -173,6 +196,13 @@ input ResetPasswordDto {
 
 input UpdateCategoryDto {
   categoryName: String
+}
+
+input UpdateDLCDto {
+  gameId: Int
+  name: String
+  price: Float
+  releaseDate: String
 }
 
 input UpdateGameDto {
