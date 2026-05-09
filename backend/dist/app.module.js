@@ -25,6 +25,16 @@ const authModule_1 = require("./auth/authModule");
 const mailModule_1 = require("./mail/mailModule");
 const adminModule_1 = require("./admin/adminModule");
 const dlcModule_1 = require("./dlc/dlcModule");
+const editionModule_1 = require("./editions/editionModule");
+const discountModule_1 = require("./discounts/discountModule");
+const wishlistModule_1 = require("./wishlist/wishlistModule");
+const userLibraryModule_1 = require("./userLibrary/userLibraryModule");
+const reviewModule_1 = require("./reviews/reviewModule");
+const userWalletModule_1 = require("./userWallet/userWalletModule");
+const orderModule_1 = require("./orders/orderModule");
+const orderItemModule_1 = require("./orderItems/orderItemModule");
+const storefrontModule_1 = require("./storefront/storefrontModule");
+const customerDashboardModule_1 = require("./customerDashboard/customerDashboardModule");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -68,6 +78,16 @@ exports.AppModule = AppModule = __decorate([
             mailModule_1.MailModule,
             adminModule_1.AdminModule,
             dlcModule_1.DLCModule,
+            editionModule_1.EditionModule,
+            discountModule_1.DiscountModule,
+            wishlistModule_1.WishlistModule,
+            userLibraryModule_1.UserLibraryModule,
+            reviewModule_1.ReviewModule,
+            userWalletModule_1.UserWalletModule,
+            orderModule_1.OrderModule,
+            orderItemModule_1.OrderItemModule,
+            storefrontModule_1.StorefrontModule,
+            customerDashboardModule_1.CustomerDashboardModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

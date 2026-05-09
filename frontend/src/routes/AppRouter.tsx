@@ -7,6 +7,7 @@ const LoginPage = React.lazy(() => import('../pages/LoginPage'));
 const RegisterPage = React.lazy(() => import('../pages/RegisterPage'));
 const AdminDashboardPage = React.lazy(() => import('../pages/AdminDashboardPage'));
 const UserDashboardPage = React.lazy(() => import('../pages/UserDashboardPage'));
+const GameDetailPage = React.lazy(() => import('../pages/GameDetailPage'));
 const OtpVerificationPage = React.lazy(() => import('../pages/OtpVerificationPage'));
 const ForgotPasswordPage = React.lazy(() => import('../pages/ForgotPasswordPage'));
 const ResetPasswordPage = React.lazy(() => import('../pages/ResetPasswordPage'));
@@ -18,6 +19,7 @@ export const AppRouter: React.FC = () => {
       <Suspense fallback={<div className="flex h-screen w-screen items-center justify-center bg-gray-900 text-white">Loading...</div>}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/games/:id" element={<GameDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           

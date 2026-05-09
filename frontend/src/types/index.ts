@@ -26,6 +26,33 @@ export interface Game {
   ageRating?: string;
 }
 
+export interface DLC {
+  dlcId: number | string;
+  name: string;
+  price: number;
+  releaseDate?: string;
+  gameId: number | string;
+  game?: Game | null;
+}
+
+export interface Edition {
+  editionId: number | string;
+  name: string;
+  price: number;
+  includes?: string | null;
+  gameId: number | string;
+  game?: Game | null;
+}
+
+export interface Discount {
+  discountId: number | string;
+  percentage: number;
+  startDate: string;
+  endDate: string;
+  gameId: number | string;
+  game?: Game | null;
+}
+
 export interface Platform {
   platformId: string | number;
   platformName: 'ps4' | 'ps5';
@@ -51,6 +78,87 @@ export interface GamePlatform {
   platform?: Platform;
 }
 
+export interface Wishlist {
+  wishlistId: number | string;
+  addedAt: string;
+  userId: string;
+  gameId: number | string;
+  user?: User | null;
+  game?: Game | null;
+}
+
+export interface UserLibrary {
+  libraryId: number | string;
+  purchaseDate: string;
+  itemType: 'game' | 'dlc' | 'edition' | string;
+  itemId: number | string;
+  userId: string;
+  user?: User | null;
+}
+
+export interface Review {
+  reviewId: number | string;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+  userId: string;
+  gameId: number | string;
+  user?: User | null;
+  game?: Game | null;
+}
+
+export interface OrderItem {
+  orderItemId: number | string;
+  itemType: 'game' | 'dlc' | 'edition' | string;
+  itemId: number | string;
+  price: number;
+  orderId: number | string;
+  order?: Order | null;
+}
+
+export interface Order {
+  orderId: number | string;
+  orderDate: string;
+  totalPrice: number;
+  paymentMethod: string;
+  status: string;
+  userId: string;
+  user?: User | null;
+  items?: OrderItem[] | null;
+}
+
+export interface UserWallet {
+  walletId: number | string;
+  balance: number;
+  updatedAt: string;
+  userId: string;
+  user?: User | null;
+}
+
+export interface GameDetails {
+  game: Game;
+  currentPrice: number;
+  activeDiscountPercentage?: number | null;
+  dlcs: DLC[];
+  editions: Edition[];
+  categories: Category[];
+  platforms: Platform[];
+  discounts: Discount[];
+  reviews: Review[];
+}
+
+export interface CustomerDashboardData {
+  wallet: UserWallet;
+  walletBalance: number;
+  wishlist: Wishlist[];
+  library: UserLibrary[];
+  orders: Order[];
+  wishlistCount: number;
+  libraryCount: number;
+  orderCount: number;
+}
+
 export interface AuthState {
   user: User | null;
   accessToken: string | null;
@@ -63,11 +171,3 @@ export interface AuthState {
   msg: string | null;
 }
 
-export interface DLC {
-  dlcId: string | number;
-  name: string;
-  price: number;
-  releaseDate?: string;
-  gameId: string | number;
-  game?: Game;
-}

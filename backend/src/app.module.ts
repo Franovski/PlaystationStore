@@ -16,6 +16,16 @@ import { AuthModule } from './auth/authModule';
 import { MailModule } from './mail/mailModule';
 import { AdminModule } from './admin/adminModule';
 import { DLCModule } from './dlc/dlcModule';
+import { EditionModule } from './editions/editionModule';
+import { DiscountModule } from './discounts/discountModule';
+import { WishlistModule } from './wishlist/wishlistModule';
+import { UserLibraryModule } from './userLibrary/userLibraryModule';
+import { ReviewModule } from './reviews/reviewModule';
+import { UserWalletModule } from './userWallet/userWalletModule';
+import { OrderModule } from './orders/orderModule';
+import { OrderItemModule } from './orderItems/orderItemModule';
+import { StorefrontModule } from './storefront/storefrontModule';
+import { CustomerDashboardModule } from './customerDashboard/customerDashboardModule';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -57,6 +67,16 @@ import { DLCModule } from './dlc/dlcModule';
     MailModule,
     AdminModule,
     DLCModule,
+    EditionModule,
+    DiscountModule,
+    WishlistModule,
+    UserLibraryModule,
+    ReviewModule,
+    UserWalletModule,
+    OrderModule,
+    OrderItemModule,
+    StorefrontModule,
+    CustomerDashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

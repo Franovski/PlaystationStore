@@ -12,8 +12,51 @@ import {
   adminGameCategoriesApi,
   adminGamePlatformsApi,
   adminDlcApi,
+  adminOrdersApi,
+  adminOrderItemsApi,
+  adminWalletsApi,
+  adminUserLibraryApi,
+  adminWishlistsApi,
+  adminReviewsApi,
+  adminDiscountsApi,
+  adminEditionsApi,
 } from '../api/adminApi';
-import { User, Game, Platform, Category, GameCategory, GamePlatform, DLC } from '../types';
+import AdminStoreModePanel from './AdminStoreModePanel';
+import {
+  User,
+  Game,
+  Platform,
+  Category,
+  GameCategory,
+  GamePlatform,
+  DLC,
+  Order,
+  OrderItem,
+  UserWallet,
+  UserLibrary,
+  Wishlist,
+  Review,
+  Discount,
+  Edition,
+} from '../types';
+
+type AdminTab =
+  | 'dashboard'
+  | 'users'
+  | 'games'
+  | 'platforms'
+  | 'categories'
+  | 'gameCategories'
+  | 'gamePlatforms'
+  | 'dlcs'
+  | 'orders'
+  | 'orderItems'
+  | 'wallets'
+  | 'libraries'
+  | 'wishlists'
+  | 'reviews'
+  | 'discounts'
+  | 'editions';
 
 type UserFormState = {
   username: string;
@@ -53,6 +96,20 @@ type DLCFormState = {
   name: string;
   price: string;
   releaseDate: string;
+  gameId: string;
+};
+
+type DiscountFormState = {
+  percentage: string;
+  startDate: string;
+  endDate: string;
+  gameId: string;
+};
+
+type EditionFormState = {
+  name: string;
+  price: string;
+  includes: string;
   gameId: string;
 };
 
@@ -287,12 +344,34 @@ const emptyDLCForm: DLCFormState = {
   gameId: '',
 };
 
+const emptyDiscountForm: DiscountFormState = {
+  percentage: '',
+  startDate: '',
+  endDate: '',
+  gameId: '',
+};
+
+const emptyEditionForm: EditionFormState = {
+  name: '',
+  price: '',
+  includes: '',
+  gameId: '',
+};
+
+const formatPrice = (value: number | string | undefined | null) => `$${Number(value ?? 0).toFixed(2)}`;
+const formatDate = (value: string | undefined | null) => (value ? String(value).slice(0, 10) : 'N/A');
+const getErrorMessage = (err: unknown) =>
+  err && typeof err === 'object' && 'message' in err
+    ? String((err as { message?: string }).message)
+    : 'Request failed';
+
 const AdminDashboardPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'games' | 'platforms' | 'categories' | 'gameCategories' | 'gamePlatforms' | 'dlcs'>('dashboard');
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const [adminMode, setAdminMode] = useState<'admin' | 'store'>('admin');
   const [stats, setStats] = useState({
     users: 0,
     admins: 0,
@@ -308,7 +387,17 @@ const AdminDashboardPage: React.FC = () => {
   const [gameCategoriesList, setGameCategoriesList] = useState<GameCategory[]>([]);
   const [gamePlatformsList, setGamePlatformsList] = useState<GamePlatform[]>([]);
   const [dlcsList, setDlcsList] = useState<DLC[]>([]);
+  const [ordersList, setOrdersList] = useState<Order[]>([]);
+  const [orderItemsList, setOrderItemsList] = useState<OrderItem[]>([]);
+  const [walletsList, setWalletsList] = useState<UserWallet[]>([]);
+  const [librariesList, setLibrariesList] = useState<UserLibrary[]>([]);
+  const [wishlistsList, setWishlistsList] = useState<Wishlist[]>([]);
+  const [reviewsList, setReviewsList] = useState<Review[]>([]);
+  const [discountsList, setDiscountsList] = useState<Discount[]>([]);
+  const [editionsList, setEditionsList] = useState<Edition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [adminSuccess, setAdminSuccess] = useState<string | null>(null);
 
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
@@ -317,6 +406,8 @@ const AdminDashboardPage: React.FC = () => {
   const [isGameCategoryModalOpen, setIsGameCategoryModalOpen] = useState(false);
   const [isGamePlatformModalOpen, setIsGamePlatformModalOpen] = useState(false);
   const [isDLCModalOpen, setIsDLCModalOpen] = useState(false);
+  const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
+  const [isEditionModalOpen, setIsEditionModalOpen] = useState(false);
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
@@ -325,6 +416,8 @@ const AdminDashboardPage: React.FC = () => {
   const [editingGameCategory, setEditingGameCategory] = useState<GameCategory | null>(null);
   const [editingGamePlatform, setEditingGamePlatform] = useState<GamePlatform | null>(null);
   const [editingDLC, setEditingDLC] = useState<DLC | null>(null);
+  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
+  const [editingEdition, setEditingEdition] = useState<Edition | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [userFormData, setUserFormData] = useState<UserFormState>(emptyUserForm);
@@ -333,6 +426,8 @@ const AdminDashboardPage: React.FC = () => {
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormState>(emptyCategoryForm);
   const [relationFormData, setRelationFormData] = useState<GameRelationFormState>(emptyRelationForm);
   const [dlcFormData, setDLCFormData] = useState(emptyDLCForm);
+  const [discountFormData, setDiscountFormData] = useState<DiscountFormState>(emptyDiscountForm);
+  const [editionFormData, setEditionFormData] = useState<EditionFormState>(emptyEditionForm);
 
   useEffect(() => {
     if (user && user.role !== 'admin') {
@@ -341,13 +436,16 @@ const AdminDashboardPage: React.FC = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    fetchAdminData();
+    if (adminMode === 'admin') {
+      fetchAdminData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [activeTab, adminMode]);
 
   const fetchAdminData = async () => {
     setIsLoading(true);
     setSearchTerm('');
+    setAdminError(null);
 
     try {
       if (activeTab === 'dashboard') {
@@ -396,9 +494,40 @@ const AdminDashboardPage: React.FC = () => {
 
         const dlcs: any = await adminDlcApi.getAll();
         setDlcsList(Array.isArray(dlcs) ? dlcs : []);
+      } else if (activeTab === 'orders') {
+        const res: any = await adminOrdersApi.getAll();
+        setOrdersList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'orderItems') {
+        const res: any = await adminOrderItemsApi.getAll();
+        setOrderItemsList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'wallets') {
+        const res: any = await adminWalletsApi.getAll();
+        setWalletsList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'libraries') {
+        const res: any = await adminUserLibraryApi.getAll();
+        setLibrariesList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'wishlists') {
+        const res: any = await adminWishlistsApi.getAll();
+        setWishlistsList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'reviews') {
+        const res: any = await adminReviewsApi.getAll();
+        setReviewsList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'discounts') {
+        const games: any = await adminGamesApi.getAll();
+        setGamesList(Array.isArray(games) ? games : []);
+
+        const res: any = await adminDiscountsApi.getAll();
+        setDiscountsList(Array.isArray(res) ? res : []);
+      } else if (activeTab === 'editions') {
+        const games: any = await adminGamesApi.getAll();
+        setGamesList(Array.isArray(games) ? games : []);
+
+        const res: any = await adminEditionsApi.getAll();
+        setEditionsList(Array.isArray(res) ? res : []);
       }
     } catch (err) {
       console.error(`Failed to load admin data for ${activeTab}`, err);
+      setAdminError(getErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -499,6 +628,46 @@ const AdminDashboardPage: React.FC = () => {
     setIsDLCModalOpen(true);
   };
 
+  const openDiscountModal = (discountToEdit: Discount | null = null) => {
+    setEditingDiscount(discountToEdit);
+
+    if (discountToEdit) {
+      setDiscountFormData({
+        percentage:
+          discountToEdit.percentage !== undefined && discountToEdit.percentage !== null
+            ? String(discountToEdit.percentage)
+            : '',
+        startDate: discountToEdit.startDate ? String(discountToEdit.startDate).slice(0, 10) : '',
+        endDate: discountToEdit.endDate ? String(discountToEdit.endDate).slice(0, 10) : '',
+        gameId: discountToEdit.gameId ? String(discountToEdit.gameId) : '',
+      });
+    } else {
+      setDiscountFormData(emptyDiscountForm);
+    }
+
+    setIsDiscountModalOpen(true);
+  };
+
+  const openEditionModal = (editionToEdit: Edition | null = null) => {
+    setEditingEdition(editionToEdit);
+
+    if (editionToEdit) {
+      setEditionFormData({
+        name: editionToEdit.name || '',
+        price:
+          editionToEdit.price !== undefined && editionToEdit.price !== null
+            ? String(editionToEdit.price)
+            : '',
+        includes: editionToEdit.includes || '',
+        gameId: editionToEdit.gameId ? String(editionToEdit.gameId) : '',
+      });
+    } else {
+      setEditionFormData(emptyEditionForm);
+    }
+
+    setIsEditionModalOpen(true);
+  };
+
   const handleUserFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -539,8 +708,10 @@ const AdminDashboardPage: React.FC = () => {
 
       if (editingUser?.userId) {
         await adminUsersApi.update(editingUser.userId as any, payload);
+        setAdminSuccess('User updated.');
       } else {
         await adminUsersApi.create(payload);
+        setAdminSuccess('User created.');
       }
 
       setIsUserModalOpen(false);
@@ -584,8 +755,10 @@ const AdminDashboardPage: React.FC = () => {
 
       if (editingGame?.gameId) {
         await adminGamesApi.update(editingGame.gameId, payload);
+        setAdminSuccess('Game updated.');
       } else {
         await adminGamesApi.create(payload);
+        setAdminSuccess('Game created.');
       }
 
       setIsGameModalOpen(false);
@@ -611,8 +784,10 @@ const AdminDashboardPage: React.FC = () => {
       }
       if (editingPlatform?.platformId) {
         await adminPlatformsApi.update(editingPlatform.platformId, platformFormData);
+        setAdminSuccess('Platform updated.');
       } else {
         await adminPlatformsApi.create(platformFormData);
+        setAdminSuccess('Platform created.');
       }
       setIsPlatformModalOpen(false);
       await fetchAdminData();
@@ -626,8 +801,10 @@ const AdminDashboardPage: React.FC = () => {
     try {
       if (editingCategory?.categoryId) {
         await adminCategoriesApi.update(editingCategory.categoryId, categoryFormData);
+        setAdminSuccess('Category updated.');
       } else {
         await adminCategoriesApi.create(categoryFormData);
+        setAdminSuccess('Category created.');
       }
       setIsCategoryModalOpen(false);
       await fetchAdminData();
@@ -645,8 +822,10 @@ const AdminDashboardPage: React.FC = () => {
 
       if (editingGameCategory) {
         await adminGameCategoriesApi.update(editingGameCategory.gameId, editingGameCategory.categoryId, { newCategoryId: cId });
+        setAdminSuccess('Game category relation updated.');
       } else {
         await adminGameCategoriesApi.create({ gameId: gId, categoryId: cId });
+        setAdminSuccess('Game category relation created.');
       }
       setIsGameCategoryModalOpen(false);
       await fetchAdminData();
@@ -664,8 +843,10 @@ const AdminDashboardPage: React.FC = () => {
 
       if (editingGamePlatform) {
         await adminGamePlatformsApi.update(editingGamePlatform.gameId, editingGamePlatform.platformId, { newPlatformId: pId });
+        setAdminSuccess('Game platform relation updated.');
       } else {
         await adminGamePlatformsApi.create({ gameId: gId, platformId: pId });
+        setAdminSuccess('Game platform relation created.');
       }
       setIsGamePlatformModalOpen(false);
       await fetchAdminData();
@@ -705,9 +886,11 @@ const AdminDashboardPage: React.FC = () => {
 
       if (editingDLC?.dlcId) {
         await adminDlcApi.update(editingDLC.dlcId, payload);
+        setAdminSuccess('DLC updated.');
       } else {
         console.log('DLC payload:', payload);
         await adminDlcApi.create(payload);
+        setAdminSuccess('DLC created.');
       }
 
       setIsDLCModalOpen(false);
@@ -717,6 +900,92 @@ const AdminDashboardPage: React.FC = () => {
     } catch (error: any) {
       alert(error?.message || 'Error saving DLC');
       console.error('DLC save error:', error);
+    }
+  };
+
+  const handleDiscountSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const payload = {
+        percentage: Number(discountFormData.percentage),
+        startDate: discountFormData.startDate.trim(),
+        endDate: discountFormData.endDate.trim(),
+        gameId: Number(discountFormData.gameId),
+      };
+
+      if (Number.isNaN(payload.percentage) || payload.percentage <= 0) {
+        setAdminError('Discount percentage must be greater than zero.');
+        return;
+      }
+
+      if (!payload.startDate || !payload.endDate) {
+        setAdminError('Discount start and end dates are required.');
+        return;
+      }
+
+      if (Number.isNaN(payload.gameId)) {
+        setAdminError('Please select a game.');
+        return;
+      }
+
+      if (editingDiscount?.discountId) {
+        await adminDiscountsApi.update(editingDiscount.discountId, payload);
+        setAdminSuccess('Discount updated.');
+      } else {
+        await adminDiscountsApi.create(payload);
+        setAdminSuccess('Discount created.');
+      }
+
+      setIsDiscountModalOpen(false);
+      setEditingDiscount(null);
+      setDiscountFormData(emptyDiscountForm);
+      await fetchAdminData();
+    } catch (error) {
+      setAdminError(getErrorMessage(error));
+    }
+  };
+
+  const handleEditionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const payload = {
+        name: editionFormData.name.trim(),
+        price: Number(editionFormData.price),
+        includes: editionFormData.includes.trim(),
+        gameId: Number(editionFormData.gameId),
+      };
+
+      if (!payload.name) {
+        setAdminError('Edition name is required.');
+        return;
+      }
+
+      if (Number.isNaN(payload.price) || payload.price < 0) {
+        setAdminError('Edition price must be a valid number.');
+        return;
+      }
+
+      if (Number.isNaN(payload.gameId)) {
+        setAdminError('Please select a game.');
+        return;
+      }
+
+      if (editingEdition?.editionId) {
+        await adminEditionsApi.update(editingEdition.editionId, payload);
+        setAdminSuccess('Edition updated.');
+      } else {
+        await adminEditionsApi.create(payload);
+        setAdminSuccess('Edition created.');
+      }
+
+      setIsEditionModalOpen(false);
+      setEditingEdition(null);
+      setEditionFormData(emptyEditionForm);
+      await fetchAdminData();
+    } catch (error) {
+      setAdminError(getErrorMessage(error));
     }
   };
 
@@ -752,8 +1021,11 @@ const AdminDashboardPage: React.FC = () => {
     if (confirm('Critical Action: Are you sure you want to delete this record?')) {
       try {
         await action();
+        setAdminSuccess('Record deleted.');
         await fetchAdminData();
-      } catch (err: any) { alert(err?.message || 'Failed to delete record'); }
+      } catch (err) {
+        setAdminError(getErrorMessage(err));
+      }
     }
   };
 
@@ -786,7 +1058,536 @@ const AdminDashboardPage: React.FC = () => {
     });
   }, [dlcsList, searchTerm]);
 
+  const filteredOrders = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return ordersList.filter((order) => {
+      const owner = order.user?.username?.toLowerCase() || order.user?.email?.toLowerCase() || '';
+      return (
+        String(order.orderId).includes(normalized) ||
+        owner.includes(normalized) ||
+        (order.status || '').toLowerCase().includes(normalized) ||
+        (order.paymentMethod || '').toLowerCase().includes(normalized)
+      );
+    });
+  }, [ordersList, searchTerm]);
+
+  const filteredOrderItems = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return orderItemsList.filter((item) => {
+      const owner = item.order?.user?.username?.toLowerCase() || item.order?.user?.email?.toLowerCase() || '';
+      return (
+        String(item.orderItemId).includes(normalized) ||
+        String(item.orderId).includes(normalized) ||
+        (item.itemType || '').toLowerCase().includes(normalized) ||
+        owner.includes(normalized)
+      );
+    });
+  }, [orderItemsList, searchTerm]);
+
+  const filteredWallets = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return walletsList.filter((wallet) => {
+      const owner = wallet.user?.username?.toLowerCase() || wallet.user?.email?.toLowerCase() || '';
+      return String(wallet.walletId).includes(normalized) || owner.includes(normalized) || wallet.userId.toLowerCase().includes(normalized);
+    });
+  }, [walletsList, searchTerm]);
+
+  const filteredLibraries = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return librariesList.filter((item) => {
+      const owner = item.user?.username?.toLowerCase() || item.user?.email?.toLowerCase() || '';
+      return (
+        String(item.libraryId).includes(normalized) ||
+        owner.includes(normalized) ||
+        (item.itemType || '').toLowerCase().includes(normalized) ||
+        String(item.itemId).includes(normalized)
+      );
+    });
+  }, [librariesList, searchTerm]);
+
+  const filteredWishlists = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return wishlistsList.filter((item) => {
+      const owner = item.user?.username?.toLowerCase() || item.user?.email?.toLowerCase() || '';
+      const gameTitle = item.game?.title?.toLowerCase() || '';
+      return owner.includes(normalized) || gameTitle.includes(normalized) || String(item.wishlistId).includes(normalized);
+    });
+  }, [wishlistsList, searchTerm]);
+
+  const filteredReviews = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return reviewsList.filter((review) => {
+      const owner = review.user?.username?.toLowerCase() || review.user?.email?.toLowerCase() || '';
+      const gameTitle = review.game?.title?.toLowerCase() || '';
+      return (
+        owner.includes(normalized) ||
+        gameTitle.includes(normalized) ||
+        (review.comment || '').toLowerCase().includes(normalized) ||
+        String(review.reviewId).includes(normalized)
+      );
+    });
+  }, [reviewsList, searchTerm]);
+
+  const filteredDiscounts = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return discountsList.filter((discount) => {
+      const gameTitle = discount.game?.title?.toLowerCase() || '';
+      return gameTitle.includes(normalized) || String(discount.discountId).includes(normalized);
+    });
+  }, [discountsList, searchTerm]);
+
+  const filteredEditions = useMemo(() => {
+    const normalized = searchTerm.trim().toLowerCase();
+
+    return editionsList.filter((edition) => {
+      const gameTitle = edition.game?.title?.toLowerCase() || '';
+      return (
+        (edition.name || '').toLowerCase().includes(normalized) ||
+        gameTitle.includes(normalized) ||
+        String(edition.editionId).includes(normalized)
+      );
+    });
+  }, [editionsList, searchTerm]);
+
   const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const ownerLabel = (owner?: User | null, fallbackId?: string) =>
+    owner?.username || owner?.email || fallbackId || 'Unknown user';
+
+  const renderEmptyRow = (colSpan: number, message: string) => (
+    <tr>
+      <td colSpan={colSpan} className="px-6 py-12 text-center text-gray-500 font-medium italic">
+        {message}
+      </td>
+    </tr>
+  );
+
+  const renderAdminToolbar = (
+    placeholder: string,
+    focusClass: string,
+    action?: { label: string; className: string; onClick: () => void },
+  ) => (
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
+      <div className="relative w-full sm:w-96">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+          className={`w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 transition-shadow ${focusClass}`}
+        />
+      </div>
+
+      {action && (
+        <button
+          type="button"
+          onClick={action.onClick}
+          className={`w-full sm:w-auto flex items-center justify-center px-6 py-3 rounded-lg text-sm font-bold shadow-lg transition-all text-white ${action.className}`}
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          {action.label}
+        </button>
+      )}
+    </div>
+  );
+
+  const renderOrdersSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search orders by ID, user, status, or payment...', 'focus:border-orange-500 focus:ring-orange-500')}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Customer</th>
+                <th className="px-6 py-4">Order Date</th>
+                <th className="px-6 py-4">Payment</th>
+                <th className="px-6 py-4">Items</th>
+                <th className="px-6 py-4">Total</th>
+                <th className="px-6 py-4">Status</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredOrders.map((order) => (
+                <tr key={order.orderId} className="hover:bg-gray-750 transition-colors align-top">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{order.orderId}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-white">{ownerLabel(order.user, order.userId)}</span>
+                      <span className="text-gray-500 text-xs">{order.userId}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-gray-400 font-medium">{formatDate(order.orderDate)}</td>
+                  <td className="px-6 py-4 text-orange-300 font-bold uppercase">{order.paymentMethod}</td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      {(order.items ?? []).map((item) => (
+                        <div key={item.orderItemId} className="text-gray-300">
+                          {item.itemType} #{item.itemId} <span className="text-gray-500">({formatPrice(item.price)})</span>
+                        </div>
+                      ))}
+                      {(order.items ?? []).length === 0 && <span className="text-gray-500">No items</span>}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-orange-400 font-black">{formatPrice(order.totalPrice)}</td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border bg-orange-900/30 text-orange-300 border-orange-800/50">
+                      {order.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {filteredOrders.length === 0 && renderEmptyRow(7, 'No orders found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderOrderItemsSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search order items by item, order, or user...', 'focus:border-cyan-500 focus:ring-cyan-500')}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Order</th>
+                <th className="px-6 py-4">Customer</th>
+                <th className="px-6 py-4">Item</th>
+                <th className="px-6 py-4">Price</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredOrderItems.map((item) => (
+                <tr key={item.orderItemId} className="hover:bg-gray-750 transition-colors">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.orderItemId}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-white">Order #{item.orderId}</span>
+                      <span className="text-gray-500 text-xs">{formatDate(item.order?.orderDate)}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">{ownerLabel(item.order?.user, item.order?.userId)}</td>
+                  <td className="px-6 py-4">
+                    <span className="text-cyan-300 font-black uppercase">{item.itemType}</span>
+                    <span className="text-gray-400 ml-2">#{item.itemId}</span>
+                  </td>
+                  <td className="px-6 py-4 text-cyan-400 font-black">{formatPrice(item.price)}</td>
+                </tr>
+              ))}
+              {filteredOrderItems.length === 0 && renderEmptyRow(5, 'No order items found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderWalletsSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search wallets by ID or user...', 'focus:border-emerald-500 focus:ring-emerald-500')}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Customer</th>
+                <th className="px-6 py-4">Balance</th>
+                <th className="px-6 py-4">Updated</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredWallets.map((wallet) => (
+                <tr key={wallet.walletId} className="hover:bg-gray-750 transition-colors">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{wallet.walletId}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-white">{ownerLabel(wallet.user, wallet.userId)}</span>
+                      <span className="text-gray-500 text-xs">{wallet.userId}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-emerald-400 font-black">{formatPrice(wallet.balance)}</td>
+                  <td className="px-6 py-4 text-gray-400">{formatDate(wallet.updatedAt)}</td>
+                </tr>
+              ))}
+              {filteredWallets.length === 0 && renderEmptyRow(4, 'No wallets found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderLibrariesSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search libraries by ID, user, item type, or item ID...', 'focus:border-lime-500 focus:ring-lime-500')}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Customer</th>
+                <th className="px-6 py-4">Owned Item</th>
+                <th className="px-6 py-4">Purchase Date</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredLibraries.map((item) => (
+                <tr key={item.libraryId} className="hover:bg-gray-750 transition-colors">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.libraryId}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-white">{ownerLabel(item.user, item.userId)}</span>
+                      <span className="text-gray-500 text-xs">{item.userId}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-lime-300 font-black uppercase">{item.itemType}</span>
+                    <span className="text-gray-400 ml-2">#{item.itemId}</span>
+                  </td>
+                  <td className="px-6 py-4 text-gray-400">{formatDate(item.purchaseDate)}</td>
+                </tr>
+              ))}
+              {filteredLibraries.length === 0 && renderEmptyRow(4, 'No library records found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderWishlistsSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search wishlists by user or game...', 'focus:border-rose-500 focus:ring-rose-500')}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Customer</th>
+                <th className="px-6 py-4">Game</th>
+                <th className="px-6 py-4">Added</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredWishlists.map((item) => (
+                <tr key={item.wishlistId} className="hover:bg-gray-750 transition-colors">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.wishlistId}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-white">{ownerLabel(item.user, item.userId)}</span>
+                      <span className="text-gray-500 text-xs">{item.userId}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-rose-300 font-bold">{item.game?.title || `Game #${item.gameId}`}</td>
+                  <td className="px-6 py-4 text-gray-400">{formatDate(item.addedAt)}</td>
+                </tr>
+              ))}
+              {filteredWishlists.length === 0 && renderEmptyRow(4, 'No wishlist records found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderReviewsSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search reviews by user, game, comment, or ID...', 'focus:border-violet-500 focus:ring-violet-500')}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Customer</th>
+                <th className="px-6 py-4">Game</th>
+                <th className="px-6 py-4">Rating</th>
+                <th className="px-6 py-4">Comment</th>
+                <th className="px-6 py-4">Created</th>
+                <th className="px-6 py-4 text-right">Manage</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredReviews.map((review) => (
+                <tr key={review.reviewId} className="hover:bg-gray-750 transition-colors">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{review.reviewId}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-white">{ownerLabel(review.user, review.userId)}</span>
+                      <span className="text-gray-500 text-xs">{review.userId}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-violet-300 font-bold">{review.game?.title || `Game #${review.gameId}`}</td>
+                  <td className="px-6 py-4 text-white font-black">{review.rating}/5</td>
+                  <td className="px-6 py-4 text-gray-300 max-w-md truncate">{review.comment || 'No comment'}</td>
+                  <td className="px-6 py-4 text-gray-400">{formatDate(review.createdAt)}</td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => deleteRecord(() => adminReviewsApi.remove(review.reviewId))}
+                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                      title="Delete Review"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filteredReviews.length === 0 && renderEmptyRow(7, 'No reviews found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDiscountsSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search discounts by ID or game...', 'focus:border-sky-500 focus:ring-sky-500', {
+        label: 'Create Discount',
+        className: 'bg-sky-600 hover:bg-sky-500 shadow-sky-900/20',
+        onClick: () => openDiscountModal(),
+      })}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Game</th>
+                <th className="px-6 py-4">Percentage</th>
+                <th className="px-6 py-4">Start</th>
+                <th className="px-6 py-4">End</th>
+                <th className="px-6 py-4 text-right">Manage</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredDiscounts.map((discount) => (
+                <tr key={discount.discountId} className="hover:bg-gray-750 transition-colors">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{discount.discountId}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-white">{discount.game?.title || `Game #${discount.gameId}`}</span>
+                      <span className="text-gray-500 text-xs">Game ID: {discount.gameId}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sky-400 font-black">{Number(discount.percentage).toFixed(0)}%</td>
+                  <td className="px-6 py-4 text-gray-400">{formatDate(discount.startDate)}</td>
+                  <td className="px-6 py-4 text-gray-400">{formatDate(discount.endDate)}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => openDiscountModal(discount)}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                        title="Edit Discount"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => deleteRecord(() => adminDiscountsApi.remove(discount.discountId))}
+                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                        title="Delete Discount"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredDiscounts.length === 0 && renderEmptyRow(6, 'No discounts found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderEditionsSection = () => (
+    <div className="space-y-6">
+      {renderAdminToolbar('Search editions by name, game, or ID...', 'focus:border-fuchsia-500 focus:ring-fuchsia-500', {
+        label: 'Create Edition',
+        className: 'bg-fuchsia-600 hover:bg-fuchsia-500 shadow-fuchsia-900/20',
+        onClick: () => openEditionModal(),
+      })}
+      <div className="bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
+                <th className="px-6 py-4 w-16">ID</th>
+                <th className="px-6 py-4">Edition</th>
+                <th className="px-6 py-4">Game</th>
+                <th className="px-6 py-4">Price</th>
+                <th className="px-6 py-4">Includes</th>
+                <th className="px-6 py-4 text-right">Manage</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-gray-700">
+              {filteredEditions.map((edition) => (
+                <tr key={edition.editionId} className="hover:bg-gray-750 transition-colors">
+                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{edition.editionId}</td>
+                  <td className="px-6 py-4 font-bold text-white">{edition.name}</td>
+                  <td className="px-6 py-4 text-fuchsia-300 font-bold">{edition.game?.title || `Game #${edition.gameId}`}</td>
+                  <td className="px-6 py-4 text-fuchsia-400 font-black">{formatPrice(edition.price)}</td>
+                  <td className="px-6 py-4 text-gray-300 max-w-md truncate">{edition.includes || 'N/A'}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => openEditionModal(edition)}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                        title="Edit Edition"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => deleteRecord(() => adminEditionsApi.remove(edition.editionId))}
+                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                        title="Delete Edition"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredEditions.length === 0 && renderEmptyRow(6, 'No editions found.')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex h-screen bg-gray-900 text-white font-sans selection:bg-blue-600 selection:text-white">
@@ -800,7 +1601,28 @@ const AdminDashboardPage: React.FC = () => {
           </p>
         </div>
 
-        <nav className="flex-1 space-y-2">
+        <div className="grid grid-cols-2 gap-2 bg-gray-900 border border-gray-700 rounded-xl p-1">
+          <button
+            type="button"
+            onClick={() => setAdminMode('admin')}
+            className={`px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${
+              adminMode === 'admin' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+            }`}
+          >
+            Admin Mode
+          </button>
+          <button
+            type="button"
+            onClick={() => setAdminMode('store')}
+            className={`px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${
+              adminMode === 'store' ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+            }`}
+          >
+            Store Mode
+          </button>
+        </div>
+
+        <nav className="flex-1 space-y-2 overflow-y-auto pr-1" onClick={() => setAdminMode('admin')}>
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'dashboard'
@@ -890,6 +1712,85 @@ const AdminDashboardPage: React.FC = () => {
           >
             <span className="mr-3 text-lg opacity-80">🎮</span> DLCs
           </button>
+          <button
+            onClick={() => setActiveTab('editions')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'editions'
+              ? 'bg-gradient-to-r from-fuchsia-600 to-fuchsia-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-sm opacity-80 font-black">ED</span> Editions
+          </button>
+
+          <button
+            onClick={() => setActiveTab('discounts')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'discounts'
+              ? 'bg-gradient-to-r from-sky-600 to-sky-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-lg opacity-80">%</span> Discounts
+          </button>
+
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'orders'
+              ? 'bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-lg opacity-80">#</span> Orders
+          </button>
+
+          <button
+            onClick={() => setActiveTab('orderItems')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'orderItems'
+              ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-sm opacity-80 font-black">LI</span> Order Items
+          </button>
+
+          <button
+            onClick={() => setActiveTab('wallets')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'wallets'
+              ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-lg opacity-80">$</span> Wallets
+          </button>
+
+          <button
+            onClick={() => setActiveTab('libraries')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'libraries'
+              ? 'bg-gradient-to-r from-lime-600 to-lime-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-sm opacity-80 font-black">LB</span> Libraries
+          </button>
+
+          <button
+            onClick={() => setActiveTab('wishlists')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'wishlists'
+              ? 'bg-gradient-to-r from-rose-600 to-rose-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-sm opacity-80 font-black">WL</span> Wishlists
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold ${activeTab === 'reviews'
+              ? 'bg-gradient-to-r from-violet-600 to-violet-500 shadow-lg text-white'
+              : 'text-gray-400 hover:bg-gray-750 hover:text-white'
+              }`}
+          >
+            <span className="mr-3 text-sm opacity-80 font-black">RV</span> Reviews
+          </button>
         </nav>
 
         <div className="mt-auto border-t border-gray-700 pt-6">
@@ -913,9 +1814,13 @@ const AdminDashboardPage: React.FC = () => {
         <div className="sticky top-0 bg-[#0f172a]/95 backdrop-blur z-20 px-10 py-8 border-b border-gray-800 shadow-sm flex justify-between items-end">
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight capitalize">
-              {activeTab.replace(/([A-Z])/g, ' $1').trim()}
+              {adminMode === 'store' ? 'Store Mode' : activeTab.replace(/([A-Z])/g, ' $1').trim()}
             </h1>
-            <p className="text-gray-400 mt-1 font-medium">Control panel for platform {activeTab.replace(/([A-Z])/g, ' $1').trim()}</p>
+            <p className="text-gray-400 mt-1 font-medium">
+              {adminMode === 'store'
+                ? 'Customer storefront running under the signed-in admin account'
+                : `Control panel for platform ${activeTab.replace(/([A-Z])/g, ' $1').trim()}`}
+            </p>
           </div>
           <div className="text-right">
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-900/40 text-blue-400 text-sm font-bold border border-blue-800/50">
@@ -926,13 +1831,25 @@ const AdminDashboardPage: React.FC = () => {
         </div>
 
         <div className="p-10">
-          {isLoading ? (
+          {adminMode === 'store' ? (
+            <AdminStoreModePanel onBackToAdmin={() => setAdminMode('admin')} />
+          ) : isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 space-y-4">
               <div className="animate-spin rounded-full h-14 w-14 border-4 border-gray-700 border-t-blue-500 border-b-purple-500"></div>
               <p className="text-gray-400 font-medium tracking-wider">Syncing Data...</p>
             </div>
           ) : (
             <div className="animate-fadeIn">
+              {adminSuccess && (
+                <div className="bg-green-500/10 border border-green-500 text-green-300 p-4 rounded-lg mb-6 font-medium">
+                  {adminSuccess}
+                </div>
+              )}
+              {adminError && (
+                <div className="bg-red-500/10 border border-red-500 text-red-300 p-4 rounded-lg mb-6 font-medium">
+                  {adminError}
+                </div>
+              )}
               {activeTab === 'dashboard' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-700/50 relative overflow-hidden group">
@@ -1329,11 +2246,7 @@ const AdminDashboardPage: React.FC = () => {
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-gray-400 font-medium">
-                                {new Date(u.createdAt).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                })}
+                                {formatDate(u.createdAt)}
                               </td>
                               <td className="px-6 py-4 text-right">
                                 <div className="flex justify-end space-x-2">
@@ -1537,12 +2450,12 @@ const AdminDashboardPage: React.FC = () => {
 
                               <td className="px-6 py-4">
                                 <span className="text-pink-400 font-black tracking-wider text-base">
-                                  ${Number(dlc.price).toFixed(2)}
+                                  {formatPrice(dlc.price)}
                                 </span>
                               </td>
 
                               <td className="px-6 py-4 text-gray-400 font-medium">
-                                {dlc.releaseDate ? String(dlc.releaseDate).slice(0, 10) : 'N/A'}
+                                {formatDate(dlc.releaseDate)}
                               </td>
 
                               <td className="px-6 py-4 text-right">
@@ -1584,6 +2497,15 @@ const AdminDashboardPage: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {activeTab === 'orders' && renderOrdersSection()}
+              {activeTab === 'orderItems' && renderOrderItemsSection()}
+              {activeTab === 'wallets' && renderWalletsSection()}
+              {activeTab === 'libraries' && renderLibrariesSection()}
+              {activeTab === 'wishlists' && renderWishlistsSection()}
+              {activeTab === 'reviews' && renderReviewsSection()}
+              {activeTab === 'discounts' && renderDiscountsSection()}
+              {activeTab === 'editions' && renderEditionsSection()}
             </div>
           )}
         </div>
@@ -2088,6 +3010,229 @@ const AdminDashboardPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   {editingDLC ? 'Update DLC' : 'Commit DLC'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isDiscountModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 transform transition-all scale-100">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+              <h2 className="text-2xl font-black text-white tracking-wide uppercase">
+                {editingDiscount ? 'Edit Discount' : 'Create Discount'}
+              </h2>
+              <button
+                onClick={() => {
+                  setIsDiscountModalOpen(false);
+                  setEditingDiscount(null);
+                  setDiscountFormData(emptyDiscountForm);
+                }}
+                className="text-gray-400 hover:text-white bg-gray-900 hover:bg-gray-700 p-1.5 rounded-md transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleDiscountSubmit} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Game
+                </label>
+                <select
+                  name="gameId"
+                  value={discountFormData.gameId}
+                  onChange={handleGenericChange(setDiscountFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none"
+                  required
+                >
+                  <option value="">Select Game</option>
+                  {gamesList.map((game) => (
+                    <option key={game.gameId} value={game.gameId}>
+                      {game.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Percentage
+                </label>
+                <input
+                  name="percentage"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={discountFormData.percentage}
+                  onChange={handleGenericChange(setDiscountFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    Start Date
+                  </label>
+                  <input
+                    name="startDate"
+                    type="text"
+                    placeholder="YYYY-MM-DD"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                    value={discountFormData.startDate}
+                    onChange={handleGenericChange(setDiscountFormData)}
+                    className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    End Date
+                  </label>
+                  <input
+                    name="endDate"
+                    type="text"
+                    placeholder="YYYY-MM-DD"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                    value={discountFormData.endDate}
+                    onChange={handleGenericChange(setDiscountFormData)}
+                    className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-6 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDiscountModalOpen(false);
+                    setEditingDiscount(null);
+                    setDiscountFormData(emptyDiscountForm);
+                  }}
+                  className="px-6 py-3 text-sm font-bold text-gray-300 hover:text-white bg-transparent hover:bg-gray-700 rounded-lg transition-all border border-gray-600"
+                >
+                  Dismiss
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-3 text-sm flex items-center bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-bold shadow-lg shadow-sky-900/40 transition-all uppercase tracking-wider"
+                >
+                  Save Discount
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isEditionModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 transform transition-all scale-100">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+              <h2 className="text-2xl font-black text-white tracking-wide uppercase">
+                {editingEdition ? 'Edit Edition' : 'Create Edition'}
+              </h2>
+              <button
+                onClick={() => {
+                  setIsEditionModalOpen(false);
+                  setEditingEdition(null);
+                  setEditionFormData(emptyEditionForm);
+                }}
+                className="text-gray-400 hover:text-white bg-gray-900 hover:bg-gray-700 p-1.5 rounded-md transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditionSubmit} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Edition Name
+                </label>
+                <input
+                  name="name"
+                  value={editionFormData.name}
+                  onChange={handleGenericChange(setEditionFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Game
+                </label>
+                <select
+                  name="gameId"
+                  value={editionFormData.gameId}
+                  onChange={handleGenericChange(setEditionFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none"
+                  required
+                >
+                  <option value="">Select Game</option>
+                  {gamesList.map((game) => (
+                    <option key={game.gameId} value={game.gameId}>
+                      {game.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Price
+                </label>
+                <input
+                  name="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editionFormData.price}
+                  onChange={handleGenericChange(setEditionFormData)}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Includes
+                </label>
+                <textarea
+                  name="includes"
+                  value={editionFormData.includes}
+                  onChange={handleGenericChange(setEditionFormData)}
+                  rows={4}
+                  className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-6 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditionModalOpen(false);
+                    setEditingEdition(null);
+                    setEditionFormData(emptyEditionForm);
+                  }}
+                  className="px-6 py-3 text-sm font-bold text-gray-300 hover:text-white bg-transparent hover:bg-gray-700 rounded-lg transition-all border border-gray-600"
+                >
+                  Dismiss
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-3 text-sm flex items-center bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-lg font-bold shadow-lg shadow-fuchsia-900/40 transition-all uppercase tracking-wider"
+                >
+                  Save Edition
                 </button>
               </div>
             </form>

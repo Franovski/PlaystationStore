@@ -14,6 +14,7 @@ import {
 import { DLCRepository } from './dlcRepository';
 import { DLC } from './dlcEntity';
 import { CreateDLCDto, UpdateDLCDto } from './dlcDto';
+import { GameService } from '../games/gameService';
 
 /**
  * Service orchestrating functionality for downloadable content management.
@@ -30,7 +31,10 @@ export class DLCService {
    *
    * @param {DLCRepository} repository - Repository providing data access specifically for DLC entities.
    */
-  constructor(private readonly repository: DLCRepository) {}
+  constructor(
+    private readonly repository: DLCRepository,
+    private readonly gameService: GameService,
+  ) {}
 
   /**
    * Retrieves all DLC records stored in the system.
@@ -117,6 +121,7 @@ export class DLCService {
    */
   async getDLCsByGameId(gameId: number): Promise<DLC[]> {
     this.validateId(gameId, 'Game ID');
+    await this.gameService.getGameById(gameId);
 
     const dlcs = await this.repository.findByGameId(gameId);
     if (!dlcs || dlcs.length === 0) {
@@ -124,6 +129,18 @@ export class DLCService {
     }
 
     return dlcs;
+  }
+
+  /**
+   * Retrieves all DLC records for a game without treating an empty collection as an error.
+   *
+   * @param {number} gameId - The game whose DLC records should be returned.
+   * @returns {Promise<DLC[]>} A promise resolving to matching DLC records, or an empty array.
+   */
+  async listDLCsByGameId(gameId: number): Promise<DLC[]> {
+    this.validateId(gameId, 'Game ID');
+    await this.gameService.getGameById(gameId);
+    return this.repository.findByGameId(gameId);
   }
 
   /**
@@ -141,6 +158,7 @@ export class DLCService {
 
     this.validatePrice(sanitizedDTO.price);
     this.validateId(sanitizedDTO.gameId, 'Game ID');
+    await this.gameService.getGameById(sanitizedDTO.gameId);
     this.validateReleaseDate(sanitizedDTO.releaseDate);
 
     await this.ensureUniqueDLCNameForGame(
@@ -181,6 +199,7 @@ export class DLCService {
 
     if (sanitizedDTO.gameId !== undefined) {
       this.validateId(sanitizedDTO.gameId, 'Game ID');
+      await this.gameService.getGameById(sanitizedDTO.gameId);
     }
 
     if (sanitizedDTO.releaseDate !== undefined) {

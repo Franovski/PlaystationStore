@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../app/store';
 import { fetchGames } from '../features/games/gamesSlice';
 import { Game } from '../types';
+import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -99,9 +100,12 @@ const HomePage: React.FC = () => {
                     </span>
                   </div>
 
-                  <button className="bg-white text-black px-4 py-2 font-bold rounded-full hover:bg-gray-200 transition-colors shadow-md">
-                    Add to Cart
-                  </button>
+                  <Link
+                    to={`/games/${game.gameId}`}
+                    className="bg-white text-black px-4 py-2 font-bold rounded-full hover:bg-gray-200 transition-colors shadow-md"
+                  >
+                    Details
+                  </Link>
                 </div>
               </div>
             </div>

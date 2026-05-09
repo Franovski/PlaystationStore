@@ -12,6 +12,7 @@ import { DLC } from './dlcEntity';
 import { DLCService } from './dlcService';
 import { DLCRepository } from './dlcRepository';
 import { DLCResolver } from './dlcResolver';
+import { GameModule } from '../games/gameModule';
 
 /**
  * Functional module encapsulating everything tied directly to DLC management.
@@ -21,7 +22,7 @@ import { DLCResolver } from './dlcResolver';
  */
 @Module({
     // Registers the 'DLC' entity into TypeORM's ecosystem for this module context.
-    imports: [TypeOrmModule.forFeature([DLC])],
+    imports: [TypeOrmModule.forFeature([DLC]), GameModule],
 
     // Defines the injectable services and resolver constructed when the application initializes.
     providers: [DLCService, DLCRepository, DLCResolver],

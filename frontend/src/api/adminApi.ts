@@ -16,6 +16,14 @@ import {
   Platform,
   User,
   DLC,
+  Discount,
+  Edition,
+  Order,
+  OrderItem,
+  Review,
+  UserLibrary,
+  UserWallet,
+  Wishlist,
 } from '../types';
 
 const USER_FIELDS = gql`
@@ -77,6 +85,150 @@ const DLC_WITH_GAME_FIELDS = gql`
   ${DLC_FIELDS}
   fragment AdminDLCWithGameFields on DLC {
     ...AdminDLCFields
+    game {
+      ...AdminGameFields
+    }
+  }
+`;
+
+const ADMIN_USER_BRIEF_FIELDS = gql`
+  fragment AdminUserBriefFields on User {
+    userId
+    username
+    email
+  }
+`;
+
+const DISCOUNT_FIELDS = gql`
+  ${GAME_FIELDS}
+  fragment AdminDiscountFields on Discount {
+    discountId
+    percentage
+    startDate
+    endDate
+    gameId
+    game {
+      ...AdminGameFields
+    }
+  }
+`;
+
+const EDITION_FIELDS = gql`
+  ${GAME_FIELDS}
+  fragment AdminEditionFields on Edition {
+    editionId
+    name
+    price
+    includes
+    gameId
+    game {
+      ...AdminGameFields
+    }
+  }
+`;
+
+const ORDER_FIELDS = gql`
+  ${ADMIN_USER_BRIEF_FIELDS}
+  fragment AdminOrderFields on Order {
+    orderId
+    orderDate
+    totalPrice
+    paymentMethod
+    status
+    userId
+    user {
+      ...AdminUserBriefFields
+    }
+    items {
+      orderItemId
+      itemType
+      itemId
+      price
+      orderId
+    }
+  }
+`;
+
+const ORDER_ITEM_FIELDS = gql`
+  ${ADMIN_USER_BRIEF_FIELDS}
+  fragment AdminOrderItemFields on OrderItem {
+    orderItemId
+    itemType
+    itemId
+    price
+    orderId
+    order {
+      orderId
+      orderDate
+      totalPrice
+      paymentMethod
+      status
+      userId
+      user {
+        ...AdminUserBriefFields
+      }
+    }
+  }
+`;
+
+const WALLET_FIELDS = gql`
+  ${ADMIN_USER_BRIEF_FIELDS}
+  fragment AdminWalletFields on UserWallet {
+    walletId
+    balance
+    updatedAt
+    userId
+    user {
+      ...AdminUserBriefFields
+    }
+  }
+`;
+
+const USER_LIBRARY_FIELDS = gql`
+  ${ADMIN_USER_BRIEF_FIELDS}
+  fragment AdminUserLibraryFields on UserLibrary {
+    libraryId
+    purchaseDate
+    itemType
+    itemId
+    userId
+    user {
+      ...AdminUserBriefFields
+    }
+  }
+`;
+
+const WISHLIST_FIELDS = gql`
+  ${ADMIN_USER_BRIEF_FIELDS}
+  ${GAME_FIELDS}
+  fragment AdminWishlistFields on Wishlist {
+    wishlistId
+    addedAt
+    userId
+    gameId
+    user {
+      ...AdminUserBriefFields
+    }
+    game {
+      ...AdminGameFields
+    }
+  }
+`;
+
+const REVIEW_FIELDS = gql`
+  ${ADMIN_USER_BRIEF_FIELDS}
+  ${GAME_FIELDS}
+  fragment AdminReviewFields on Review {
+    reviewId
+    rating
+    comment
+    createdAt
+    updatedAt
+    userId
+    gameId
+    user {
+      ...AdminUserBriefFields
+    }
     game {
       ...AdminGameFields
     }
@@ -402,10 +554,150 @@ const DELETE_DLC = gql`
   }
 `;
 
+const GET_DISCOUNTS = gql`
+  ${DISCOUNT_FIELDS}
+  query AdminDiscounts {
+    discounts {
+      ...AdminDiscountFields
+    }
+  }
+`;
+
+const CREATE_DISCOUNT = gql`
+  ${DISCOUNT_FIELDS}
+  mutation AdminCreateDiscount($createDiscountInput: CreateDiscountDto!) {
+    createDiscount(createDiscountInput: $createDiscountInput) {
+      ...AdminDiscountFields
+    }
+  }
+`;
+
+const UPDATE_DISCOUNT = gql`
+  ${DISCOUNT_FIELDS}
+  mutation AdminUpdateDiscount($id: Int!, $updateDiscountInput: UpdateDiscountDto!) {
+    updateDiscount(id: $id, updateDiscountInput: $updateDiscountInput) {
+      ...AdminDiscountFields
+    }
+  }
+`;
+
+const DELETE_DISCOUNT = gql`
+  mutation AdminDeleteDiscount($id: Int!) {
+    deleteDiscount(id: $id)
+  }
+`;
+
+const GET_EDITIONS = gql`
+  ${EDITION_FIELDS}
+  query AdminEditions {
+    editions {
+      ...AdminEditionFields
+    }
+  }
+`;
+
+const CREATE_EDITION = gql`
+  ${EDITION_FIELDS}
+  mutation AdminCreateEdition($createEditionInput: CreateEditionDto!) {
+    createEdition(createEditionInput: $createEditionInput) {
+      ...AdminEditionFields
+    }
+  }
+`;
+
+const UPDATE_EDITION = gql`
+  ${EDITION_FIELDS}
+  mutation AdminUpdateEdition($id: Int!, $updateEditionInput: UpdateEditionDto!) {
+    updateEdition(id: $id, updateEditionInput: $updateEditionInput) {
+      ...AdminEditionFields
+    }
+  }
+`;
+
+const DELETE_EDITION = gql`
+  mutation AdminDeleteEdition($id: Int!) {
+    deleteEdition(id: $id)
+  }
+`;
+
+const GET_ADMIN_ORDERS = gql`
+  ${ORDER_FIELDS}
+  query AdminOrders {
+    adminOrders {
+      ...AdminOrderFields
+    }
+  }
+`;
+
+const GET_ADMIN_ORDER_ITEMS = gql`
+  ${ORDER_ITEM_FIELDS}
+  query AdminOrderItems {
+    adminOrderItems {
+      ...AdminOrderItemFields
+    }
+  }
+`;
+
+const GET_ADMIN_WALLETS = gql`
+  ${WALLET_FIELDS}
+  query AdminWallets {
+    adminWallets {
+      ...AdminWalletFields
+    }
+  }
+`;
+
+const GET_ADMIN_USER_LIBRARY = gql`
+  ${USER_LIBRARY_FIELDS}
+  query AdminUserLibrary {
+    adminUserLibrary {
+      ...AdminUserLibraryFields
+    }
+  }
+`;
+
+const GET_ADMIN_WISHLISTS = gql`
+  ${WISHLIST_FIELDS}
+  query AdminWishlists {
+    adminWishlists {
+      ...AdminWishlistFields
+    }
+  }
+`;
+
+const GET_ADMIN_REVIEWS = gql`
+  ${REVIEW_FIELDS}
+  query AdminReviews {
+    adminReviews {
+      ...AdminReviewFields
+    }
+  }
+`;
+
+const DELETE_REVIEW = gql`
+  mutation AdminDeleteReview($id: Int!) {
+    deleteReview(id: $id)
+  }
+`;
+
 const toInt = (value: string | number) => Number(value);
 
 const categoryInput = (data: Record<string, any>) => ({
   categoryName: data.categoryName,
+});
+
+const discountInput = (data: Record<string, any>) => ({
+  percentage: Number(data.percentage),
+  startDate: data.startDate,
+  endDate: data.endDate,
+  gameId: toInt(data.gameId),
+});
+
+const editionInput = (data: Record<string, any>) => ({
+  name: data.name,
+  price: Number(data.price),
+  includes: data.includes || undefined,
+  gameId: toInt(data.gameId),
 });
 
 const normalizeGamePlatform = (relation: any): GamePlatform => ({
@@ -825,5 +1117,156 @@ export const adminDlcApi = {
     });
 
     return data.deleteDLC;
+  },
+};
+
+export const adminDiscountsApi = {
+  getAll: async (): Promise<Discount[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_DISCOUNTS,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.discounts ?? [];
+  },
+
+  create: async (data: Record<string, any>): Promise<Discount> => {
+    const result = await apolloClient.mutate<any>({
+      mutation: CREATE_DISCOUNT,
+      variables: { createDiscountInput: discountInput(data) },
+    });
+
+    return result.data.createDiscount;
+  },
+
+  update: async (id: number | string, data: Record<string, any>): Promise<Discount> => {
+    const result = await apolloClient.mutate<any>({
+      mutation: UPDATE_DISCOUNT,
+      variables: { id: toInt(id), updateDiscountInput: discountInput(data) },
+    });
+
+    return result.data.updateDiscount;
+  },
+
+  remove: async (id: number | string): Promise<boolean> => {
+    const { data } = await apolloClient.mutate<any>({
+      mutation: DELETE_DISCOUNT,
+      variables: { id: toInt(id) },
+    });
+
+    return data.deleteDiscount;
+  },
+};
+
+export const adminEditionsApi = {
+  getAll: async (): Promise<Edition[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_EDITIONS,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.editions ?? [];
+  },
+
+  create: async (data: Record<string, any>): Promise<Edition> => {
+    const result = await apolloClient.mutate<any>({
+      mutation: CREATE_EDITION,
+      variables: { createEditionInput: editionInput(data) },
+    });
+
+    return result.data.createEdition;
+  },
+
+  update: async (id: number | string, data: Record<string, any>): Promise<Edition> => {
+    const result = await apolloClient.mutate<any>({
+      mutation: UPDATE_EDITION,
+      variables: { id: toInt(id), updateEditionInput: editionInput(data) },
+    });
+
+    return result.data.updateEdition;
+  },
+
+  remove: async (id: number | string): Promise<boolean> => {
+    const { data } = await apolloClient.mutate<any>({
+      mutation: DELETE_EDITION,
+      variables: { id: toInt(id) },
+    });
+
+    return data.deleteEdition;
+  },
+};
+
+export const adminOrdersApi = {
+  getAll: async (): Promise<Order[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_ADMIN_ORDERS,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.adminOrders ?? [];
+  },
+};
+
+export const adminOrderItemsApi = {
+  getAll: async (): Promise<OrderItem[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_ADMIN_ORDER_ITEMS,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.adminOrderItems ?? [];
+  },
+};
+
+export const adminWalletsApi = {
+  getAll: async (): Promise<UserWallet[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_ADMIN_WALLETS,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.adminWallets ?? [];
+  },
+};
+
+export const adminUserLibraryApi = {
+  getAll: async (): Promise<UserLibrary[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_ADMIN_USER_LIBRARY,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.adminUserLibrary ?? [];
+  },
+};
+
+export const adminWishlistsApi = {
+  getAll: async (): Promise<Wishlist[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_ADMIN_WISHLISTS,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.adminWishlists ?? [];
+  },
+};
+
+export const adminReviewsApi = {
+  getAll: async (): Promise<Review[]> => {
+    const { data } = await apolloClient.query<any>({
+      query: GET_ADMIN_REVIEWS,
+      fetchPolicy: 'network-only',
+    });
+
+    return data.adminReviews ?? [];
+  },
+
+  remove: async (id: number | string): Promise<boolean> => {
+    const { data } = await apolloClient.mutate<any>({
+      mutation: DELETE_REVIEW,
+      variables: { id: toInt(id) },
+    });
+
+    return data.deleteReview;
   },
 };

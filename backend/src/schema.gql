@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddLibraryItemDto {
+  itemId: Int!
+  itemType: String!
+}
+
+input AddWalletFundsDto {
+  amount: Float!
+}
+
+input AddWishlistItemDto {
+  gameId: Int!
+}
+
 type Category {
   categoryId: Int!
   categoryName: String!
@@ -18,6 +31,20 @@ input CreateDLCDto {
   releaseDate: String
 }
 
+input CreateDiscountDto {
+  endDate: String!
+  gameId: Int!
+  percentage: Float!
+  startDate: String!
+}
+
+input CreateEditionDto {
+  gameId: Int!
+  includes: String
+  name: String!
+  price: Float!
+}
+
 input CreateGameDto {
   ageRating: String
   basePrice: Float!
@@ -28,8 +55,24 @@ input CreateGameDto {
   title: String!
 }
 
+input CreateOrderDto {
+  items: [CreateOrderItemDto!]!
+  paymentMethod: String!
+}
+
+input CreateOrderItemDto {
+  itemId: Int!
+  itemType: String!
+}
+
 input CreatePlatformDto {
   platformName: PlatformName!
+}
+
+input CreateReviewDto {
+  comment: String
+  gameId: Int!
+  rating: Int!
 }
 
 input CreateUserDto {
@@ -41,6 +84,17 @@ input CreateUserDto {
   password: String
   role: UserRole
   username: String!
+}
+
+type CustomerDashboardData {
+  library: [UserLibrary!]!
+  libraryCount: Int!
+  orderCount: Int!
+  orders: [Order!]!
+  wallet: UserWallet!
+  walletBalance: Float!
+  wishlist: [Wishlist!]!
+  wishlistCount: Int!
 }
 
 type DLC {
@@ -66,6 +120,24 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Discount {
+  discountId: Int!
+  endDate: String!
+  game: Game
+  gameId: Int!
+  percentage: Float!
+  startDate: String!
+}
+
+type Edition {
+  editionId: Int!
+  game: Game
+  gameId: Int!
+  includes: String
+  name: String!
+  price: Float!
+}
+
 input ForgotPasswordDto {
   email: String!
 }
@@ -86,6 +158,18 @@ type GameCategory {
   categoryId: Int!
   game: Game
   gameId: Int!
+}
+
+type GameDetails {
+  activeDiscountPercentage: Float
+  categories: [Category!]!
+  currentPrice: Float!
+  discounts: [Discount!]!
+  dlcs: [DLC!]!
+  editions: [Edition!]!
+  game: Game!
+  platforms: [Platform!]!
+  reviews: [Review!]!
 }
 
 type GamePlatform {
@@ -111,29 +195,63 @@ type LoginResponse {
 
 type Mutation {
   addCategoryToGame(categoryId: Int!, gameId: Int!): GameCategory!
+  addLibraryItem(addLibraryItemInput: AddLibraryItemDto!): UserLibrary!
   addPlatformToGame(gameId: Int!, platformId: Int!): GamePlatform!
+  addWalletFunds(addWalletFundsInput: AddWalletFundsDto!): UserWallet!
+  addWishlistItem(addWishlistItemInput: AddWishlistItemDto!): Wishlist!
   createCategory(createCategoryInput: CreateCategoryDto!): Category!
   createDLC(createDLCInput: CreateDLCDto!): DLC!
+  createDiscount(createDiscountInput: CreateDiscountDto!): Discount!
+  createEdition(createEditionInput: CreateEditionDto!): Edition!
   createGame(createGameInput: CreateGameDto!): Game!
+  createOrder(createOrderInput: CreateOrderDto!): Order!
   createPlatform(createPlatformInput: CreatePlatformDto!): Platform!
+  createReview(createReviewInput: CreateReviewDto!): Review!
   createUser(createUserInput: CreateUserDto!): User!
   deleteCategory(categoryId: Int!): Boolean!
   deleteDLC(id: Int!): Boolean!
+  deleteDiscount(id: Int!): Boolean!
+  deleteEdition(id: Int!): Boolean!
   deleteGame(id: Int!): Boolean!
   deletePlatform(platformId: Int!): Boolean!
+  deleteReview(id: Int!): Boolean!
   deleteUser(id: ID!): Boolean!
   forgotPassword(forgotPasswordInput: ForgotPasswordDto!): Boolean!
   login(loginInput: LoginDto!): LoginResponse!
   register(registerInput: RegisterDto!): RegisterResponse!
   removeCategoryFromGame(categoryId: Int!, gameId: Int!): Boolean!
   removePlatformFromGame(gameId: Int!, platformId: Int!): Boolean!
+  removeWishlistItem(gameId: Int!): Boolean!
   resetPassword(resetPasswordInput: ResetPasswordDto!): Boolean!
   updateCategory(categoryId: Int!, updateCategoryInput: UpdateCategoryDto!): Category!
   updateDLC(id: Int!, updateDLCInput: UpdateDLCDto!): DLC!
+  updateDiscount(id: Int!, updateDiscountInput: UpdateDiscountDto!): Discount!
+  updateEdition(id: Int!, updateEditionInput: UpdateEditionDto!): Edition!
   updateGame(id: Int!, updateGameInput: UpdateGameDto!): Game!
   updatePlatform(platformId: Int!, updatePlatformInput: UpdatePlatformDto!): Platform!
+  updateReview(id: Int!, updateReviewInput: UpdateReviewDto!): Review!
   updateUser(id: ID!, updateUserInput: UpdateUserDto!): User!
   verifyTotp(verifyTotpInput: VerifyTotpDto!): LoginResponse!
+}
+
+type Order {
+  items: [OrderItem!]
+  orderDate: DateTime!
+  orderId: Int!
+  paymentMethod: String!
+  status: String!
+  totalPrice: Float!
+  user: User
+  userId: ID!
+}
+
+type OrderItem {
+  itemId: Int!
+  itemType: String!
+  order: Order
+  orderId: Int!
+  orderItemId: Int!
+  price: Float!
 }
 
 enum PasswordResetMethod {
@@ -152,23 +270,44 @@ enum PlatformName {
 }
 
 type Query {
+  activeDiscounts(gameId: Int!): [Discount!]!
+  adminOrderItems: [OrderItem!]!
+  adminOrders: [Order!]!
+  adminReviews: [Review!]!
+  adminUserLibrary: [UserLibrary!]!
+  adminWallets: [UserWallet!]!
+  adminWishlists: [Wishlist!]!
   categories: [Category!]!
   category(categoryId: Int!): Category
+  currentUserDashboard: CustomerDashboardData!
   dashboardSummary: DashboardSummary!
+  discount(id: Int!): Discount!
+  discounts(gameId: Int): [Discount!]!
   dlc(id: Int!): DLC!
   dlcWithGame(id: Int!): DLC!
   dlcs(gameId: Int, name: String): [DLC!]!
   dlcsWithGames: [DLC!]!
+  edition(id: Int!): Edition!
+  editions(gameId: Int): [Edition!]!
   game(id: Int!): Game!
+  gameCatalog: [GameDetails!]!
   gameCategories: [GameCategory!]!
   gameCategoriesByGameId(gameId: Int!): [Category!]!
+  gameDetails(gameId: Int!): GameDetails!
   gamePlatforms: [GamePlatform!]!
   gamePlatformsByGameId(gameId: Int!): [Platform!]!
   games(title: String): [Game!]!
+  order(id: Int!): Order!
+  orderItems(orderId: Int!): [OrderItem!]!
+  orders: [Order!]!
   platform(platformId: Int!): Platform
   platforms: [Platform!]!
+  reviewsForGame(gameId: Int!): [Review!]!
   user(id: ID!): User!
+  userLibrary: [UserLibrary!]!
   users: [User!]!
+  wallet: UserWallet!
+  wishlist: [Wishlist!]!
 }
 
 input RegisterDto {
@@ -194,6 +333,18 @@ input ResetPasswordDto {
   token: String!
 }
 
+type Review {
+  comment: String
+  createdAt: DateTime!
+  game: Game
+  gameId: Int!
+  rating: Int!
+  reviewId: Int!
+  updatedAt: DateTime!
+  user: User
+  userId: ID!
+}
+
 input UpdateCategoryDto {
   categoryName: String
 }
@@ -203,6 +354,20 @@ input UpdateDLCDto {
   name: String
   price: Float
   releaseDate: String
+}
+
+input UpdateDiscountDto {
+  endDate: String
+  gameId: Int
+  percentage: Float
+  startDate: String
+}
+
+input UpdateEditionDto {
+  gameId: Int
+  includes: String
+  name: String
+  price: Float
 }
 
 input UpdateGameDto {
@@ -217,6 +382,11 @@ input UpdateGameDto {
 
 input UpdatePlatformDto {
   platformName: PlatformName
+}
+
+input UpdateReviewDto {
+  comment: String
+  rating: Int
 }
 
 input UpdateUserDto {
@@ -250,12 +420,38 @@ type User {
   username: String!
 }
 
+type UserLibrary {
+  itemId: Int!
+  itemType: String!
+  libraryId: Int!
+  purchaseDate: DateTime!
+  user: User
+  userId: ID!
+}
+
 enum UserRole {
   ADMIN
   PLAYSTATION_USER
 }
 
+type UserWallet {
+  balance: Float!
+  updatedAt: DateTime!
+  user: User
+  userId: ID!
+  walletId: Int!
+}
+
 input VerifyTotpDto {
   code: String!
   tempToken: String!
+}
+
+type Wishlist {
+  addedAt: DateTime!
+  game: Game
+  gameId: Int!
+  user: User
+  userId: ID!
+  wishlistId: Int!
 }

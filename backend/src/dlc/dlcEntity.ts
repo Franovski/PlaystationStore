@@ -6,7 +6,7 @@
  * @interaction Referenced by Game-related queries, order items, user libraries, and any feature that needs DLC ownership or pricing information.
  */
 
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -48,7 +48,7 @@ export class DLC {
    *
    * @type {number}
    */
-  @Field()
+  @Field(() => Float)
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
