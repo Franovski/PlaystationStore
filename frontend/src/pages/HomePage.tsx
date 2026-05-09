@@ -1,21 +1,20 @@
 import React, { useEffect } from 'react';
-import MainLayout from '../layouts/MainLayout';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../app/store';
-import { fetchGames } from '../features/games/gamesSlice';
+import Layout from '../components/layout/Layout';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { fetchGames } from '../store/slices/gamesSlice';
 import { Game } from '../types';
 import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { items, isLoading, error } = useSelector((state: RootState) => state.games);
+  const dispatch = useAppDispatch();
+  const { items, isLoading, error } = useAppSelector((state) => state.games);
 
   useEffect(() => {
     dispatch(fetchGames());
   }, [dispatch]);
 
   return (
-    <MainLayout>
+    <Layout>
       <div className="p-8">
         <div className="mb-10 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white text-shadow-sm mb-4">
@@ -112,7 +111,7 @@ const HomePage: React.FC = () => {
           ))}
         </div>
       </div>
-    </MainLayout>
+    </Layout>
   );
 };
 
