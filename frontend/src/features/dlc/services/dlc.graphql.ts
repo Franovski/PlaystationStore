@@ -70,3 +70,7 @@ export const DELETE_DLC = gql`
     deleteDLC(id: $id)
   }
 `;
+
+/*
+  step 1
+ */

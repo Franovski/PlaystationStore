@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchGames } from '../store/slices/gamesSlice';
-import { Game } from '../types';
+import { fetchGameCatalog } from '../store/slices/gamesSlice';
+import { GameDetails } from '../types';
 import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { items, isLoading, error } = useAppSelector((state) => state.games);
+  const { catalogItems, isLoading, error } = useAppSelector((state) => state.games);
 
   useEffect(() => {
-    dispatch(fetchGames());
+    dispatch(fetchGameCatalog());
   }, [dispatch]);
 
   return (
@@ -41,14 +41,16 @@ const HomePage: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && !error && items.length === 0 && (
+        {!isLoading && !error && catalogItems.length === 0 && (
           <div className="text-gray-400 bg-gray-800 p-8 text-center rounded border border-gray-700">
             No games currently found in the database. Add some via the Admin Dashboard.
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {items.map((game: Game) => (
+          {catalogItems.map((item: GameDetails) => {
+            const game = item.game;
+            return (
             <div
               key={game.gameId}
               className="bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform hover:-translate-y-2 hover:shadow-blue-500/10 border border-gray-700 flex flex-col"
@@ -94,9 +96,25 @@ const HomePage: React.FC = () => {
 
                 <div className="mt-4 flex justify-between items-center mt-auto pt-4">
                   <div className="flex flex-col">
-                    <span className="text-xl font-bold text-white">
-                      ${Number(game.basePrice).toFixed(2)}
-                    </span>
+                    {item.activeDiscountPercentage ? (
+                      <>
+                        <span className="text-gray-400 line-through text-sm">
+                          ${Number(game.basePrice).toFixed(2)}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded">
+                            -{item.activeDiscountPercentage}%
+                          </span>
+                          <span className="text-xl font-bold text-white">
+                            ${Number(item.currentPrice).toFixed(2)}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-xl font-bold text-white">
+                        ${Number(game.basePrice).toFixed(2)}
+                      </span>
+                    )}
                   </div>
 
                   <Link
@@ -108,7 +126,8 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </Layout>

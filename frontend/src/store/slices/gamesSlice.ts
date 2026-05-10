@@ -8,6 +8,7 @@ import { wishlistApi } from '../../features/wishlist/services/wishlistApi';
 
 interface GamesState {
   items: Game[];
+  catalogItems: GameDetails[];
   selectedGame: Game | null;
   selectedGameDetails: GameDetails | null;
   isLoading: boolean;
@@ -21,6 +22,7 @@ interface GamesState {
 
 const initialState: GamesState = {
   items: [],
+  catalogItems: [],
   selectedGame: null,
   selectedGameDetails: null,
   isLoading: false,
@@ -44,6 +46,17 @@ export const fetchGames = createAsyncThunk(
       return await gameApi.getAll();
     } catch (err: any) {
       return rejectWithValue(err.message || 'Failed to fetch games');
+    }
+  }
+);
+
+export const fetchGameCatalog = createAsyncThunk(
+  'games/fetchCatalog',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await gameDetailsApi.getCatalog();
+    } catch (err: any) {
+      return rejectWithValue(getErrorMessage(err, 'Failed to fetch game catalog'));
     }
   }
 );
@@ -166,6 +179,18 @@ const gamesSlice = createSlice({
         state.items = action.payload;
       })
       .addCase(fetchGames.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchGameCatalog.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchGameCatalog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.catalogItems = action.payload;
+      })
+      .addCase(fetchGameCatalog.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })
