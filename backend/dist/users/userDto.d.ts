@@ -27,3 +27,15 @@ export declare class UpdateUserDto {
     totpSecret?: string | null;
     isEmailVerified?: boolean;
 }
+export declare class UpdateUserSettingsDto {
+    role?: UserRole;
+    isEmailVerified?: boolean;
+    isTotpEnabled?: boolean;
+    password?: string;
+    totpSecret?: string;
+    refreshToken?: string;
+    passwordResetToken?: string;
+    passwordResetExpires?: string;
+    passwordResetMethod?: PasswordResetMethod;
+    passwordResetAttempts?: number;
+}

@@ -5,7 +5,15 @@
  * @responsibilities Stores balances, update timestamps, and user ownership.
  * @interaction Used by wallet queries, purchase validation, and order payment processing.
  */
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { User } from '../users/userEntity';
 

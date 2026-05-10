@@ -1,12 +1,21 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { UsersService } from './userService';
 import { User } from './userEntity';
-import { CreateUserDto, UpdateUserDto } from './userDto';
+import { CreateUserDto, UpdateUserDto, UpdateUserSettingsDto } from './userDto';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { RolesGuard } from '../auth/guards/rolesGuard';
 import { Roles } from '../auth/decorators/roleDecorator';
 import { UserRole } from './userEntity';
+
+type GqlRequestContext = {
+  req: {
+    user: {
+      userId: string;
+      role: UserRole;
+    };
+  };
+};
 
 @Resolver(() => User)
 export class UserResolver {
@@ -16,6 +25,13 @@ export class UserResolver {
   @Roles(UserRole.ADMIN)
   @Query(() => [User])
   async users() {
+    return this.userService.findAll();
+  }
+
+  @UseGuards(GqlAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Query(() => [User])
+  async adminUsers() {
     return this.userService.findAll();
   }
 
@@ -37,6 +53,22 @@ export class UserResolver {
     @Args('updateUserInput') updateUserInput: UpdateUserDto,
   ) {
     return this.userService.update(id, updateUserInput);
+  }
+
+  @UseGuards(GqlAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Mutation(() => User)
+  async updateUserSettings(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('updateUserSettingsInput')
+    updateUserSettingsInput: UpdateUserSettingsDto,
+    @Context() context: GqlRequestContext,
+  ) {
+    return this.userService.updateUserSettings(
+      id,
+      updateUserSettingsInput,
+      context.req.user.userId,
+    );
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)

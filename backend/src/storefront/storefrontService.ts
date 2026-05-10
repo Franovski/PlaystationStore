@@ -47,7 +47,15 @@ export class StorefrontService {
    */
   async getGameDetails(gameId: number): Promise<GameDetails> {
     const game = await this.gameService.getGameById(gameId);
-    const [dlcs, editions, categories, platforms, discounts, reviews, activeDiscount] = await Promise.all([
+    const [
+      dlcs,
+      editions,
+      categories,
+      platforms,
+      discounts,
+      reviews,
+      activeDiscount,
+    ] = await Promise.all([
       this.dlcService.listDLCsByGameId(game.gameId),
       this.editionService.getEditionsByGameId(game.gameId),
       this.getCategories(game.gameId),
@@ -57,15 +65,18 @@ export class StorefrontService {
       this.discountService.getBestActiveDiscountForGame(game.gameId),
     ]);
 
-    const currentPrice = await this.discountService.calculateDiscountedGamePrice(
-      game.gameId,
-      Number(game.basePrice),
-    );
+    const currentPrice =
+      await this.discountService.calculateDiscountedGamePrice(
+        game.gameId,
+        Number(game.basePrice),
+      );
 
     return {
       game,
       currentPrice,
-      activeDiscountPercentage: activeDiscount ? Number(activeDiscount.percentage) : null,
+      activeDiscountPercentage: activeDiscount
+        ? Number(activeDiscount.percentage)
+        : null,
       dlcs,
       editions,
       categories,
@@ -76,12 +87,17 @@ export class StorefrontService {
   }
 
   private async getCategories(gameId: number): Promise<Category[]> {
-    const categories = await this.gameCategoryService.getCategoriesByGame(gameId);
-    return categories.filter((category): category is Category => Boolean(category));
+    const categories =
+      await this.gameCategoryService.getCategoriesByGame(gameId);
+    return categories.filter((category): category is Category =>
+      Boolean(category),
+    );
   }
 
   private async getPlatforms(gameId: number): Promise<Platform[]> {
     const platforms = await this.gamePlatformService.getPlatformsByGame(gameId);
-    return platforms.filter((platform): platform is Platform => Boolean(platform));
+    return platforms.filter((platform): platform is Platform =>
+      Boolean(platform),
+    );
   }
 }

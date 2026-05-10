@@ -18,14 +18,18 @@ export class PlatformResolver {
   }
 
   @Query(() => Platform, { nullable: true, name: 'platform' })
-  async getPlatformById(@Args('platformId', { type: () => Int }) platformId: number) {
+  async getPlatformById(
+    @Args('platformId', { type: () => Int }) platformId: number,
+  ) {
     return this.platformService.getPlatformById(platformId);
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Mutation(() => Platform)
-  async createPlatform(@Args('createPlatformInput') createPlatformDto: CreatePlatformDto) {
+  async createPlatform(
+    @Args('createPlatformInput') createPlatformDto: CreatePlatformDto,
+  ) {
     return this.platformService.createPlatform(createPlatformDto);
   }
 
@@ -42,7 +46,9 @@ export class PlatformResolver {
   @UseGuards(GqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Mutation(() => Boolean)
-  async deletePlatform(@Args('platformId', { type: () => Int }) platformId: number) {
+  async deletePlatform(
+    @Args('platformId', { type: () => Int }) platformId: number,
+  ) {
     await this.platformService.deletePlatform(platformId);
     return true;
   }

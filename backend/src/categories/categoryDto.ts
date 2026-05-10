@@ -10,9 +10,9 @@ import { InputType, Field } from '@nestjs/graphql';
 
 /**
  * Validates the data required to instantiate a brand new Category.
- * 
+ *
  * @class CreateCategoryDto
- * @description Requires the client to formally establish the category name explicitly. 
+ * @description Requires the client to formally establish the category name explicitly.
  */
 @InputType()
 export class CreateCategoryDto {
@@ -28,7 +28,7 @@ export class CreateCategoryDto {
 
 /**
  * Validates data for amending pre-existing Categories.
- * 
+ *
  * @class UpdateCategoryDto
  * @description Keeps fields optional so HTTP PATCH/PUT calls can supply partial modifications smoothly.
  */

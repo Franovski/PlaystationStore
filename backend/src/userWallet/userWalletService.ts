@@ -52,7 +52,10 @@ export class UserWalletService {
   /**
    * Checks whether a user has enough wallet funds.
    */
-  async validateSufficientBalance(userId: string, amount: number): Promise<void> {
+  async validateSufficientBalance(
+    userId: string,
+    amount: number,
+  ): Promise<void> {
     this.validatePaymentAmount(amount);
     const wallet = await this.getOrCreateWallet(userId);
 
@@ -82,7 +85,11 @@ export class UserWalletService {
   }
 
   private validateAmount(amount: number, fieldName: string): void {
-    if (typeof amount !== 'number' || Number.isNaN(amount) || !Number.isFinite(amount)) {
+    if (
+      typeof amount !== 'number' ||
+      Number.isNaN(amount) ||
+      !Number.isFinite(amount)
+    ) {
       throw new BadRequestException(`${fieldName} must be a valid number`);
     }
 
@@ -92,7 +99,11 @@ export class UserWalletService {
   }
 
   private validatePaymentAmount(amount: number): void {
-    if (typeof amount !== 'number' || Number.isNaN(amount) || !Number.isFinite(amount)) {
+    if (
+      typeof amount !== 'number' ||
+      Number.isNaN(amount) ||
+      !Number.isFinite(amount)
+    ) {
       throw new BadRequestException('Payment amount must be a valid number');
     }
 

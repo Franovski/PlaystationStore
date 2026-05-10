@@ -25,7 +25,9 @@ export class EditionResolver {
   constructor(private readonly editionService: EditionService) {}
 
   @Query(() => [Edition])
-  async editions(@Args('gameId', { type: () => Int, nullable: true }) gameId?: number) {
+  async editions(
+    @Args('gameId', { type: () => Int, nullable: true }) gameId?: number,
+  ) {
     if (gameId) {
       return this.editionService.getEditionsByGameId(gameId);
     }
@@ -41,7 +43,9 @@ export class EditionResolver {
   @UseGuards(GqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Mutation(() => Edition)
-  async createEdition(@Args('createEditionInput') createEditionInput: CreateEditionDto) {
+  async createEdition(
+    @Args('createEditionInput') createEditionInput: CreateEditionDto,
+  ) {
     return this.editionService.createEdition(createEditionInput);
   }
 

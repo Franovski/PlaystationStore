@@ -21,7 +21,12 @@ import { EditionModule } from '../editions/editionModule';
  * @class UserLibraryModule
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([UserLibrary]), GameModule, DLCModule, EditionModule],
+  imports: [
+    TypeOrmModule.forFeature([UserLibrary]),
+    GameModule,
+    DLCModule,
+    EditionModule,
+  ],
   providers: [UserLibraryRepository, UserLibraryService, UserLibraryResolver],
   exports: [UserLibraryRepository, UserLibraryService],
 })

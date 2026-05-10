@@ -25,7 +25,8 @@ export interface TestMailMessage {
 
 @Injectable()
 export class MailService implements OnModuleDestroy {
-  private transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null = null;
+  private transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null =
+    null;
   private readonly testMessages: TestMailMessage[] = [];
 
   constructor(private readonly configService: ConfigService) {}

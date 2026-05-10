@@ -18,14 +18,18 @@ export class CategoryResolver {
   }
 
   @Query(() => Category, { nullable: true, name: 'category' })
-  async getCategoryById(@Args('categoryId', { type: () => Int }) categoryId: number) {
+  async getCategoryById(
+    @Args('categoryId', { type: () => Int }) categoryId: number,
+  ) {
     return this.categoryService.getCategoryById(categoryId);
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Mutation(() => Category)
-  async createCategory(@Args('createCategoryInput') createCategoryDto: CreateCategoryDto) {
+  async createCategory(
+    @Args('createCategoryInput') createCategoryDto: CreateCategoryDto,
+  ) {
     return this.categoryService.createCategory(createCategoryDto);
   }
 
@@ -42,7 +46,9 @@ export class CategoryResolver {
   @UseGuards(GqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Mutation(() => Boolean)
-  async deleteCategory(@Args('categoryId', { type: () => Int }) categoryId: number) {
+  async deleteCategory(
+    @Args('categoryId', { type: () => Int }) categoryId: number,
+  ) {
     await this.categoryService.deleteCategory(categoryId);
     return true;
   }

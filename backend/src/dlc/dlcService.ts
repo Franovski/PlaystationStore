@@ -105,7 +105,9 @@ export class DLCService {
 
     const dlcs = await this.repository.findByName(normalizedName);
     if (!dlcs || dlcs.length === 0) {
-      throw new NotFoundException(`No DLC found with this name: ${normalizedName}`);
+      throw new NotFoundException(
+        `No DLC found with this name: ${normalizedName}`,
+      );
     }
 
     return dlcs;
@@ -213,7 +215,9 @@ export class DLCService {
 
     const dlc = await this.repository.update(id, sanitizedDTO);
     if (!dlc) {
-      throw new NotFoundException(`DLC with ID ${id} not found after update attempt`);
+      throw new NotFoundException(
+        `DLC with ID ${id} not found after update attempt`,
+      );
     }
 
     return dlc;
@@ -285,7 +289,11 @@ export class DLCService {
    * @returns {void}
    */
   private validatePrice(price: number): void {
-    if (typeof price !== 'number' || Number.isNaN(price) || !Number.isFinite(price)) {
+    if (
+      typeof price !== 'number' ||
+      Number.isNaN(price) ||
+      !Number.isFinite(price)
+    ) {
       throw new BadRequestException('DLC price must be a valid number');
     }
 
@@ -294,12 +302,16 @@ export class DLCService {
     }
 
     if (price > 99999999.99) {
-      throw new BadRequestException('DLC price exceeds the maximum supported value');
+      throw new BadRequestException(
+        'DLC price exceeds the maximum supported value',
+      );
     }
 
     const decimalPlaces = price.toString().split('.')[1]?.length ?? 0;
     if (decimalPlaces > 2) {
-      throw new BadRequestException('DLC price cannot have more than 2 decimal places');
+      throw new BadRequestException(
+        'DLC price cannot have more than 2 decimal places',
+      );
     }
   }
 
@@ -350,7 +362,8 @@ export class DLCService {
 
     const duplicate = existingDLCs.find((dlc) => {
       const isSameGame = dlc.gameId === gameId;
-      const isDifferentDLC = excludedDLCId === undefined || dlc.dlcId !== excludedDLCId;
+      const isDifferentDLC =
+        excludedDLCId === undefined || dlc.dlcId !== excludedDLCId;
 
       return isSameGame && isDifferentDLC;
     });

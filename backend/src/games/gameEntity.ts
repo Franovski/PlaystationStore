@@ -10,9 +10,9 @@ import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 
 /**
  * Represents a Game entity within the application.
- * 
+ *
  * @class Game
- * @description Serves as the primary data model for games, mapping directly to the 'games' table in the database. 
+ * @description Serves as the primary data model for games, mapping directly to the 'games' table in the database.
  * It encapsulates all core properties of a game such as title, pricing, release date, and developer information.
  */
 @ObjectType()

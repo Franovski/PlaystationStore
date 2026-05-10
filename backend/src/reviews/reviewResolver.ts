@@ -42,7 +42,10 @@ export class ReviewResolver {
     @Args('createReviewInput') createReviewInput: CreateReviewDto,
     @Context() context: any,
   ) {
-    return this.reviewService.createReview(context.req.user.userId, createReviewInput);
+    return this.reviewService.createReview(
+      context.req.user.userId,
+      createReviewInput,
+    );
   }
 
   @UseGuards(GqlAuthGuard)
@@ -66,7 +69,11 @@ export class ReviewResolver {
     @Args('id', { type: () => Int }) id: number,
     @Context() context: any,
   ) {
-    await this.reviewService.deleteReview(id, context.req.user.userId, context.req.user.role);
+    await this.reviewService.deleteReview(
+      id,
+      context.req.user.userId,
+      context.req.user.role,
+    );
     return true;
   }
 }

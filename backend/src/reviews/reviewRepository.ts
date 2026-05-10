@@ -48,13 +48,19 @@ export class ReviewRepository {
    * Finds a review by ID.
    */
   async findById(reviewId: number): Promise<Review | null> {
-    return this.repository.findOne({ where: { reviewId }, relations: ['user', 'game'] });
+    return this.repository.findOne({
+      where: { reviewId },
+      relations: ['user', 'game'],
+    });
   }
 
   /**
    * Finds a user's review for one game.
    */
-  async findByUserAndGame(userId: string, gameId: number): Promise<Review | null> {
+  async findByUserAndGame(
+    userId: string,
+    gameId: number,
+  ): Promise<Review | null> {
     return this.repository.findOne({ where: { userId, gameId } });
   }
 

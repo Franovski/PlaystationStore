@@ -5,30 +5,34 @@
  * @responsibilities Implements business rules for games (e.g., preventing negative prices, validating future release dates) and mediates between controllers and repositories.
  * @interaction Receives calls from GameController, performs validations, and invokes GameRepository for data persistence/retrieval. Raises exceptions if rules are violated.
  */
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { GameRepository } from './gameRepository';
 import { CreateGameDto, UpdateGameDto } from './gameDto';
 import { Game } from './gameEntity';
 
 /**
  * Service orchestrating functionality for games management.
- * 
+ *
  * @class GameService
- * @description Encapsulates business logic, data rules, and verification for retrieving or mutating Game entities. 
+ * @description Encapsulates business logic, data rules, and verification for retrieving or mutating Game entities.
  * Prevents invalid states, such as negative prices or empty titles.
  */
 @Injectable()
 export class GameService {
   /**
    * Initializes the GameService.
-   * 
+   *
    * @param {GameRepository} gameRepository - Repository providing data access specifically for Game entities.
    */
   constructor(private readonly gameRepository: GameRepository) {}
 
   /**
    * Retrieves all games stored in the system without pagination or filtering.
-   * 
+   *
    * @returns {Promise<Game[]>} A promise resolving to an array containing every available game entity.
    */
   async getAllGames(): Promise<Game[]> {
@@ -37,7 +41,7 @@ export class GameService {
 
   /**
    * Fetches a game based on its strict numeric ID.
-   * 
+   *
    * @param {number} id - The ID of the desired game.
    * @throws {NotFoundException} If no associated game can be found with the given ID.
    * @returns {Promise<Game>} A promise resolving to the matched Game object.
@@ -52,7 +56,7 @@ export class GameService {
 
   /**
    * Performs an exact or partial match search for games based on their title.
-   * 
+   *
    * @param {string} title - The title or partial title to query against.
    * @throws {NotFoundException} If the search yields no results.
    * @returns {Promise<Game[]>} A promise resolving to a collection of matched games.
@@ -67,7 +71,7 @@ export class GameService {
 
   /**
    * Validates input criteria and provisions a new game in the database.
-   * 
+   *
    * @param {CreateGameDto} createDto - The dto enveloping properties for the desired game.
    * @throws {BadRequestException} If structural preconditions (e.g., positive price, non-empty title, future date) are not met.
    * @returns {Promise<Game>} A promise resolving to the created Game resource.
@@ -87,7 +91,9 @@ export class GameService {
     if (createDto.releaseDate) {
       const releaseDate = new Date(createDto.releaseDate);
       if (releaseDate <= new Date()) {
-        throw new BadRequestException('Game release date must be in the future');
+        throw new BadRequestException(
+          'Game release date must be in the future',
+        );
       }
     }
 
@@ -96,7 +102,7 @@ export class GameService {
 
   /**
    * Modifies an existing game by applying partial updates, validating constraints beforehand.
-   * 
+   *
    * @param {number} id - The ID mapped to the game entity pending modifications.
    * @param {UpdateGameDto} updateDto - A partial subset of game properties to update.
    * @throws {NotFoundException} If the ID maps to a non-existent record.
@@ -109,7 +115,7 @@ export class GameService {
 
     // Re-run logical validation checks to prevent modifying into an invalid state
     if (updateDto.basePrice !== undefined && updateDto.basePrice < 0) {
-        throw new BadRequestException('Game basePrice cannot be negative');
+      throw new BadRequestException('Game basePrice cannot be negative');
     }
 
     if (updateDto.title !== undefined && updateDto.title.trim().length === 0) {
@@ -119,7 +125,9 @@ export class GameService {
     if (updateDto.releaseDate) {
       const releaseDate = new Date(updateDto.releaseDate);
       if (releaseDate <= new Date()) {
-        throw new BadRequestException('Game release date must be in the future');
+        throw new BadRequestException(
+          'Game release date must be in the future',
+        );
       }
     }
 
@@ -130,14 +138,16 @@ export class GameService {
 
     const game = await this.gameRepository.update(id, updateDto);
     if (!game) {
-      throw new NotFoundException(`Game with ID ${id} not found after update attempt`);
+      throw new NotFoundException(
+        `Game with ID ${id} not found after update attempt`,
+      );
     }
     return game;
   }
 
   /**
    * Erases a specified game from persistence.
-   * 
+   *
    * @param {number} id - The unique ID of the game targeted for deletion.
    * @throws {NotFoundException} If the entity doesn't exist.
    * @returns {Promise<void>} Resolves when the resource is completely removed.

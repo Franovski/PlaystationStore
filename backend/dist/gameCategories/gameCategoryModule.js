@@ -25,7 +25,11 @@ exports.GameCategoryModule = GameCategoryModule = __decorate([
             gameModule_1.GameModule,
             categoryModule_1.CategoryModule,
         ],
-        providers: [gameCategoryService_1.GameCategoryService, gameCategoryRepository_1.GameCategoryRepository, gameCategoryResolver_1.GameCategoryResolver],
+        providers: [
+            gameCategoryService_1.GameCategoryService,
+            gameCategoryRepository_1.GameCategoryRepository,
+            gameCategoryResolver_1.GameCategoryResolver,
+        ],
         exports: [gameCategoryService_1.GameCategoryService],
     })
 ], GameCategoryModule);

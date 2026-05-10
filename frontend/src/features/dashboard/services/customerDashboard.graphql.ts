@@ -31,6 +31,28 @@ export const CUSTOMER_DASHBOARD_QUERY = gql`
         itemType
         itemId
         userId
+        game {
+          gameId
+          title
+        }
+        dlc {
+          dlcId
+          name
+          gameId
+          game {
+            gameId
+            title
+          }
+        }
+        edition {
+          editionId
+          name
+          gameId
+          game {
+            gameId
+            title
+          }
+        }
       }
       orders {
         orderId

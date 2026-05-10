@@ -33,14 +33,14 @@ exports.AuthModule = AuthModule = __decorate([
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
                 useFactory: async (configService) => {
-                    const secret = configService.get("JWT_ACCESS_SECRET");
+                    const secret = configService.get('JWT_ACCESS_SECRET');
                     if (!secret) {
-                        throw new Error("JWT_ACCESS_SECRET is missing in .env");
+                        throw new Error('JWT_ACCESS_SECRET is missing in .env');
                     }
                     return {
                         secret,
                         signOptions: {
-                            expiresIn: "15m",
+                            expiresIn: '15m',
                         },
                     };
                 },

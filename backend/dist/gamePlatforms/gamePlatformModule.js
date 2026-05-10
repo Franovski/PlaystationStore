@@ -25,7 +25,11 @@ exports.GamePlatformModule = GamePlatformModule = __decorate([
             gameModule_1.GameModule,
             platformModule_1.PlatformModule,
         ],
-        providers: [gamePlatformService_1.GamePlatformService, gamePlatformRepository_1.GamePlatformRepository, gamePlatformResolver_1.GamePlatformResolver],
+        providers: [
+            gamePlatformService_1.GamePlatformService,
+            gamePlatformRepository_1.GamePlatformRepository,
+            gamePlatformResolver_1.GamePlatformResolver,
+        ],
         exports: [gamePlatformService_1.GamePlatformService],
     })
 ], GamePlatformModule);

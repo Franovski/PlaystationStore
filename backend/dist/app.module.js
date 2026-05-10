@@ -54,8 +54,7 @@ exports.AppModule = AppModule = __decorate([
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
                 useFactory: (configService) => {
-                    const synchronize = String(configService.get('DATABASE_SYNCHRONIZE', 'false')).toLowerCase() ===
-                        'true';
+                    const synchronize = String(configService.get('DATABASE_SYNCHRONIZE', 'false')).toLowerCase() === 'true';
                     return {
                         type: 'postgres',
                         host: configService.get('DB_HOST', 'localhost'),
@@ -65,6 +64,9 @@ exports.AppModule = AppModule = __decorate([
                         database: configService.get('DB_NAME', 'playstation_store'),
                         autoLoadEntities: true,
                         synchronize,
+                        extra: {
+                            max: 20,
+                        },
                     };
                 },
             }),

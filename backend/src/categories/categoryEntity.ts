@@ -10,7 +10,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 
 /**
  * Represents a Category entity within the application.
- * 
+ *
  * @class Category
  * @description Serves as the primary data model for categories, mapping directly to the 'categories' table in the database.
  * Used for grouping and classifying games in the store.

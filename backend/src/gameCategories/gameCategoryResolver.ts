@@ -18,7 +18,9 @@ export class GameCategoryResolver {
   }
 
   @Query(() => [Category])
-  async gameCategoriesByGameId(@Args('gameId', { type: () => Int }) gameId: number) {
+  async gameCategoriesByGameId(
+    @Args('gameId', { type: () => Int }) gameId: number,
+  ) {
     return this.gameCategoryService.getCategoriesByGame(gameId);
   }
 

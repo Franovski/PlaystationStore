@@ -26,7 +26,10 @@ export class UserLibraryRepository {
    * Finds all library records for one user.
    */
   async findByUserId(userId: string): Promise<UserLibrary[]> {
-    return this.repository.find({ where: { userId }, order: { purchaseDate: 'DESC' } });
+    return this.repository.find({
+      where: { userId },
+      order: { purchaseDate: 'DESC' },
+    });
   }
 
   /**
@@ -42,14 +45,22 @@ export class UserLibraryRepository {
   /**
    * Finds one ownership row.
    */
-  async findByUserAndItem(userId: string, itemType: string, itemId: number): Promise<UserLibrary | null> {
+  async findByUserAndItem(
+    userId: string,
+    itemType: string,
+    itemId: number,
+  ): Promise<UserLibrary | null> {
     return this.repository.findOne({ where: { userId, itemType, itemId } });
   }
 
   /**
    * Creates a new ownership row.
    */
-  async create(userId: string, itemType: string, itemId: number): Promise<UserLibrary> {
+  async create(
+    userId: string,
+    itemType: string,
+    itemId: number,
+  ): Promise<UserLibrary> {
     const entry = this.repository.create({ userId, itemType, itemId });
     return this.repository.save(entry);
   }
@@ -57,7 +68,11 @@ export class UserLibraryRepository {
   /**
    * Removes an ownership row.
    */
-  async remove(userId: string, itemType: string, itemId: number): Promise<void> {
+  async remove(
+    userId: string,
+    itemType: string,
+    itemId: number,
+  ): Promise<void> {
     await this.repository.delete({ userId, itemType, itemId });
   }
 }

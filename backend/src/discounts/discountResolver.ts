@@ -25,7 +25,9 @@ export class DiscountResolver {
   constructor(private readonly discountService: DiscountService) {}
 
   @Query(() => [Discount])
-  async discounts(@Args('gameId', { type: () => Int, nullable: true }) gameId?: number) {
+  async discounts(
+    @Args('gameId', { type: () => Int, nullable: true }) gameId?: number,
+  ) {
     if (gameId) {
       return this.discountService.getDiscountsByGameId(gameId);
     }
@@ -46,7 +48,9 @@ export class DiscountResolver {
   @UseGuards(GqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Mutation(() => Discount)
-  async createDiscount(@Args('createDiscountInput') createDiscountInput: CreateDiscountDto) {
+  async createDiscount(
+    @Args('createDiscountInput') createDiscountInput: CreateDiscountDto,
+  ) {
     return this.discountService.createDiscount(createDiscountInput);
   }
 

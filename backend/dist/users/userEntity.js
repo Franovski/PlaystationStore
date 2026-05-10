@@ -47,7 +47,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    (0, graphql_1.HideField)(),
+    (0, graphql_1.Field)(() => String, { nullable: true }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "password", void 0);
@@ -82,7 +82,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "isEmailVerified", void 0);
 __decorate([
-    (0, graphql_1.HideField)(),
+    (0, graphql_1.Field)(() => String, { nullable: true }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "totpSecret", void 0);
@@ -92,12 +92,12 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "isTotpEnabled", void 0);
 __decorate([
-    (0, graphql_1.HideField)(),
+    (0, graphql_1.Field)(() => String, { nullable: true }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "refreshToken", void 0);
 __decorate([
-    (0, graphql_1.HideField)(),
+    (0, graphql_1.Field)(() => String, { nullable: true }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "passwordResetToken", void 0);

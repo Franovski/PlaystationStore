@@ -5,9 +5,18 @@
  * @responsibilities Stores item type, item identifier, captured price, and parent order linkage.
  * @interaction Used by order creation, order history, and customer purchase views.
  */
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Order } from '../orders/orderEntity';
+import { Game } from '../games/gameEntity';
+import { DLC } from '../dlc/dlcEntity';
+import { Edition } from '../editions/editionEntity';
 
 /**
  * Represents one purchased item inside an order.
@@ -59,4 +68,22 @@ export class OrderItem {
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
   order?: Order;
+
+  /**
+   * Optional resolved game when this line item purchased a game.
+   */
+  @Field(() => Game, { nullable: true })
+  game?: Game | null;
+
+  /**
+   * Optional resolved DLC when this line item purchased DLC.
+   */
+  @Field(() => DLC, { nullable: true })
+  dlc?: DLC | null;
+
+  /**
+   * Optional resolved edition when this line item purchased an edition.
+   */
+  @Field(() => Edition, { nullable: true })
+  edition?: Edition | null;
 }

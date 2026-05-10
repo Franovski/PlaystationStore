@@ -21,13 +21,13 @@ import { GameModule } from '../games/gameModule';
  * @description Encapsulates instantiation and dependency injection configurations for GraphQL operations, business logic, repositories, and TypeORM entities linked specifically to downloadable content. Ensures isolation and modularity in the overall NestJS architecture.
  */
 @Module({
-    // Registers the 'DLC' entity into TypeORM's ecosystem for this module context.
-    imports: [TypeOrmModule.forFeature([DLC]), GameModule],
+  // Registers the 'DLC' entity into TypeORM's ecosystem for this module context.
+  imports: [TypeOrmModule.forFeature([DLC]), GameModule],
 
-    // Defines the injectable services and resolver constructed when the application initializes.
-    providers: [DLCService, DLCRepository, DLCResolver],
+  // Defines the injectable services and resolver constructed when the application initializes.
+  providers: [DLCService, DLCRepository, DLCResolver],
 
-    // Exposes specific classes so other modules can reuse DLC business and persistence logic.
-    exports: [DLCService, DLCRepository],
+  // Exposes specific classes so other modules can reuse DLC business and persistence logic.
+  exports: [DLCService, DLCRepository],
 })
-export class DLCModule { }
+export class DLCModule {}

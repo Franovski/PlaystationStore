@@ -5,7 +5,16 @@
  * @responsibilities Stores rating, optional comment, creation/update timestamps, and ownership references.
  * @interaction Used by game detail pages, review mutations, and dashboard validation flows.
  */
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Game } from '../games/gameEntity';
 import { User } from '../users/userEntity';

@@ -8,7 +8,9 @@ export class GameResolver {
   constructor(private readonly gameService: GameService) {}
 
   @Query(() => [Game])
-  async games(@Args('title', { type: () => String, nullable: true }) title?: string) {
+  async games(
+    @Args('title', { type: () => String, nullable: true }) title?: string,
+  ) {
     if (title) {
       return this.gameService.getGamesByTitle(title);
     }

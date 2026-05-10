@@ -5,12 +5,19 @@
  * @responsibilities Ensures HTTP request payloads adhere to the required schema before they reach the controller layer. Allows for strict typing throughout the service layer.
  * @interaction GameController heavily relies on these DTOs to bind and validate `@Body()` parameters.
  */
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDateString, Min } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsDateString,
+  Min,
+} from 'class-validator';
 import { InputType, Field, Float } from '@nestjs/graphql';
 
 /**
  * Data Transfer Object utilized for the creation of a new Game entity.
- * 
+ *
  * @class CreateGameDto
  * @description Specifies the exact properties, data types, and validation rules required to establish a valid Game entry in the system.
  */
@@ -82,7 +89,7 @@ export class CreateGameDto {
 
 /**
  * Data Transfer Object facilitating partial updates to an existing Game.
- * 
+ *
  * @class UpdateGameDto
  * @description Mirrors `CreateGameDto`, but explicitly marks every property as optional, allowing clients to send only the fields that require mutation.
  */

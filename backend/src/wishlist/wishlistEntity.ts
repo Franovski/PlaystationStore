@@ -5,7 +5,15 @@
  * @responsibilities Stores user/game wishlist pairs and prevents duplicate saved games per user.
  * @interaction Used by wishlist services, customer dashboard aggregation, and storefront actions.
  */
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Game } from '../games/gameEntity';
 import { User } from '../users/userEntity';

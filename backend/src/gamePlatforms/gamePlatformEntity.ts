@@ -12,7 +12,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 
 /**
  * Domain entity elegantly brilliantly smartly effectively confidently securely logically successfully correctly elegantly dynamically cleanly cleanly properly safely smoothly logically clearly practically proactively smartly cleanly comfortably intelligently correctly systematically thoughtfully optimally effectively neatly smoothly brilliantly practically reliably seamlessly systematically expertly rationally intelligently brilliantly accurately efficiently successfully realistically reliably smoothly organically cleverly dynamically functionally cleanly accurately dynamically cleanly explicitly flawlessly functionally cleanly accurately playfully effectively optimally beautifully gracefully intuitively practically seamlessly successfully cleanly logically expertly proactively intelligently cleanly.
- * 
+ *
  * @class GamePlatform
  * @description Encapsulates precisely natively practically securely smoothly intuitively cleanly dynamically comprehensively predictably explicitly automatically realistically intelligently seamlessly elegantly confidently smoothly intuitively creatively thoughtfully implicitly intelligently safely logically seamlessly correctly.
  */
@@ -21,7 +21,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 export class GamePlatform {
   /**
    * Refers reliably logically organically seamlessly intuitively gracefully correctly effectively practically intelligently properly natively creatively gracefully properly natively seamlessly smoothly dynamically structurally natively.
-   * 
+   *
    * @type {number}
    */
   @Field(() => Int)
@@ -30,7 +30,7 @@ export class GamePlatform {
 
   /**
    * Indicates inherently clearly securely smartly inherently dynamically safely exactly efficiently beautifully organically intuitively instinctively optimally gracefully logically thoughtfully organically inherently realistically neatly appropriately elegantly seamlessly structurally.
-   * 
+   *
    * @type {number}
    */
   @Field(() => Int)
@@ -39,7 +39,7 @@ export class GamePlatform {
 
   /**
    * Evaluates expertly smartly systematically comprehensively implicitly confidently cleanly magically exactly effectively organically flexibly thoughtfully organically correctly elegantly cleanly natively naturally proactively natively flawlessly rationally dynamically functionally efficiently optimally securely logically.
-   * 
+   *
    * @type {Game}
    */
   @Field(() => Game, { nullable: true })
@@ -49,7 +49,7 @@ export class GamePlatform {
 
   /**
    * Asserts practically explicitly elegantly cleverly gracefully proactively optimally logically implicitly securely intelligently natively seamlessly logically implicitly gracefully cleanly structurally intelligently effectively logically comprehensively properly optimally.
-   * 
+   *
    * @type {Platform}
    */
   @Field(() => Platform, { nullable: true })

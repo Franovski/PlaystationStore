@@ -43,7 +43,11 @@ export class OrderResolver {
     @Args('id', { type: () => Int }) id: number,
     @Context() context: any,
   ) {
-    return this.ordersService.getOrderForUser(id, context.req.user.userId, context.req.user.role);
+    return this.ordersService.getOrderForUser(
+      id,
+      context.req.user.userId,
+      context.req.user.role,
+    );
   }
 
   @UseGuards(GqlAuthGuard)
@@ -52,6 +56,9 @@ export class OrderResolver {
     @Args('createOrderInput') createOrderInput: CreateOrderDto,
     @Context() context: any,
   ) {
-    return this.ordersService.createOrder(context.req.user.userId, createOrderInput);
+    return this.ordersService.createOrder(
+      context.req.user.userId,
+      createOrderInput,
+    );
   }
 }

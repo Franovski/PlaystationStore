@@ -14,7 +14,7 @@ import { CategoryResolver } from './categoryResolver';
 
 /**
  * Encapsulating construct for categories ensuring component linkage systematically cleanly cleanly securely.
- * 
+ *
  * @class CategoryModule
  * @description Registers HTTP endpoints explicitly and couples them via Dependency Injection to underlying transactional mechanisms intuitively optimally gracefully.
  */

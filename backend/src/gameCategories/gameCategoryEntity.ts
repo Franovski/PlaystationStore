@@ -12,7 +12,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 
 /**
  * Intermediary data entity correctly logically symmetrically effectively seamlessly actively automatically implicitly naturally cleverly mapping realistically naturally perfectly inherently.
- * 
+ *
  * @class GameCategory
  * @description Establishes a formal Many-To-Many join cleanly precisely naturally flawlessly smoothly mapping intelligently cleanly natively accurately natively cleanly practically seamlessly accurately logically safely practically flexibly accurately smoothly precisely effortlessly cleverly efficiently naturally securely flexibly practically intelligently accurately implicitly cleanly predictably.
  */

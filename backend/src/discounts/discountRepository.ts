@@ -34,7 +34,10 @@ export class DiscountRepository {
    * Finds a discount by ID.
    */
   async findById(discountId: number): Promise<Discount | null> {
-    return this.repository.findOne({ where: { discountId }, relations: ['game'] });
+    return this.repository.findOne({
+      where: { discountId },
+      relations: ['game'],
+    });
   }
 
   /**
@@ -55,7 +58,10 @@ export class DiscountRepository {
   /**
    * Updates a discount and returns the refreshed entity.
    */
-  async update(discountId: number, dto: UpdateDiscountDto): Promise<Discount | null> {
+  async update(
+    discountId: number,
+    dto: UpdateDiscountDto,
+  ): Promise<Discount | null> {
     await this.repository.update(discountId, dto);
     return this.findById(discountId);
   }

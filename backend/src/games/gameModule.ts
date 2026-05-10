@@ -14,17 +14,17 @@ import { GameResolver } from './gameResolver';
 
 /**
  * Functional module encapsulating everything tied directly to Game management.
- * 
+ *
  * @class GameModule
  * @description Encapsulates instantiation and dependency injection configurations for endpoints, business logic, and TypeORM entities linked specifically to games. Ensures isolation and modularity in the overall NestJS architecture.
  */
 @Module({
   // Registers the 'Game' entity securely into TypeORM's ecosystem for this context.
   imports: [TypeOrmModule.forFeature([Game])],
-  
+
   // Defines the injectable services constructed when the application initializes.
   providers: [GameService, GameRepository, GameResolver],
-  
+
   // Exposes specific classes allowing sibling modules to share these providers.
   exports: [GameService, GameRepository],
 })

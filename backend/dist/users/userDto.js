@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateUserDto = exports.CreateUserDto = void 0;
+exports.UpdateUserSettingsDto = exports.UpdateUserDto = exports.CreateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 const graphql_1 = require("@nestjs/graphql");
 const userEntity_1 = require("./userEntity");
@@ -162,4 +162,69 @@ __decorate([
 exports.UpdateUserDto = UpdateUserDto = __decorate([
     (0, graphql_1.InputType)()
 ], UpdateUserDto);
+let UpdateUserSettingsDto = class UpdateUserSettingsDto {
+};
+exports.UpdateUserSettingsDto = UpdateUserSettingsDto;
+__decorate([
+    (0, graphql_1.Field)(() => userEntity_1.UserRole, { nullable: true }),
+    (0, class_validator_1.IsEnum)(userEntity_1.UserRole),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserSettingsDto.prototype, "role", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateUserSettingsDto.prototype, "isEmailVerified", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateUserSettingsDto.prototype, "isTotpEnabled", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserSettingsDto.prototype, "password", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserSettingsDto.prototype, "totpSecret", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserSettingsDto.prototype, "refreshToken", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserSettingsDto.prototype, "passwordResetToken", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserSettingsDto.prototype, "passwordResetExpires", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => userEntity_1.PasswordResetMethod, { nullable: true }),
+    (0, class_validator_1.IsEnum)(userEntity_1.PasswordResetMethod),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserSettingsDto.prototype, "passwordResetMethod", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateUserSettingsDto.prototype, "passwordResetAttempts", void 0);
+exports.UpdateUserSettingsDto = UpdateUserSettingsDto = __decorate([
+    (0, graphql_1.InputType)()
+], UpdateUserSettingsDto);
 //# sourceMappingURL=userDto.js.map

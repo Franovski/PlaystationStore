@@ -5,7 +5,12 @@
  * @responsibilities Prevents duplicate ownership, validates wallet balance, creates orders, deducts wallet funds, and grants library ownership.
  * @interaction Used by OrdersResolver and customer dashboard aggregation.
  */
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Order } from './orderEntity';
 import { CreateOrderDto } from './orderDto';
 import { OrderRepository } from './orderRepository';
@@ -60,7 +65,11 @@ export class OrdersService {
   /**
    * Retrieves one order after checking ownership or admin role.
    */
-  async getOrderForUser(orderId: number, userId: string, role?: string): Promise<Order> {
+  async getOrderForUser(
+    orderId: number,
+    userId: string,
+    role?: string,
+  ): Promise<Order> {
     this.validateId(orderId, 'Order ID');
 
     const order = await this.orderRepository.findById(orderId);
@@ -93,16 +102,24 @@ export class OrdersService {
 
       const itemKey = `${normalizedType}:${item.itemId}`;
       if (seenItems.has(itemKey)) {
-        throw new BadRequestException('Duplicate items are not allowed in the same order');
+        throw new BadRequestException(
+          'Duplicate items are not allowed in the same order',
+        );
       }
       seenItems.add(itemKey);
 
-      const alreadyOwned = await this.libraryService.hasOwnership(userId, normalizedType, item.itemId);
+      const alreadyOwned = await this.libraryService.hasOwnership(
+        userId,
+        normalizedType,
+        item.itemId,
+      );
       if (alreadyOwned) {
         throw new BadRequestException(`You already own this ${normalizedType}`);
       }
 
-      resolvedItems.push(await this.resolvePurchasableItem(normalizedType, item.itemId));
+      resolvedItems.push(
+        await this.resolvePurchasableItem(normalizedType, item.itemId),
+      );
     }
 
     const totalPrice = this.roundCurrency(
@@ -126,17 +143,27 @@ export class OrdersService {
     }
 
     for (const item of resolvedItems) {
-      await this.libraryService.grantOwnership(userId, item.itemType, item.itemId);
+      await this.libraryService.grantOwnership(
+        userId,
+        item.itemType,
+        item.itemId,
+      );
     }
 
     return this.getOrderForUser(order.orderId, userId);
   }
 
-  private async resolvePurchasableItem(itemType: string, itemId: number): Promise<ResolvedOrderItem> {
+  private async resolvePurchasableItem(
+    itemType: string,
+    itemId: number,
+  ): Promise<ResolvedOrderItem> {
     if (itemType === 'game') {
       const game = await this.gameService.getGameById(itemId);
       const basePrice = Number(game.basePrice);
-      const price = await this.discountService.calculateDiscountedGamePrice(game.gameId, basePrice);
+      const price = await this.discountService.calculateDiscountedGamePrice(
+        game.gameId,
+        basePrice,
+      );
       return { itemType, itemId, price };
     }
 
@@ -147,25 +174,37 @@ export class OrdersService {
 
     if (itemType === 'edition') {
       const edition = await this.editionService.getEditionById(itemId);
-      return { itemType, itemId, price: this.roundCurrency(Number(edition.price)) };
+      return {
+        itemType,
+        itemId,
+        price: this.roundCurrency(Number(edition.price)),
+      };
     }
 
     throw new BadRequestException('Unsupported item type');
   }
 
   private normalizePaymentMethod(paymentMethod: string): string {
-    const normalized = String(paymentMethod || '').trim().toLowerCase();
+    const normalized = String(paymentMethod || '')
+      .trim()
+      .toLowerCase();
     if (!this.supportedPaymentMethods.includes(normalized)) {
-      throw new BadRequestException('paymentMethod must be one of: wallet, card');
+      throw new BadRequestException(
+        'paymentMethod must be one of: wallet, card',
+      );
     }
 
     return normalized;
   }
 
   private normalizeItemType(itemType: string): string {
-    const normalized = String(itemType || '').trim().toLowerCase();
+    const normalized = String(itemType || '')
+      .trim()
+      .toLowerCase();
     if (!this.supportedItemTypes.includes(normalized)) {
-      throw new BadRequestException('itemType must be one of: game, dlc, edition');
+      throw new BadRequestException(
+        'itemType must be one of: game, dlc, edition',
+      );
     }
 
     return normalized;

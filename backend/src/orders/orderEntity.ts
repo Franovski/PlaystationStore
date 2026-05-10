@@ -5,7 +5,15 @@
  * @responsibilities Stores payment method, order status, calculated total, and order date.
  * @interaction Used by purchase creation, wallet payments, library fulfillment, and customer order history.
  */
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { User } from '../users/userEntity';
 import { OrderItem } from '../orderItems/orderItemEntity';

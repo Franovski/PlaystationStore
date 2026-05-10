@@ -110,6 +110,31 @@ const AdminStoreModePanel: React.FC<AdminStoreModePanelProps> = ({ onBackToAdmin
     return `${itemType} #${itemId}`;
   };
 
+  const libraryItemName = (item: UserLibrary) => {
+    const itemType = String(item.itemType || '').toLowerCase();
+    const numericId = Number(item.itemId);
+
+    if (itemType === 'game') {
+      return item.game?.title
+        || catalog.find((entry) => Number(entry.game?.gameId) === numericId)?.game?.title
+        || 'Unknown Game';
+    }
+
+    if (itemType === 'dlc') {
+      return item.dlc?.name
+        || catalog.flatMap((entry) => entry.dlcs ?? []).find((dlc) => Number(dlc.dlcId) === numericId)?.name
+        || 'Unknown DLC';
+    }
+
+    if (itemType === 'edition') {
+      return item.edition?.name
+        || catalog.flatMap((entry) => entry.editions ?? []).find((edition) => Number(edition.editionId) === numericId)?.name
+        || 'Unknown Edition';
+    }
+
+    return 'Unknown Item';
+  };
+
   const isOwned = (itemType: string, itemId: number | string) =>
     Boolean(
       (dashboard?.library ?? []).some(
@@ -302,7 +327,7 @@ const AdminStoreModePanel: React.FC<AdminStoreModePanelProps> = ({ onBackToAdmin
   const renderLibraryRow = (item: UserLibrary) => (
     <div key={item.libraryId} className="flex items-center justify-between gap-4 border-b border-gray-700 py-4 last:border-b-0">
       <div>
-        <h3 className="font-bold text-white">{itemName(item.itemType, item.itemId)}</h3>
+        <h3 className="font-bold text-white">{libraryItemName(item)}</h3>
         <p className="text-sm text-gray-400">
           {item.itemType.toUpperCase()} purchased {formatDate(item.purchaseDate)}
         </p>

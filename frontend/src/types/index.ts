@@ -13,6 +13,13 @@ export interface User {
   updatedAt?: string;
   isEmailVerified?: boolean;
   isTotpEnabled?: boolean;
+  password?: string | null;
+  totpSecret?: string | null;
+  refreshToken?: string | null;
+  passwordResetToken?: string | null;
+  passwordResetExpires?: string | null;
+  passwordResetMethod?: string | null;
+  passwordResetAttempts?: number;
 }
 
 export interface Game {
@@ -94,6 +101,9 @@ export interface UserLibrary {
   itemId: number | string;
   userId: string;
   user?: User | null;
+  game?: Game | null;
+  dlc?: DLC | null;
+  edition?: Edition | null;
 }
 
 export interface Review {
@@ -115,6 +125,9 @@ export interface OrderItem {
   price: number;
   orderId: number | string;
   order?: Order | null;
+  game?: Game | null;
+  dlc?: DLC | null;
+  edition?: Edition | null;
 }
 
 export interface Order {

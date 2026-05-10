@@ -5,7 +5,12 @@
  * @responsibilities Validates order ownership and delegates item lookup to the repository.
  * @interaction Used by OrderItemResolver.
  */
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderItem } from './orderItemEntity';
@@ -29,7 +34,11 @@ export class OrderItemService {
   /**
    * Returns items for an order after ownership checks.
    */
-  async getItemsForOrder(orderId: number, userId: string, role?: string): Promise<OrderItem[]> {
+  async getItemsForOrder(
+    orderId: number,
+    userId: string,
+    role?: string,
+  ): Promise<OrderItem[]> {
     this.validateId(orderId, 'Order ID');
 
     const order = await this.orderRepository.findOne({ where: { orderId } });
@@ -38,7 +47,9 @@ export class OrderItemService {
     }
 
     if (order.userId !== userId && role !== UserRole.ADMIN) {
-      throw new ForbiddenException('You can only view items from your own orders');
+      throw new ForbiddenException(
+        'You can only view items from your own orders',
+      );
     }
 
     return this.orderItemRepository.findByOrderId(orderId);

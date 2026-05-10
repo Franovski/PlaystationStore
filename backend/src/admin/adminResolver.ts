@@ -31,9 +31,8 @@ export class AdminResolver {
     return {
       totalUsers: users.length,
       totalAdmins: users.filter((u) => u.role === UserRole.ADMIN).length,
-      totalCustomers: users.filter(
-        (u) => u.role === UserRole.PLAYSTATION_USER,
-      ).length,
+      totalCustomers: users.filter((u) => u.role === UserRole.PLAYSTATION_USER)
+        .length,
       totalGames: games.length,
       totalCategories: categories.length,
       totalPlatforms: platforms.length,

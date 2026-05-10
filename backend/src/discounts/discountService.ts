@@ -5,7 +5,11 @@
  * @responsibilities Provides CRUD operations and calculates effective game prices for purchase flows.
  * @interaction Used by DiscountResolver, StorefrontService, and OrdersService.
  */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Discount } from './discountEntity';
 import { CreateDiscountDto, UpdateDiscountDto } from './discountDto';
 import { DiscountRepository } from './discountRepository';
@@ -56,7 +60,10 @@ export class DiscountService {
   /**
    * Retrieves discounts valid on the supplied date.
    */
-  async getActiveDiscountsForGame(gameId: number, date: Date = new Date()): Promise<Discount[]> {
+  async getActiveDiscountsForGame(
+    gameId: number,
+    date: Date = new Date(),
+  ): Promise<Discount[]> {
     const discounts = await this.getDiscountsByGameId(gameId);
     const normalizedDate = this.normalizeDateOnly(date);
 
@@ -84,7 +91,10 @@ export class DiscountService {
   /**
    * Applies the best active game discount to a base price.
    */
-  async calculateDiscountedGamePrice(gameId: number, basePrice: number): Promise<number> {
+  async calculateDiscountedGamePrice(
+    gameId: number,
+    basePrice: number,
+  ): Promise<number> {
     const discount = await this.getBestActiveDiscountForGame(gameId);
     if (!discount) {
       return this.roundCurrency(basePrice);
@@ -99,9 +109,9 @@ export class DiscountService {
    */
   async createDiscount(dto: CreateDiscountDto): Promise<Discount> {
     this.validatePercentage(dto.percentage);
-    this.validateDateRange(dto.startDate, dto.endDate);
     this.validateId(dto.gameId, 'Game ID');
-    await this.gameService.getGameById(dto.gameId);
+    const game = await this.gameService.getGameById(dto.gameId);
+    this.validateDateRange(dto.startDate, dto.endDate, game.releaseDate);
 
     return this.repository.create(dto);
   }
@@ -122,16 +132,19 @@ export class DiscountService {
     }
     if (dto.gameId !== undefined) {
       this.validateId(dto.gameId, 'Game ID');
-      await this.gameService.getGameById(dto.gameId);
     }
 
+    const finalGameId = dto.gameId ?? existing.gameId;
+    const game = await this.gameService.getGameById(finalGameId);
     const finalStartDate = dto.startDate ?? existing.startDate;
     const finalEndDate = dto.endDate ?? existing.endDate;
-    this.validateDateRange(finalStartDate, finalEndDate);
+    this.validateDateRange(finalStartDate, finalEndDate, game.releaseDate);
 
     const discount = await this.repository.update(id, dto);
     if (!discount) {
-      throw new NotFoundException(`Discount with ID ${id} not found after update attempt`);
+      throw new NotFoundException(
+        `Discount with ID ${id} not found after update attempt`,
+      );
     }
 
     return discount;
@@ -152,37 +165,87 @@ export class DiscountService {
   }
 
   private validatePercentage(percentage: number): void {
-    if (typeof percentage !== 'number' || Number.isNaN(percentage) || !Number.isFinite(percentage)) {
-      throw new BadRequestException('Discount percentage must be a valid number');
+    if (
+      typeof percentage !== 'number' ||
+      Number.isNaN(percentage) ||
+      !Number.isFinite(percentage)
+    ) {
+      throw new BadRequestException(
+        'Discount percentage must be a valid number',
+      );
     }
 
     if (percentage < 0 || percentage > 100) {
-      throw new BadRequestException('Discount percentage must be between 0 and 100');
+      throw new BadRequestException(
+        'Discount percentage must be between 0 and 100',
+      );
     }
   }
 
-  private validateDateRange(startDateValue: string, endDateValue: string): void {
+  private validateDateRange(
+    startDateValue: string,
+    endDateValue: string,
+    releaseDateValue?: string | null,
+  ): void {
     const startDate = this.parseDate(startDateValue, 'Discount start date');
     const endDate = this.parseDate(endDateValue, 'Discount end date');
+    const today = this.todayDateOnly();
 
-    if (startDate > endDate) {
-      throw new BadRequestException('Discount start date cannot be after end date');
+    if (startDate < today) {
+      throw new BadRequestException('Start date cannot be in the past.');
+    }
+
+    if (endDate < today) {
+      throw new BadRequestException('End date cannot be in the past.');
+    }
+
+    if (releaseDateValue) {
+      const releaseDate = this.parseDate(releaseDateValue, 'Release date');
+      if (startDate < releaseDate) {
+        throw new BadRequestException(
+          'Start date must be on or after the release date.',
+        );
+      }
+    }
+
+    if (endDate <= startDate) {
+      throw new BadRequestException('End date must be after the start date.');
     }
   }
 
   private parseDate(value: string, fieldName: string): Date {
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value));
+    if (!match) {
       throw new BadRequestException(`${fieldName} must be a valid date`);
     }
 
-    return this.normalizeDateOnly(parsed);
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const parsed = new Date(Date.UTC(year, month - 1, day));
+
+    if (
+      parsed.getUTCFullYear() !== year ||
+      parsed.getUTCMonth() !== month - 1 ||
+      parsed.getUTCDate() !== day
+    ) {
+      throw new BadRequestException(`${fieldName} must be a valid date`);
+    }
+
+    return parsed;
   }
 
   private normalizeDateOnly(value: Date): Date {
-    const normalized = new Date(value);
-    normalized.setHours(0, 0, 0, 0);
-    return normalized;
+    return new Date(
+      Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()),
+    );
+  }
+
+  private todayDateOnly(): Date {
+    const today = new Date();
+    return new Date(
+      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()),
+    );
   }
 
   private roundCurrency(value: number): number {

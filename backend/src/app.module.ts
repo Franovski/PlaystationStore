@@ -42,8 +42,9 @@ import { CustomerDashboardModule } from './customerDashboard/customerDashboardMo
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const synchronize =
-          String(configService.get('DATABASE_SYNCHRONIZE', 'false')).toLowerCase() ===
-          'true';
+          String(
+            configService.get('DATABASE_SYNCHRONIZE', 'false'),
+          ).toLowerCase() === 'true';
 
         return {
           type: 'postgres',
@@ -54,6 +55,9 @@ import { CustomerDashboardModule } from './customerDashboard/customerDashboardMo
           database: configService.get<string>('DB_NAME', 'playstation_store'),
           autoLoadEntities: true,
           synchronize,
+          extra: {
+            max: 20, // Increases connection pool size to alleviate overlapping queries during rapid sync
+          },
         };
       },
     }),
@@ -81,4 +85,4 @@ import { CustomerDashboardModule } from './customerDashboard/customerDashboardMo
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

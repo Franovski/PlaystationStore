@@ -34,7 +34,10 @@ export class EditionRepository {
    * Finds an edition by its identifier.
    */
   async findById(editionId: number): Promise<Edition | null> {
-    return this.repository.findOne({ where: { editionId }, relations: ['game'] });
+    return this.repository.findOne({
+      where: { editionId },
+      relations: ['game'],
+    });
   }
 
   /**
@@ -62,7 +65,10 @@ export class EditionRepository {
   /**
    * Applies a partial update and returns the refreshed edition.
    */
-  async update(editionId: number, dto: UpdateEditionDto): Promise<Edition | null> {
+  async update(
+    editionId: number,
+    dto: UpdateEditionDto,
+  ): Promise<Edition | null> {
     await this.repository.update(editionId, dto);
     return this.findById(editionId);
   }

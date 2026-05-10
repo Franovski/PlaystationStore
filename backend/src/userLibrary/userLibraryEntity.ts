@@ -5,9 +5,20 @@
  * @responsibilities Stores ownership dates and prevents duplicate ownership of the same item by the same user.
  * @interaction Used by purchase fulfillment, review eligibility, and customer dashboard library views.
  */
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { User } from '../users/userEntity';
+import { Game } from '../games/gameEntity';
+import { DLC } from '../dlc/dlcEntity';
+import { Edition } from '../editions/editionEntity';
 
 /**
  * Represents one item owned by a user.
@@ -60,4 +71,22 @@ export class UserLibrary {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user?: User;
+
+  /**
+   * Loaded game display data when itemType is game.
+   */
+  @Field(() => Game, { nullable: true })
+  game?: Game | null;
+
+  /**
+   * Loaded DLC display data when itemType is dlc.
+   */
+  @Field(() => DLC, { nullable: true })
+  dlc?: DLC | null;
+
+  /**
+   * Loaded edition display data when itemType is edition.
+   */
+  @Field(() => Edition, { nullable: true })
+  edition?: Edition | null;
 }

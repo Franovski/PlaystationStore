@@ -46,8 +46,14 @@ export class WishlistRepository {
   /**
    * Finds one user/game wishlist entry.
    */
-  async findByUserAndGame(userId: string, gameId: number): Promise<Wishlist | null> {
-    return this.repository.findOne({ where: { userId, gameId }, relations: ['game'] });
+  async findByUserAndGame(
+    userId: string,
+    gameId: number,
+  ): Promise<Wishlist | null> {
+    return this.repository.findOne({
+      where: { userId, gameId },
+      relations: ['game'],
+    });
   }
 
   /**

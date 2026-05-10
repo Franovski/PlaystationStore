@@ -26,6 +26,8 @@ import {
   DLC,
   Discount,
   Edition,
+  OrderItem,
+  UserLibrary,
 } from '../../../types';
 
 type AdminTab =
@@ -348,10 +350,168 @@ const emptyEditionForm: EditionFormState = {
 
 const formatPrice = (value: number | string | undefined | null) => `$${Number(value ?? 0).toFixed(2)}`;
 const formatDate = (value: string | undefined | null) => (value ? String(value).slice(0, 10) : 'N/A');
+const dateInputPattern = /^(\d{4})-(\d{2})-(\d{2})$/;
 const getErrorMessage = (err: unknown) =>
   err && typeof err === 'object' && 'message' in err
     ? String((err as { message?: string }).message)
     : 'Request failed';
+
+const formatDateInput = (date: Date) => {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const parseDateInput = (value?: string | null): Date | null => {
+  const match = dateInputPattern.exec(String(value || '').slice(0, 10));
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return parsed;
+};
+
+const todayInputDate = () => {
+  const today = new Date();
+  return formatDateInput(new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())));
+};
+
+const addDaysToDateString = (value: string, days: number) => {
+  const parsed = parseDateInput(value);
+  if (!parsed) return '';
+
+  parsed.setUTCDate(parsed.getUTCDate() + days);
+  return formatDateInput(parsed);
+};
+
+const maxDateString = (...values: Array<string | undefined | null>) => {
+  const validDates = values
+    .map((value) => parseDateInput(value))
+    .filter((value): value is Date => Boolean(value));
+
+  if (validDates.length === 0) return '';
+
+  return formatDateInput(new Date(Math.max(...validDates.map((date) => date.getTime()))));
+};
+
+const collectDiscountValidationMessages = (
+  formData: DiscountFormState,
+  selectedGame?: Game | null,
+) => {
+  const messages: string[] = [];
+  const startDate = parseDateInput(formData.startDate);
+  const endDate = parseDateInput(formData.endDate);
+  const today = parseDateInput(todayInputDate());
+  const releaseDate = parseDateInput(selectedGame?.releaseDate);
+
+  if ((formData.startDate && !startDate) || (formData.endDate && !endDate)) {
+    return ['Discount dates must use YYYY-MM-DD.'];
+  }
+
+  if (startDate && today && startDate < today) {
+    messages.push('Start date cannot be in the past.');
+  }
+
+  if (endDate && today && endDate < today) {
+    messages.push('End date cannot be in the past.');
+  }
+
+  if (startDate && releaseDate && startDate < releaseDate) {
+    messages.push('Start date must be on or after the release date.');
+  }
+
+  if (startDate && endDate && endDate <= startDate) {
+    messages.push('End date must be after the start date.');
+  }
+
+  return messages;
+};
+
+const getOrderItemProductLabels = (item: OrderItem) => {
+  const itemType = String(item.itemType || '').toLowerCase();
+  const gameTitle = item.game?.title || item.edition?.game?.title || item.dlc?.game?.title;
+
+  if (itemType === 'game') {
+    return {
+      lines: [`Game: ${gameTitle || 'Unknown Game'}`],
+      meta: `Game ID: ${item.itemId}`,
+    };
+  }
+
+  if (itemType === 'edition') {
+    return {
+      lines: [
+        `Game: ${gameTitle || 'Unknown Game'}`,
+        `Edition: ${item.edition?.name || 'Unknown Edition'}`,
+      ],
+      meta: `Edition ID: ${item.itemId}`,
+    };
+  }
+
+  if (itemType === 'dlc') {
+    return {
+      lines: [
+        `Game: ${gameTitle || 'Unknown Game'}`,
+        `DLC: ${item.dlc?.name || 'Unknown DLC'}`,
+      ],
+      meta: `DLC ID: ${item.itemId}`,
+    };
+  }
+
+  return {
+    lines: [`${item.itemType || 'Item'}: Unknown Item`],
+    meta: `Item ID: ${item.itemId}`,
+  };
+};
+
+const getLibraryItemProductLabels = (item: UserLibrary) => {
+  const itemType = String(item.itemType || '').toLowerCase();
+  const gameTitle = item.game?.title || item.edition?.game?.title || item.dlc?.game?.title;
+
+  if (itemType === 'game') {
+    return {
+      lines: [`Game: ${gameTitle || 'Unknown Game'}`],
+      meta: `Game ID: ${item.itemId}`,
+    };
+  }
+
+  if (itemType === 'edition') {
+    return {
+      lines: [
+        `Game: ${gameTitle || 'Unknown Game'}`,
+        `Edition: ${item.edition?.name || 'Unknown Edition'}`,
+      ],
+      meta: `Edition ID: ${item.itemId}`,
+    };
+  }
+
+  if (itemType === 'dlc') {
+    return {
+      lines: [
+        `Game: ${gameTitle || 'Unknown Game'}`,
+        `DLC: ${item.dlc?.name || 'Unknown DLC'}`,
+      ],
+      meta: `DLC ID: ${item.itemId}`,
+    };
+  }
+
+  return {
+    lines: [`${item.itemType || 'Item'}: Unknown Item`],
+    meta: `Item ID: ${item.itemId}`,
+  };
+};
 
 const AdminDashboardPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -411,6 +571,26 @@ const AdminDashboardPage: React.FC = () => {
   const [dlcFormData, setDLCFormData] = useState(emptyDLCForm);
   const [discountFormData, setDiscountFormData] = useState<DiscountFormState>(emptyDiscountForm);
   const [editionFormData, setEditionFormData] = useState<EditionFormState>(emptyEditionForm);
+
+  const selectedDiscountGame = useMemo(
+    () => gamesList.find((game) => String(game.gameId) === String(discountFormData.gameId)) ?? null,
+    [gamesList, discountFormData.gameId],
+  );
+  const discountStartMin = useMemo(
+    () => maxDateString(todayInputDate(), selectedDiscountGame?.releaseDate),
+    [selectedDiscountGame?.releaseDate],
+  );
+  const discountEndMin = useMemo(
+    () => maxDateString(
+      todayInputDate(),
+      discountFormData.startDate ? addDaysToDateString(discountFormData.startDate, 1) : null,
+    ),
+    [discountFormData.startDate],
+  );
+  const discountValidationMessages = useMemo(
+    () => collectDiscountValidationMessages(discountFormData, selectedDiscountGame),
+    [discountFormData, selectedDiscountGame],
+  );
 
   useEffect(() => {
     if (user && user.role !== 'admin') {
@@ -826,6 +1006,12 @@ const AdminDashboardPage: React.FC = () => {
         return;
       }
 
+      const validationMessages = collectDiscountValidationMessages(discountFormData, selectedDiscountGame);
+      if (validationMessages.length > 0) {
+        dispatch(setAdminError(validationMessages[0]));
+        return;
+      }
+
       if (editingDiscount?.discountId) {
         await adminDiscountsApi.update(editingDiscount.discountId, payload);
         dispatch(setAdminSuccess('Discount updated.'));
@@ -960,9 +1146,14 @@ const AdminDashboardPage: React.FC = () => {
 
     return ordersList.filter((order) => {
       const owner = order.user?.username?.toLowerCase() || order.user?.email?.toLowerCase() || '';
+      const itemText = (order.items ?? [])
+        .flatMap((item) => getOrderItemProductLabels(item).lines)
+        .join(' ')
+        .toLowerCase();
       return (
         String(order.orderId).includes(normalized) ||
         owner.includes(normalized) ||
+        itemText.includes(normalized) ||
         (order.status || '').toLowerCase().includes(normalized) ||
         (order.paymentMethod || '').toLowerCase().includes(normalized)
       );
@@ -974,10 +1165,12 @@ const AdminDashboardPage: React.FC = () => {
 
     return orderItemsList.filter((item) => {
       const owner = item.order?.user?.username?.toLowerCase() || item.order?.user?.email?.toLowerCase() || '';
+      const itemText = getOrderItemProductLabels(item).lines.join(' ').toLowerCase();
       return (
         String(item.orderItemId).includes(normalized) ||
         String(item.orderId).includes(normalized) ||
         (item.itemType || '').toLowerCase().includes(normalized) ||
+        itemText.includes(normalized) ||
         owner.includes(normalized)
       );
     });
@@ -997,10 +1190,12 @@ const AdminDashboardPage: React.FC = () => {
 
     return librariesList.filter((item) => {
       const owner = item.user?.username?.toLowerCase() || item.user?.email?.toLowerCase() || '';
+      const itemText = getLibraryItemProductLabels(item).lines.join(' ').toLowerCase();
       return (
         String(item.libraryId).includes(normalized) ||
         owner.includes(normalized) ||
         (item.itemType || '').toLowerCase().includes(normalized) ||
+        itemText.includes(normalized) ||
         String(item.itemId).includes(normalized)
       );
     });
@@ -1133,11 +1328,22 @@ const AdminDashboardPage: React.FC = () => {
                   <td className="px-6 py-4 text-orange-300 font-bold uppercase">{order.paymentMethod}</td>
                   <td className="px-6 py-4">
                     <div className="space-y-1">
-                      {(order.items ?? []).map((item) => (
-                        <div key={item.orderItemId} className="text-gray-300">
-                          {item.itemType} #{item.itemId} <span className="text-gray-500">({formatPrice(item.price)})</span>
-                        </div>
-                      ))}
+                      {(order.items ?? []).map((item) => {
+                        const product = getOrderItemProductLabels(item);
+
+                        return (
+                          <div key={item.orderItemId} className="text-gray-300">
+                            <div className="flex flex-col">
+                              {product.lines.map((line) => (
+                                <span key={line}>{line}</span>
+                              ))}
+                              <span className="text-gray-500 text-xs">
+                                {product.meta} - {formatPrice(item.price)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                       {(order.items ?? []).length === 0 && <span className="text-gray-500">No items</span>}
                     </div>
                   </td>
@@ -1184,8 +1390,16 @@ const AdminDashboardPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">{ownerLabel(item.order?.user, item.order?.userId)}</td>
                   <td className="px-6 py-4">
-                    <span className="text-cyan-300 font-black uppercase">{item.itemType}</span>
-                    <span className="text-gray-400 ml-2">#{item.itemId}</span>
+                    <div className="flex flex-col">
+                      {getOrderItemProductLabels(item).lines.map((line) => (
+                        <span key={line} className="text-gray-200 font-semibold">
+                          {line}
+                        </span>
+                      ))}
+                      <span className="text-gray-500 text-xs">
+                        {getOrderItemProductLabels(item).meta}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-cyan-400 font-black">{formatPrice(item.price)}</td>
                 </tr>
@@ -1249,22 +1463,31 @@ const AdminDashboardPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-gray-700">
-              {filteredLibraries.map((item) => (
-                <tr key={item.libraryId} className="hover:bg-gray-750 transition-colors">
-                  <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.libraryId}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-white">{ownerLabel(item.user, item.userId)}</span>
-                      <span className="text-gray-500 text-xs">{item.userId}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-lime-300 font-black uppercase">{item.itemType}</span>
-                    <span className="text-gray-400 ml-2">#{item.itemId}</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-400">{formatDate(item.purchaseDate)}</td>
-                </tr>
-              ))}
+              {filteredLibraries.map((item) => {
+                const productLabels = getLibraryItemProductLabels(item);
+
+                return (
+                  <tr key={item.libraryId} className="hover:bg-gray-750 transition-colors">
+                    <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.libraryId}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-white">{ownerLabel(item.user, item.userId)}</span>
+                        <span className="text-gray-500 text-xs">{item.userId}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-lime-300 font-black uppercase">{item.itemType}</span>
+                        {productLabels.lines.map((line) => (
+                          <span key={line} className="font-bold text-white">{line}</span>
+                        ))}
+                        <span className="text-gray-500 text-xs">{productLabels.meta}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-400">{formatDate(item.purchaseDate)}</td>
+                  </tr>
+                );
+              })}
               {filteredLibraries.length === 0 && renderEmptyRow(4, 'No library records found.')}
             </tbody>
           </table>
@@ -1544,6 +1767,17 @@ const AdminDashboardPage: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             User Directory
+          </button>
+
+          <button
+            onClick={() => navigate('/admin/settings')}
+            className="flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 font-bold text-gray-400 hover:bg-gray-750 hover:text-white"
+          >
+            <svg className="w-5 h-5 mr-3 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.89 3.31.877 2.42 2.42a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.89 1.543-.877 3.31-2.42 2.42a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.89-3.31-.877-2.42-2.42a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.89-1.543.877-3.31 2.42-2.42.996.574 2.242.061 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Settings
           </button>
 
           <button
@@ -2979,9 +3213,8 @@ const AdminDashboardPage: React.FC = () => {
                   </label>
                   <input
                     name="startDate"
-                    type="text"
-                    placeholder="YYYY-MM-DD"
-                    pattern="\d{4}-\d{2}-\d{2}"
+                    type="date"
+                    min={discountStartMin}
                     value={discountFormData.startDate}
                     onChange={handleGenericChange(setDiscountFormData)}
                     className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
@@ -2994,9 +3227,8 @@ const AdminDashboardPage: React.FC = () => {
                   </label>
                   <input
                     name="endDate"
-                    type="text"
-                    placeholder="YYYY-MM-DD"
-                    pattern="\d{4}-\d{2}-\d{2}"
+                    type="date"
+                    min={discountEndMin}
                     value={discountFormData.endDate}
                     onChange={handleGenericChange(setDiscountFormData)}
                     className="w-full p-3 bg-gray-900 rounded-lg text-white border border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
@@ -3004,6 +3236,14 @@ const AdminDashboardPage: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {discountValidationMessages.length > 0 && (
+                <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200">
+                  {discountValidationMessages.map((message) => (
+                    <div key={message}>{message}</div>
+                  ))}
+                </div>
+              )}
 
               <div className="flex justify-end gap-3 pt-6 mt-4">
                 <button

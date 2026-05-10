@@ -23,7 +23,7 @@ registerEnumType(PlatformName, {
 
 /**
  * Target database entity for platforms.
- * 
+ *
  * @class Platform
  * @description Provides the data schema corresponding to the `platforms` table, supporting the association of products with supported gaming systems.
  */

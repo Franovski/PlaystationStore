@@ -10,6 +10,7 @@ import reviewsReducer from './reviewsSlice';
 import dashboardReducer from './dashboardSlice';
 import adminReducer from './adminSlice';
 import libraryReducer from './librarySlice';
+import settingsReducer from './settingsSlice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   dashboard: dashboardReducer,
   admin: adminReducer,
   library: libraryReducer,
+  settings: settingsReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

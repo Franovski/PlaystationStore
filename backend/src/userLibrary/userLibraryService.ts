@@ -5,7 +5,11 @@
  * @responsibilities Grants ownership after purchases and reads a customer's owned items.
  * @interaction Used by UserLibraryResolver, OrdersService, ReviewsService, and dashboard aggregation.
  */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserLibrary } from './userLibraryEntity';
 import { UserLibraryRepository } from './userLibraryRepository';
 import { GameService } from '../games/gameService';
@@ -32,45 +36,67 @@ export class UserLibraryService {
    * Lists all owned items for a user.
    */
   async getLibraryForUser(userId: string): Promise<UserLibrary[]> {
-    return this.repository.findByUserId(userId);
+    return this.hydrateLibraryItems(await this.repository.findByUserId(userId));
   }
 
   /**
    * Lists every ownership row for admin views.
    */
   async getAllLibraryItems(): Promise<UserLibrary[]> {
-    return this.repository.findAll();
+    return this.hydrateLibraryItems(await this.repository.findAll());
   }
 
   /**
    * Validates and grants ownership of one item.
    */
-  async grantOwnership(userId: string, itemType: string, itemId: number): Promise<UserLibrary> {
+  async grantOwnership(
+    userId: string,
+    itemType: string,
+    itemId: number,
+  ): Promise<UserLibrary> {
     const normalizedType = this.normalizeItemType(itemType);
     this.validateId(itemId, 'Item ID');
     await this.validatePurchasableItem(normalizedType, itemId);
 
-    const existing = await this.repository.findByUserAndItem(userId, normalizedType, itemId);
+    const existing = await this.repository.findByUserAndItem(
+      userId,
+      normalizedType,
+      itemId,
+    );
     if (existing) {
       throw new BadRequestException('User already owns this item');
     }
 
-    return this.repository.create(userId, normalizedType, itemId);
+    return this.hydrateLibraryItem(
+      await this.repository.create(userId, normalizedType, itemId),
+    );
   }
 
   /**
    * Checks whether a user owns a specific item.
    */
-  async hasOwnership(userId: string, itemType: string, itemId: number): Promise<boolean> {
+  async hasOwnership(
+    userId: string,
+    itemType: string,
+    itemId: number,
+  ): Promise<boolean> {
     const normalizedType = this.normalizeItemType(itemType);
-    const existing = await this.repository.findByUserAndItem(userId, normalizedType, itemId);
+    const existing = await this.repository.findByUserAndItem(
+      userId,
+      normalizedType,
+      itemId,
+    );
     return Boolean(existing);
   }
 
   /**
    * Ensures a user owns a specific item.
    */
-  async ensureOwnership(userId: string, itemType: string, itemId: number): Promise<void> {
+  async ensureOwnership(
+    userId: string,
+    itemType: string,
+    itemId: number,
+  ): Promise<void> {
     const owned = await this.hasOwnership(userId, itemType, itemId);
     if (!owned) {
       throw new NotFoundException('Library item not found for this user');
@@ -90,7 +116,11 @@ export class UserLibraryService {
 
     const editions = await this.editionService.getEditionsByGameId(gameId);
     for (const edition of editions) {
-      const ownsEdition = await this.hasOwnership(userId, 'edition', edition.editionId);
+      const ownsEdition = await this.hasOwnership(
+        userId,
+        'edition',
+        edition.editionId,
+      );
       if (ownsEdition) {
         return true;
       }
@@ -102,7 +132,10 @@ export class UserLibraryService {
   /**
    * Validates that an item type and ID point to a real purchasable record.
    */
-  async validatePurchasableItem(itemType: string, itemId: number): Promise<void> {
+  async validatePurchasableItem(
+    itemType: string,
+    itemId: number,
+  ): Promise<void> {
     const normalizedType = this.normalizeItemType(itemType);
     this.validateId(itemId, 'Item ID');
 
@@ -122,9 +155,13 @@ export class UserLibraryService {
   }
 
   private normalizeItemType(itemType: string): string {
-    const normalized = String(itemType || '').trim().toLowerCase();
+    const normalized = String(itemType || '')
+      .trim()
+      .toLowerCase();
     if (!this.supportedItemTypes.includes(normalized)) {
-      throw new BadRequestException('itemType must be one of: game, dlc, edition');
+      throw new BadRequestException(
+        'itemType must be one of: game, dlc, edition',
+      );
     }
 
     return normalized;
@@ -133,6 +170,52 @@ export class UserLibraryService {
   private validateId(id: number, fieldName: string): void {
     if (!Number.isInteger(id) || id < 1) {
       throw new BadRequestException(`${fieldName} must be a positive integer`);
+    }
+  }
+
+  private async hydrateLibraryItems(
+    items: UserLibrary[],
+  ): Promise<UserLibrary[]> {
+    return Promise.all(items.map((item) => this.hydrateLibraryItem(item)));
+  }
+
+  private async hydrateLibraryItem(item: UserLibrary): Promise<UserLibrary> {
+    const itemType = String(item.itemType || '').toLowerCase();
+
+    if (itemType === 'game') {
+      item.game = await this.getOptionalDisplayItem(() =>
+        this.gameService.getGameById(item.itemId),
+      );
+      return item;
+    }
+
+    if (itemType === 'dlc') {
+      item.dlc = await this.getOptionalDisplayItem(() =>
+        this.dlcService.getDLCByIdWithGame(item.itemId),
+      );
+      return item;
+    }
+
+    if (itemType === 'edition') {
+      item.edition = await this.getOptionalDisplayItem(() =>
+        this.editionService.getEditionById(item.itemId),
+      );
+    }
+
+    return item;
+  }
+
+  private async getOptionalDisplayItem<T>(
+    loader: () => Promise<T>,
+  ): Promise<T | null> {
+    try {
+      return await loader();
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return null;
+      }
+
+      throw error;
     }
   }
 }

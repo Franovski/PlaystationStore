@@ -42,7 +42,10 @@ export class OrderItemRepository {
   /**
    * Creates many order item entities for a parent order.
    */
-  createMany(orderId: number, items: Array<{ itemType: string; itemId: number; price: number }>): OrderItem[] {
+  createMany(
+    orderId: number,
+    items: Array<{ itemType: string; itemId: number; price: number }>,
+  ): OrderItem[] {
     return this.repository.create(items.map((item) => ({ ...item, orderId })));
   }
 

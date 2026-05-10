@@ -5,7 +5,11 @@
  * @responsibilities Validates names, prices, identifiers, duplicate edition names, and mutation safety.
  * @interaction Called by EditionResolver, order validation, library ownership checks, and storefront queries.
  */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Edition } from './editionEntity';
 import { CreateEditionDto, UpdateEditionDto } from './editionDto';
 import { EditionRepository } from './editionRepository';
@@ -103,7 +107,9 @@ export class EditionService {
 
     const edition = await this.repository.update(id, sanitized);
     if (!edition) {
-      throw new NotFoundException(`Edition with ID ${id} not found after update attempt`);
+      throw new NotFoundException(
+        `Edition with ID ${id} not found after update attempt`,
+      );
     }
 
     return edition;
@@ -142,7 +148,11 @@ export class EditionService {
   }
 
   private validatePrice(price: number): void {
-    if (typeof price !== 'number' || Number.isNaN(price) || !Number.isFinite(price)) {
+    if (
+      typeof price !== 'number' ||
+      Number.isNaN(price) ||
+      !Number.isFinite(price)
+    ) {
       throw new BadRequestException('Edition price must be a valid number');
     }
 
@@ -151,16 +161,24 @@ export class EditionService {
     }
   }
 
-  private async ensureUniqueNameForGame(name: string, gameId: number, excludedEditionId?: number): Promise<void> {
+  private async ensureUniqueNameForGame(
+    name: string,
+    gameId: number,
+    excludedEditionId?: number,
+  ): Promise<void> {
     const existing = await this.repository.findByName(name);
     const duplicate = existing.find((edition) => {
       const sameGame = edition.gameId === gameId;
-      const differentEdition = excludedEditionId === undefined || edition.editionId !== excludedEditionId;
+      const differentEdition =
+        excludedEditionId === undefined ||
+        edition.editionId !== excludedEditionId;
       return sameGame && differentEdition;
     });
 
     if (duplicate) {
-      throw new BadRequestException(`Edition '${name}' already exists for game with ID ${gameId}`);
+      throw new BadRequestException(
+        `Edition '${name}' already exists for game with ID ${gameId}`,
+      );
     }
   }
 }

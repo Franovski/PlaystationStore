@@ -18,7 +18,9 @@ export class GamePlatformResolver {
   }
 
   @Query(() => [Platform])
-  async gamePlatformsByGameId(@Args('gameId', { type: () => Int }) gameId: number) {
+  async gamePlatformsByGameId(
+    @Args('gameId', { type: () => Int }) gameId: number,
+  ) {
     return this.gamePlatformService.getPlatformsByGame(gameId);
   }
 

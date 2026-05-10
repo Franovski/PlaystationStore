@@ -6,7 +6,14 @@
  * @interaction Consumed by DiscountResolver and DiscountService.
  */
 import { Field, Float, InputType, Int } from '@nestjs/graphql';
-import { IsDateString, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  Max,
+  Min,
+} from 'class-validator';
 
 /**
  * Payload used to create a discount.

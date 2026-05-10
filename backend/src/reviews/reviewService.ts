@@ -5,7 +5,12 @@
  * @responsibilities Handles review reads, creation, updates, and deletion authorization.
  * @interaction Used by ReviewResolver and StorefrontService.
  */
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Review } from './reviewEntity';
 import { CreateReviewDto, UpdateReviewDto } from './reviewDto';
 import { ReviewRepository } from './reviewRepository';
@@ -55,7 +60,10 @@ export class ReviewService {
       throw new ForbiddenException('You can only review games you own');
     }
 
-    const existing = await this.repository.findByUserAndGame(userId, dto.gameId);
+    const existing = await this.repository.findByUserAndGame(
+      userId,
+      dto.gameId,
+    );
     if (existing) {
       throw new BadRequestException('You have already reviewed this game');
     }
@@ -69,7 +77,12 @@ export class ReviewService {
   /**
    * Updates a review after confirming ownership or admin role.
    */
-  async updateReview(reviewId: number, userId: string, role: string | undefined, dto: UpdateReviewDto): Promise<Review> {
+  async updateReview(
+    reviewId: number,
+    userId: string,
+    role: string | undefined,
+    dto: UpdateReviewDto,
+  ): Promise<Review> {
     this.validateId(reviewId, 'Review ID');
     const review = await this.getReviewById(reviewId);
     this.ensureCanMutateReview(review, userId, role);
@@ -80,11 +93,16 @@ export class ReviewService {
 
     const updated = await this.repository.update(reviewId, {
       ...dto,
-      comment: dto.comment === undefined ? undefined : this.normalizeOptionalComment(dto.comment),
+      comment:
+        dto.comment === undefined
+          ? undefined
+          : this.normalizeOptionalComment(dto.comment),
     });
 
     if (!updated) {
-      throw new NotFoundException(`Review with ID ${reviewId} not found after update attempt`);
+      throw new NotFoundException(
+        `Review with ID ${reviewId} not found after update attempt`,
+      );
     }
 
     return updated;
@@ -93,7 +111,11 @@ export class ReviewService {
   /**
    * Deletes a review after confirming ownership or admin role.
    */
-  async deleteReview(reviewId: number, userId: string, role: string | undefined): Promise<void> {
+  async deleteReview(
+    reviewId: number,
+    userId: string,
+    role: string | undefined,
+  ): Promise<void> {
     this.validateId(reviewId, 'Review ID');
     const review = await this.getReviewById(reviewId);
     this.ensureCanMutateReview(review, userId, role);
@@ -109,7 +131,11 @@ export class ReviewService {
     return review;
   }
 
-  private ensureCanMutateReview(review: Review, userId: string, role: string | undefined): void {
+  private ensureCanMutateReview(
+    review: Review,
+    userId: string,
+    role: string | undefined,
+  ): void {
     if (review.userId === userId || role === UserRole.ADMIN) {
       return;
     }
@@ -125,7 +151,9 @@ export class ReviewService {
 
   private validateRating(rating: number): void {
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-      throw new BadRequestException('Review rating must be an integer from 1 to 5');
+      throw new BadRequestException(
+        'Review rating must be an integer from 1 to 5',
+      );
     }
   }
 

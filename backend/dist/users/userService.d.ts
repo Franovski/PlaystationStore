@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { User, PasswordResetMethod } from './userEntity';
-import { CreateUserDto, UpdateUserDto } from './userDto';
+import { CreateUserDto, UpdateUserDto, UpdateUserSettingsDto } from './userDto';
 import { RegisterDto } from '../auth/dto/register';
 export declare class UsersService {
     private readonly usersRepository;
@@ -17,6 +17,7 @@ export declare class UsersService {
     update(userId: string, dto: UpdateUserDto | Partial<User>, options?: {
         allowRoleChange?: boolean;
     }): Promise<User>;
+    updateUserSettings(userId: string, dto: UpdateUserSettingsDto, actorUserId?: string): Promise<Partial<User>>;
     remove(userId: string): Promise<void>;
     setRefreshToken(userId: string, refreshToken: string | null): Promise<void>;
     clearRefreshToken(userId: string): Promise<void>;

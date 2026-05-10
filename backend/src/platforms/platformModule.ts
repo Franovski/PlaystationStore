@@ -14,7 +14,7 @@ import { PlatformResolver } from './platformResolver';
 
 /**
  * Encapsulating construct for platforms ensuring component linkage securely.
- * 
+ *
  * @class PlatformModule
  * @description Registers HTTP endpoints explicitly and couples them via Dependency Injection.
  */

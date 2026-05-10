@@ -6,6 +6,7 @@ const HomePage = React.lazy(() => import('../pages/HomePage'));
 const LoginPage = React.lazy(() => import('../features/auth/pages/LoginPage'));
 const RegisterPage = React.lazy(() => import('../features/auth/pages/RegisterPage'));
 const AdminDashboardPage = React.lazy(() => import('../features/admin/pages/AdminDashboardPage'));
+const AdminSettingsPage = React.lazy(() => import('../features/settings/pages/AdminSettingsPage'));
 const UserDashboardPage = React.lazy(() => import('../features/dashboard/pages/UserDashboardPage'));
 const GameDetailPage = React.lazy(() => import('../features/games/pages/GameDetailPage'));
 const OtpVerificationPage = React.lazy(() => import('../features/auth/pages/OtpVerificationPage'));
@@ -34,6 +35,7 @@ export const AppRoutes: React.FC = () => {
 
           <Route element={<AdminRoute />}>
              <Route path="/admin" element={<AdminDashboardPage />} />
+             <Route path="/admin/settings" element={<AdminSettingsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

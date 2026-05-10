@@ -43,6 +43,9 @@ export class UserWalletResolver {
     @Args('addWalletFundsInput') addWalletFundsInput: AddWalletFundsDto,
     @Context() context: any,
   ) {
-    return this.walletService.addFunds(context.req.user.userId, addWalletFundsInput.amount);
+    return this.walletService.addFunds(
+      context.req.user.userId,
+      addWalletFundsInput.amount,
+    );
   }
 }

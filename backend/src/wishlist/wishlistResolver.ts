@@ -43,7 +43,10 @@ export class WishlistResolver {
     @Args('addWishlistItemInput') addWishlistItemInput: AddWishlistItemDto,
     @Context() context: any,
   ) {
-    return this.wishlistService.addWishlistItem(context.req.user.userId, addWishlistItemInput.gameId);
+    return this.wishlistService.addWishlistItem(
+      context.req.user.userId,
+      addWishlistItemInput.gameId,
+    );
   }
 
   @UseGuards(GqlAuthGuard)
@@ -52,7 +55,10 @@ export class WishlistResolver {
     @Args('gameId', { type: () => Int }) gameId: number,
     @Context() context: any,
   ) {
-    await this.wishlistService.removeWishlistItem(context.req.user.userId, gameId);
+    await this.wishlistService.removeWishlistItem(
+      context.req.user.userId,
+      gameId,
+    );
     return true;
   }
 }

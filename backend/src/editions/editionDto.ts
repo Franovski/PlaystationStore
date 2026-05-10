@@ -6,7 +6,14 @@
  * @interaction Consumed by EditionResolver and EditionService during mutation workflows.
  */
 import { Field, Float, InputType, Int } from '@nestjs/graphql';
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 /**
  * Input payload for creating a new edition.

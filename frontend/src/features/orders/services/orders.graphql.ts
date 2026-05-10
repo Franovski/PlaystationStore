@@ -14,6 +14,28 @@ export const ORDER_FIELDS = gql`
       itemId
       price
       orderId
+      game {
+        gameId
+        title
+      }
+      dlc {
+        dlcId
+        name
+        gameId
+        game {
+          gameId
+          title
+        }
+      }
+      edition {
+        editionId
+        name
+        gameId
+        game {
+          gameId
+          title
+        }
+      }
     }
   }
 `;

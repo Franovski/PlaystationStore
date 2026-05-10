@@ -9,9 +9,11 @@ async function bootstrap() {
     origin: ['http://localhost:3001', 'http://localhost:5173'],
     credentials: true,
   });
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+    }),
+  );
   const port = process.env.BACKEND_PORT || 3000;
   await app.listen(port);
 }

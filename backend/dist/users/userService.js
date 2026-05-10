@@ -95,13 +95,20 @@ let UsersService = UsersService_1 = class UsersService {
                 userId: true,
                 username: true,
                 email: true,
+                password: true,
                 firstName: true,
                 lastName: true,
                 country: true,
                 dateOfBirth: true,
                 role: true,
                 isEmailVerified: true,
+                totpSecret: true,
                 isTotpEnabled: true,
+                refreshToken: true,
+                passwordResetToken: true,
+                passwordResetExpires: true,
+                passwordResetMethod: true,
+                passwordResetAttempts: true,
                 createdAt: true,
                 updatedAt: true,
             },
@@ -237,6 +244,101 @@ let UsersService = UsersService_1 = class UsersService {
             existingUser.passwordResetAttempts = dto.passwordResetAttempts;
         }
         return this.usersRepository.save(existingUser);
+    }
+    async updateUserSettings(userId, dto, actorUserId) {
+        const existingUser = await this.findById(userId);
+        if (!existingUser) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        if (Object.keys(dto).length === 0) {
+            const dbUser = await this.usersRepository.findOne({
+                where: { userId },
+                select: {
+                    userId: true,
+                    username: true,
+                    email: true,
+                    password: true,
+                    firstName: true,
+                    lastName: true,
+                    country: true,
+                    dateOfBirth: true,
+                    role: true,
+                    isEmailVerified: true,
+                    totpSecret: true,
+                    isTotpEnabled: true,
+                    refreshToken: true,
+                    passwordResetToken: true,
+                    passwordResetExpires: true,
+                    passwordResetMethod: true,
+                    passwordResetAttempts: true,
+                    createdAt: true,
+                    updatedAt: true,
+                }
+            });
+            return dbUser;
+        }
+        if (dto.role !== undefined) {
+            if (actorUserId === userId && dto.role !== existingUser.role) {
+                throw new common_1.BadRequestException('Admins cannot change their own role from Settings.');
+            }
+            existingUser.role = dto.role;
+        }
+        if (dto.isEmailVerified !== undefined) {
+            existingUser.isEmailVerified = dto.isEmailVerified;
+        }
+        if (dto.isTotpEnabled !== undefined) {
+            existingUser.isTotpEnabled = dto.isTotpEnabled;
+        }
+        if (dto.password && dto.password.trim()) {
+            existingUser.password = await bcrypt.hash(dto.password, UsersService_1.SALT_ROUNDS);
+        }
+        if (dto.totpSecret !== undefined) {
+            existingUser.totpSecret = dto.totpSecret;
+        }
+        if (dto.refreshToken !== undefined) {
+            existingUser.refreshToken = dto.refreshToken;
+        }
+        if (dto.passwordResetToken !== undefined) {
+            existingUser.passwordResetToken = dto.passwordResetToken;
+        }
+        if (dto.passwordResetExpires !== undefined) {
+            existingUser.passwordResetExpires = dto.passwordResetExpires ? new Date(dto.passwordResetExpires) : null;
+        }
+        if (dto.passwordResetMethod !== undefined) {
+            existingUser.passwordResetMethod = dto.passwordResetMethod;
+        }
+        if (dto.passwordResetAttempts !== undefined) {
+            existingUser.passwordResetAttempts = dto.passwordResetAttempts;
+        }
+        await this.usersRepository.save(existingUser);
+        const updatedUser = await this.usersRepository.findOne({
+            where: { userId },
+            select: {
+                userId: true,
+                username: true,
+                email: true,
+                password: true,
+                firstName: true,
+                lastName: true,
+                country: true,
+                dateOfBirth: true,
+                role: true,
+                isEmailVerified: true,
+                totpSecret: true,
+                isTotpEnabled: true,
+                refreshToken: true,
+                passwordResetToken: true,
+                passwordResetExpires: true,
+                passwordResetMethod: true,
+                passwordResetAttempts: true,
+                createdAt: true,
+                updatedAt: true,
+            }
+        });
+        if (!updatedUser) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return updatedUser;
     }
     async remove(userId) {
         const user = await this.findById(userId);

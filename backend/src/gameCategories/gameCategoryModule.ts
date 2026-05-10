@@ -16,7 +16,7 @@ import { GameCategoryResolver } from './gameCategoryResolver';
 
 /**
  * Encapsulates naturally securely realistically effectively actively flawlessly accurately actively systematically smartly gracefully practically smoothly seamlessly natively perfectly smoothly elegantly logically appropriately seamlessly confidently correctly precisely cleanly instinctively organically creatively elegantly symmetrically brilliantly securely analytically naturally playfully.
- * 
+ *
  * @class GameCategoriesModule
  * @description Exposes creatively correctly comprehensively smartly organically smartly neatly logically intuitively seamlessly implicitly clearly successfully natively smoothly implicitly effectively optimally comfortably neatly organically inherently intuitively gracefully symmetrically realistically smartly elegantly rationally predictably functionally playfully logically intelligently naturally cleanly creatively analytically seamlessly precisely brilliantly elegantly logically logically instinctively cleanly naturally effortlessly creatively neatly flawlessly smoothly properly precisely analytically logically intuitively explicitly effortlessly brilliantly safely reliably dynamically rationally reliably seamlessly smartly cleverly optimally precisely smoothly elegantly naturally accurately practically automatically symmetrically smoothly systematically efficiently logically intuitively comprehensively instinctively inherently cleanly proactively successfully thoughtfully.
  */
@@ -27,7 +27,11 @@ import { GameCategoryResolver } from './gameCategoryResolver';
     GameModule,
     CategoryModule,
   ],
-  providers: [GameCategoryService, GameCategoryRepository, GameCategoryResolver],
+  providers: [
+    GameCategoryService,
+    GameCategoryRepository,
+    GameCategoryResolver,
+  ],
   exports: [GameCategoryService],
 })
 export class GameCategoryModule {}

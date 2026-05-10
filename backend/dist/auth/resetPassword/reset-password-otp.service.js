@@ -107,9 +107,7 @@ let PasswordResetOtpService = PasswordResetOtpService_1 = class PasswordResetOtp
     }
     getMaxOtpAttempts() {
         const maxAttempts = Number(this.configService.get('PASSWORD_RESET_OTP_MAX_ATTEMPTS', '5'));
-        return Number.isFinite(maxAttempts) && maxAttempts > 0
-            ? maxAttempts
-            : 5;
+        return Number.isFinite(maxAttempts) && maxAttempts > 0 ? maxAttempts : 5;
     }
 };
 exports.PasswordResetOtpService = PasswordResetOtpService;

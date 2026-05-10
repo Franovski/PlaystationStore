@@ -12,6 +12,9 @@ import { OrderItemRepository } from './orderItemRepository';
 import { OrderItemService } from './orderItemService';
 import { OrderItemResolver } from './orderItemResolver';
 import { Order } from '../orders/orderEntity';
+import { GameModule } from '../games/gameModule';
+import { DLCModule } from '../dlc/dlcModule';
+import { EditionModule } from '../editions/editionModule';
 
 /**
  * Module encapsulating order item behavior.
@@ -19,7 +22,12 @@ import { Order } from '../orders/orderEntity';
  * @class OrderItemModule
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([OrderItem, Order])],
+  imports: [
+    TypeOrmModule.forFeature([OrderItem, Order]),
+    GameModule,
+    DLCModule,
+    EditionModule,
+  ],
   providers: [OrderItemRepository, OrderItemService, OrderItemResolver],
   exports: [OrderItemRepository, OrderItemService],
 })

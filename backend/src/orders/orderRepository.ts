@@ -50,7 +50,10 @@ export class OrderRepository {
    * Finds one order by ID.
    */
   async findById(orderId: number): Promise<Order | null> {
-    return this.repository.findOne({ where: { orderId }, relations: ['items'] });
+    return this.repository.findOne({
+      where: { orderId },
+      relations: ['items'],
+    });
   }
 
   /**
@@ -63,12 +66,14 @@ export class OrderRepository {
     totalPrice: number,
     items: Array<{ itemType: string; itemId: number; price: number }>,
   ): Promise<Order> {
-    const order = await this.repository.save(this.repository.create({
-      userId,
-      paymentMethod,
-      status,
-      totalPrice,
-    }));
+    const order = await this.repository.save(
+      this.repository.create({
+        userId,
+        paymentMethod,
+        status,
+        totalPrice,
+      }),
+    );
 
     const orderItems = this.orderItemRepository.create(
       items.map((item) => ({

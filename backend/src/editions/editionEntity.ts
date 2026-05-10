@@ -5,7 +5,14 @@
  * @responsibilities Stores edition pricing, included content notes, and the owning game reference.
  * @interaction Used by edition services, order validation, library ownership, and storefront game detail queries.
  */
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Game } from '../games/gameEntity';
 

@@ -129,6 +129,7 @@ const EDITION_FIELDS = gql`
 
 const ORDER_FIELDS = gql`
   ${ADMIN_USER_BRIEF_FIELDS}
+  ${GAME_FIELDS}
   fragment AdminOrderFields on Order {
     orderId
     orderDate
@@ -145,18 +146,57 @@ const ORDER_FIELDS = gql`
       itemId
       price
       orderId
+      game {
+        ...AdminGameFields
+      }
+      dlc {
+        dlcId
+        name
+        gameId
+        game {
+          ...AdminGameFields
+        }
+      }
+      edition {
+        editionId
+        name
+        gameId
+        game {
+          ...AdminGameFields
+        }
+      }
     }
   }
 `;
 
 const ORDER_ITEM_FIELDS = gql`
   ${ADMIN_USER_BRIEF_FIELDS}
+  ${GAME_FIELDS}
   fragment AdminOrderItemFields on OrderItem {
     orderItemId
     itemType
     itemId
     price
     orderId
+    game {
+      ...AdminGameFields
+    }
+    dlc {
+      dlcId
+      name
+      gameId
+      game {
+        ...AdminGameFields
+      }
+    }
+    edition {
+      editionId
+      name
+      gameId
+      game {
+        ...AdminGameFields
+      }
+    }
     order {
       orderId
       orderDate
@@ -186,6 +226,7 @@ const WALLET_FIELDS = gql`
 
 const USER_LIBRARY_FIELDS = gql`
   ${ADMIN_USER_BRIEF_FIELDS}
+  ${GAME_FIELDS}
   fragment AdminUserLibraryFields on UserLibrary {
     libraryId
     purchaseDate
@@ -194,6 +235,25 @@ const USER_LIBRARY_FIELDS = gql`
     userId
     user {
       ...AdminUserBriefFields
+    }
+    game {
+      ...AdminGameFields
+    }
+    dlc {
+      dlcId
+      name
+      gameId
+      game {
+        ...AdminGameFields
+      }
+    }
+    edition {
+      editionId
+      name
+      gameId
+      game {
+        ...AdminGameFields
+      }
     }
   }
 `;

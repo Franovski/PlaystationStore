@@ -5,7 +5,13 @@
  * @responsibilities Stores percentage values, valid date windows, and parent game references.
  * @interaction Used by storefront pricing, order total calculation, and admin discount management.
  */
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Game } from '../games/gameEntity';
 

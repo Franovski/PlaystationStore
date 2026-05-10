@@ -11,7 +11,7 @@ import { InputType, Field } from '@nestjs/graphql';
 
 /**
  * Validates initialization payload attributes gracefully correctly proactively natively seamlessly cleanly functionally efficiently dynamically appropriately practically logically efficiently intuitively flexibly predictably realistically.
- * 
+ *
  * @class CreatePlatformDto
  * @description Asserts payload requirements rejecting conceptually automatically explicitly gracefully symmetrically.
  */
@@ -29,7 +29,7 @@ export class CreatePlatformDto {
 
 /**
  * Ensures natively comfortably securely implicitly implicitly reliably thoughtfully smoothly smoothly practically perfectly logically intuitively intuitively optimally creatively proactively securely gracefully safely cleverly creatively seamlessly proactively cleanly seamlessly explicitly brilliantly conceptually seamlessly safely creatively smoothly confidently systematically realistically expertly clearly predictably dynamically accurately explicitly proactively properly intuitively rationally accurately natively intelligently intelligently effortlessly smoothly confidently safely.
- * 
+ *
  * @class UpdatePlatformDto
  * @description Allows dynamically accurately safely smartly smoothly inherently expertly conceptually rationally correctly intelligently gracefully smoothly explicitly symmetrically seamlessly smoothly creatively securely logically effectively smoothly cleanly explicitly seamlessly cleanly symmetrically gracefully conceptually logically smoothly systematically symmetrically naturally cleanly structurally accurately securely conceptually predictably effortlessly intuitively symmetrically elegantly conceptually realistically smartly optimally perfectly intelligently elegantly automatically efficiently intuitively naturally organically intelligently explicitly structurally cleanly gracefully smoothly smartly effectively automatically confidently natively intelligently accurately rationally intelligently realistically accurately natively organically symmetrically systematically implicitly thoughtfully gracefully optimally smartly successfully gracefully cleanly naturally gracefully creatively cleanly organically optimally naturally realistically systematically reliably implicitly brilliantly reliably dynamically precisely natively organically naturally seamlessly flexibly smartly realistically natively flexibly intelligently implicitly functionally correctly functionally rationally.
  */

@@ -5,7 +5,11 @@
  * @responsibilities Handles adding, listing, and removing wishlist entries.
  * @interaction Used by WishlistResolver and current dashboard aggregation.
  */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Wishlist } from './wishlistEntity';
 import { WishlistRepository } from './wishlistRepository';
 import { GameService } from '../games/gameService';

@@ -231,6 +231,7 @@ type Mutation {
   updatePlatform(platformId: Int!, updatePlatformInput: UpdatePlatformDto!): Platform!
   updateReview(id: Int!, updateReviewInput: UpdateReviewDto!): Review!
   updateUser(id: ID!, updateUserInput: UpdateUserDto!): User!
+  updateUserSettings(id: ID!, updateUserSettingsInput: UpdateUserSettingsDto!): User!
   verifyTotp(verifyTotpInput: VerifyTotpDto!): LoginResponse!
 }
 
@@ -246,6 +247,9 @@ type Order {
 }
 
 type OrderItem {
+  dlc: DLC
+  edition: Edition
+  game: Game
   itemId: Int!
   itemType: String!
   order: Order
@@ -275,6 +279,7 @@ type Query {
   adminOrders: [Order!]!
   adminReviews: [Review!]!
   adminUserLibrary: [UserLibrary!]!
+  adminUsers: [User!]!
   adminWallets: [UserWallet!]!
   adminWishlists: [Wishlist!]!
   categories: [Category!]!
@@ -402,6 +407,19 @@ input UpdateUserDto {
   username: String
 }
 
+input UpdateUserSettingsDto {
+  isEmailVerified: Boolean
+  isTotpEnabled: Boolean
+  password: String
+  passwordResetAttempts: Int
+  passwordResetExpires: String
+  passwordResetMethod: PasswordResetMethod
+  passwordResetToken: String
+  refreshToken: String
+  role: UserRole
+  totpSecret: String
+}
+
 type User {
   country: String!
   createdAt: DateTime!
@@ -411,16 +429,23 @@ type User {
   isEmailVerified: Boolean!
   isTotpEnabled: Boolean!
   lastName: String!
+  password: String
   passwordResetAttempts: Int!
   passwordResetExpires: DateTime
   passwordResetMethod: PasswordResetMethod
+  passwordResetToken: String
+  refreshToken: String
   role: UserRole!
+  totpSecret: String
   updatedAt: DateTime!
   userId: ID!
   username: String!
 }
 
 type UserLibrary {
+  dlc: DLC
+  edition: Edition
+  game: Game
   itemId: Int!
   itemType: String!
   libraryId: Int!
