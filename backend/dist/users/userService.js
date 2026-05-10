@@ -208,10 +208,7 @@ let UsersService = UsersService_1 = class UsersService {
             existingUser.country = this.normalizeRequiredString(dto.country, 'country');
         }
         if (dto.dateOfBirth !== undefined) {
-            existingUser.dateOfBirth =
-                typeof dto.dateOfBirth === 'string'
-                    ? this.parseDateOfBirth(dto.dateOfBirth)
-                    : dto.dateOfBirth.toISOString().split('T')[0];
+            existingUser.dateOfBirth = this.parseDateOfBirth(dto.dateOfBirth);
         }
         if (dto.role !== undefined) {
             if (!options?.allowRoleChange) {
@@ -273,7 +270,7 @@ let UsersService = UsersService_1 = class UsersService {
                     passwordResetAttempts: true,
                     createdAt: true,
                     updatedAt: true,
-                }
+                },
             });
             return dbUser;
         }
@@ -302,7 +299,9 @@ let UsersService = UsersService_1 = class UsersService {
             existingUser.passwordResetToken = dto.passwordResetToken;
         }
         if (dto.passwordResetExpires !== undefined) {
-            existingUser.passwordResetExpires = dto.passwordResetExpires ? new Date(dto.passwordResetExpires) : null;
+            existingUser.passwordResetExpires = dto.passwordResetExpires
+                ? new Date(dto.passwordResetExpires)
+                : null;
         }
         if (dto.passwordResetMethod !== undefined) {
             existingUser.passwordResetMethod = dto.passwordResetMethod;
@@ -333,7 +332,7 @@ let UsersService = UsersService_1 = class UsersService {
                 passwordResetAttempts: true,
                 createdAt: true,
                 updatedAt: true,
-            }
+            },
         });
         if (!updatedUser) {
             throw new common_1.NotFoundException('User not found');
@@ -390,7 +389,14 @@ let UsersService = UsersService_1 = class UsersService {
         });
     }
     sanitizeUser(user) {
-        const { password, refreshToken, totpSecret, passwordResetToken, passwordResetExpires, passwordResetMethod, passwordResetAttempts, ...safeUser } = user;
+        const safeUser = { ...user };
+        delete safeUser.password;
+        delete safeUser.refreshToken;
+        delete safeUser.totpSecret;
+        delete safeUser.passwordResetToken;
+        delete safeUser.passwordResetExpires;
+        delete safeUser.passwordResetMethod;
+        delete safeUser.passwordResetAttempts;
         return safeUser;
     }
     async ensureEmailAvailable(email) {

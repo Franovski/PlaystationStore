@@ -1,19 +1,18 @@
-# 📦 Dependencies
+# Dependencies
 node_modules/
 .pnp
 .pnp.js
-package.json
-package-lock.json
 
-# 🔐 Secrets & Environment Variables
+# Environment and secrets
 .env
 .env.*
+!.env.example
+!**/.env.example
 *.pem
 *.key
 *.cert
-!.env.example
 
-# 🏗️ Build & Production Outputs
+# Build outputs
 dist/
 build/
 out/
@@ -21,7 +20,7 @@ dist-ssr/
 *.tsbuildinfo
 .nest/
 
-# 📝 Logs
+# Logs
 logs/
 *.log
 npm-debug.log*
@@ -29,16 +28,16 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# 🧪 Testing & Coverage
+# Test and coverage output
 coverage/
 .nyc_output/
 
-# 💾 Database
+# Local databases
 *.sqlite
 *.sqlite3
 *.db
 
-# 💻 OS-Generated Files
+# OS metadata
 .DS_Store
 .DS_Store?
 ._*
@@ -46,8 +45,9 @@ coverage/
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# 🛠️ IDEs & Editors
+# IDE and editor state
 .vscode/
 .idea/
 *.suo

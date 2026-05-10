@@ -16,7 +16,7 @@ class ForgotPasswordDto {
 }
 exports.ForgotPasswordDto = ForgotPasswordDto;
 __decorate([
-    (0, class_transformer_1.Transform)(({ value }) => typeof value === 'string' ? value.trim().toLowerCase() : value),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === 'string' ? value.trim().toLowerCase() : ''),
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], ForgotPasswordDto.prototype, "email", void 0);

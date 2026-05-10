@@ -10,10 +10,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtStrategy = void 0;
-const passport_jwt_1 = require("passport-jwt");
-const passport_1 = require("@nestjs/passport");
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const passport_1 = require("@nestjs/passport");
+const passport_jwt_1 = require("passport-jwt");
+const userEntity_1 = require("../users/userEntity");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor(configService) {
         super({
@@ -21,10 +22,11 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             ignoreExpiration: false,
             secretOrKey: configService.get('JWT_ACCESS_SECRET') || 'fallback_secret',
         });
-        this.configService = configService;
     }
-    async validate(payload) {
-        if (!payload.sub) {
+    validate(payload) {
+        if (typeof payload.sub !== 'string' ||
+            typeof payload.email !== 'string' ||
+            !this.isUserRole(payload.role)) {
             throw new common_1.UnauthorizedException('Invalid token payload');
         }
         return {
@@ -32,6 +34,9 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             email: payload.email,
             role: payload.role,
         };
+    }
+    isUserRole(value) {
+        return Object.values(userEntity_1.UserRole).includes(value);
     }
 };
 exports.JwtStrategy = JwtStrategy;

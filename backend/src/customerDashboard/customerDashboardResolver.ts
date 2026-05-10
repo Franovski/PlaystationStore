@@ -10,6 +10,10 @@ import { UseGuards } from '@nestjs/common';
 import { CustomerDashboardData } from './customerDashboardTypes';
 import { CustomerDashboardService } from './customerDashboardService';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import {
+  getAuthenticatedUser,
+  GraphqlContext,
+} from '../auth/types/auth-context';
 
 /**
  * Resolver for customer dashboard data.
@@ -22,7 +26,9 @@ export class CustomerDashboardResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => CustomerDashboardData)
-  async currentUserDashboard(@Context() context: any) {
-    return this.dashboardService.getDashboardData(context.req.user.userId);
+  async currentUserDashboard(@Context() context: GraphqlContext) {
+    const user = getAuthenticatedUser(context);
+
+    return this.dashboardService.getDashboardData(user.userId);
   }
 }

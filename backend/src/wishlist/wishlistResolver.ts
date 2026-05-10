@@ -14,6 +14,10 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { RolesGuard } from '../auth/guards/rolesGuard';
 import { Roles } from '../auth/decorators/roleDecorator';
 import { UserRole } from '../users/userEntity';
+import {
+  getAuthenticatedUser,
+  GraphqlContext,
+} from '../auth/types/auth-context';
 
 /**
  * Resolver for wishlist operations.
@@ -26,8 +30,10 @@ export class WishlistResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => [Wishlist])
-  async wishlist(@Context() context: any) {
-    return this.wishlistService.getWishlistForUser(context.req.user.userId);
+  async wishlist(@Context() context: GraphqlContext) {
+    const user = getAuthenticatedUser(context);
+
+    return this.wishlistService.getWishlistForUser(user.userId);
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
@@ -41,10 +47,12 @@ export class WishlistResolver {
   @Mutation(() => Wishlist)
   async addWishlistItem(
     @Args('addWishlistItemInput') addWishlistItemInput: AddWishlistItemDto,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
+    const user = getAuthenticatedUser(context);
+
     return this.wishlistService.addWishlistItem(
-      context.req.user.userId,
+      user.userId,
       addWishlistItemInput.gameId,
     );
   }
@@ -53,12 +61,11 @@ export class WishlistResolver {
   @Mutation(() => Boolean)
   async removeWishlistItem(
     @Args('gameId', { type: () => Int }) gameId: number,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
-    await this.wishlistService.removeWishlistItem(
-      context.req.user.userId,
-      gameId,
-    );
+    const user = getAuthenticatedUser(context);
+
+    await this.wishlistService.removeWishlistItem(user.userId, gameId);
     return true;
   }
 }

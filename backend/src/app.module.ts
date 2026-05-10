@@ -4,6 +4,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import {
+  AppRequest,
+  GraphqlContext,
+  GraphqlContextInput,
+} from './auth/types/auth-context';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CategoryModule } from './categories/categoryModule';
@@ -35,7 +40,10 @@ import { CustomerDashboardModule } from './customerDashboard/customerDashboardMo
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      context: ({ req, res }: { req: any; res: any }) => ({ req, res }),
+      context: ({ req, res }: GraphqlContextInput): GraphqlContext => ({
+        req: req as AppRequest,
+        res,
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

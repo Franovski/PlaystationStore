@@ -18,6 +18,7 @@ const bcrypt = require("bcryptjs");
 const otplib_1 = require("otplib");
 const QRCode = require("qrcode");
 const userService_1 = require("../users/userService");
+const userEntity_1 = require("../users/userEntity");
 const mailService_1 = require("../mail/mailService");
 const reset_password_service_1 = require("./resetPassword/reset-password.service");
 let AuthService = AuthService_1 = class AuthService {
@@ -38,10 +39,10 @@ let AuthService = AuthService_1 = class AuthService {
         return valid ? user : null;
     }
     async register(dto) {
-        if (dto.role === 'admin' &&
+        if (dto.role === userEntity_1.UserRole.ADMIN &&
             (process.env.NODE_ENV !== 'development' ||
                 process.env.ENABLE_DEV_ADMIN_SIGNUP !== 'true')) {
-            dto.role = 'playstation_user';
+            dto.role = userEntity_1.UserRole.PLAYSTATION_USER;
         }
         const user = await this.usersService.create(dto);
         const tokens = await this.generateTokens(user);
@@ -80,7 +81,7 @@ let AuthService = AuthService_1 = class AuthService {
         try {
             await this.sendLoginOtp(user.email, loginCode);
         }
-        catch (error) {
+        catch {
             throw new common_1.BadRequestException('Failed to send verification code. Please try again.');
         }
         return {
@@ -218,8 +219,15 @@ let AuthService = AuthService_1 = class AuthService {
         return { accessToken, refreshToken };
     }
     sanitizeUser(user) {
-        const { password, refreshToken, totpSecret, passwordResetToken, passwordResetExpires, passwordResetMethod, passwordResetAttempts, ...safe } = user;
-        return safe;
+        const safeUser = { ...user };
+        delete safeUser.password;
+        delete safeUser.refreshToken;
+        delete safeUser.totpSecret;
+        delete safeUser.passwordResetToken;
+        delete safeUser.passwordResetExpires;
+        delete safeUser.passwordResetMethod;
+        delete safeUser.passwordResetAttempts;
+        return safeUser;
     }
     storePendingLoginOtp(tempToken, userId, code) {
         const expiresAt = Date.now() + AuthService_1.LOGIN_OTP_TTL_MINUTES * 60000;
@@ -263,7 +271,7 @@ let AuthService = AuthService_1 = class AuthService {
                 expiresInMinutes: AuthService_1.LOGIN_OTP_TTL_MINUTES,
             });
         }
-        catch (error) {
+        catch {
             throw new common_1.BadRequestException('Failed to send verification code. Please try again.');
         }
     }

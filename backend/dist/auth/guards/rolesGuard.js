@@ -20,17 +20,22 @@ let RolesGuard = class RolesGuard {
     }
     canActivate(context) {
         const requiredRoles = this.reflector.getAllAndOverride(roleDecorator_1.ROLES_KEY, [context.getHandler(), context.getClass()]);
-        if (!requiredRoles)
+        if (!requiredRoles) {
             return true;
-        let request = context.switchToHttp().getRequest();
-        if (!request) {
-            const ctx = graphql_1.GqlExecutionContext.create(context);
-            request = ctx.getContext().req;
         }
-        const user = request?.user;
-        if (!user)
+        const request = this.getRequest(context);
+        const user = request.user;
+        if (!user) {
             return false;
+        }
         return requiredRoles.includes(user.role);
+    }
+    getRequest(context) {
+        const gqlContext = graphql_1.GqlExecutionContext.create(context).getContext();
+        if (gqlContext.req) {
+            return gqlContext.req;
+        }
+        return context.switchToHttp().getRequest();
     }
 };
 exports.RolesGuard = RolesGuard;

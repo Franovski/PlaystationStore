@@ -1,196 +1,185 @@
-# 🎮 PlayStation Store
+# PlayStation Store Project
 
-## 📌 Overview
+A full-stack digital game store built with a NestJS GraphQL API and a React/Vite frontend. The app supports public catalog browsing, authentication, user dashboards, and admin management for store data such as games, platforms, categories, DLC, editions, discounts, orders, reviews, wallets, wishlists, and user libraries.
 
-The PlayStation Store project is a full-stack e-commerce web application designed to replicate the core functionalities of a modern digital gaming storefront. 
+## Features
 
-It provides a robust platform for managing digital game catalogs, handling complex relationships between games, categories, and console platforms, and delivering a secure, consumer-facing storefront alongside a comprehensive administrative backend.
+- GraphQL API with modular NestJS feature modules.
+- PostgreSQL persistence through TypeORM entities and repositories.
+- JWT authentication with refresh tokens, role-based admin access, optional TOTP, and optional email OTP login.
+- Password reset flows using OTP or reset links.
+- Public storefront catalog and game detail pages.
+- Customer dashboard for wallet, wishlist, library, orders, and reviews.
+- Admin dashboard for users, games, platforms, categories, and store settings.
+- React Router protected routes and Redux Toolkit state management.
+- Vite production build for the frontend.
 
-Key features include:
-* Full user authentication with robust session management (JWT) and Two-Factor Authentication (TOTP).
-* Dual-mode forgot password resets (OTP code or Magic Link).
-* Comprehensive catalog management with granular categorizations and platform assignments.
-* Role-based access control (RBAC) securing administrative dashboards versus standard user interfaces.
+## Tech Stack
 
----
+- Backend: Node.js, NestJS, GraphQL, Apollo, TypeORM, PostgreSQL, Passport/JWT, Jest, ESLint, Prettier.
+- Frontend: React 18, TypeScript, Vite, Apollo Client, Redux Toolkit, React Router, Axios, Tailwind CSS, Socket.IO client.
+- Local services: Docker Compose for PostgreSQL.
 
-## 🏗️ Architecture
+## Project Structure
 
-* **Backend Framework:** NestJS (Node.js) built with strict TypeScript and a modular, service-oriented architecture separating controllers, services, and DTOs.
-* **Database:** PostgreSQL managed via TypeORM, utilizing strict entity relationship mapping.
-* **Frontend Framework:** React with TypeScript, bundled via Vite.
-* **Styling:** Tailwind CSS combined with PostCSS for rapid, responsive UI development.
-* **Communication:** RESTful API endpoints exchanging JSON payloads, mapped under the `/api/` routing prefix.
-* **State Management:** Redux Toolkit utilized extensively on the frontend for global auth and UI state handling.
+```text
+.
+├── backend/              # NestJS API, GraphQL resolvers, TypeORM entities, tests
+│   ├── src/              # Feature modules and application bootstrap
+│   ├── test/             # E2E test scaffold
+│   ├── .env.example      # Backend environment template
+│   └── docker-compose.yml
+├── frontend/             # React + Vite client
+│   ├── src/              # App routes, features, services, store, styles
+│   └── .env.example      # Frontend environment template
+└── README.md
+```
 
----
+There are no root-level npm workspaces or root scripts. Run backend and frontend commands from their own folders.
 
-## 🚀 Features
+## Prerequisites
 
-### 🔐 Authentication & Security
-* User registration and secured login (Bcrypt password hashing).
-* JWT-based authentication (Access and Refresh token cycle).
-* Optional TOTP (Time-based One-Time Password) Two-Factor Authentication.
-* Configurable Password Reset workflows (Email Magic Links vs. Email OTP codes).
-* Protected routing via NestJS Auth Guards (Backend) and React Router wrappers (Frontend).
+- Node.js 20 or newer recommended.
+- npm.
+- PostgreSQL 15+, or Docker for the included local database service.
 
-### 🎮 Game Management
-* Complete CRUD operations for games.
-* Detailed game entities containing pricing, descriptions, and metadata.
-* Real-time validation checks for duplication and attribute constraints.
+## Environment Variables
 
-### 🗂️ Categories & Platforms
-* Dynamic Category management (e.g., RPG, Action, FPS).
-* Platform configurations restricted to targeted hardware constraints (e.g., PS4, PS5).
-* Many-to-Many associations mapping a single game to multiple platforms and categories.
+Copy the example files before running locally:
 
-### 🛠️ Admin Dashboard
-* Elevated dashboard restricted to users with the `admin` role.
-* Overview summary generating platform-wide metrics and stats.
-* Dedicated interfaces for managing user accounts, editing game details, and purging records.
-
----
-
-## 🧱 Database Design
-
-The database schema relies on strict relational ties mapped by TypeORM:
-
-* **User:** Stores profile details, roles (`admin` | `playstation_user`), password hashes, and security tokens (Refresh tokens, OTP secrets, reset constraints).
-* **Game:** Stores core catalog details.
-* **Platform:** Defines console environments.
-* **Category:** Defines genres or functional groups.
-* **GamePlatform (Join Table):** Maps games to compatible platforms (Many-to-Many).
-* **GameCategory (Join Table):** Maps games to associated genres (Many-to-Many).
-
----
-
-## 🔑 API Endpoints
-
-### Auth
-* `POST /api/auth/register` - Create a new user account
-* `POST /api/auth/login` - Authenticate and retrieve JWT
-* `POST /api/auth/refresh` - Refresh access token
-* `POST /api/auth/forgot-password` - Request a password reset
-* `POST /api/auth/reset-password` - Submit reset token/OTP with new password
-* `POST /api/auth/totp/verify` - Verify 2FA code during login
-
-### Games
-* `GET /api/games` - Retrieve all games
-* `POST /api/games` - Create a new game (Admin)
-* `GET /api/games/:id` - Fetch game details
-* `PUT /api/games/:id` - Update game metadata (Admin)
-
-### Categories & Platforms
-* `GET /api/categories` - List all active categories
-* `POST /api/platforms` - Define a new platform
-* `POST /api/game-categories` - Associate a game with a category
-* `DELETE /api/game-platforms/game/:gameId/platform/:platformId` - Sever game-platform relation
-
-### Admin
-* `GET /api/admin/dashboard/summary` - Fetch platform-wide analytical metrics
-* `GET /api/admin/users` - Fetch total user list
-* `PATCH /api/admin/games/:id` - Perform partial game updates
-
----
-
-## 🖥️ Frontend
-
-* **Structure:** Component-based architecture utilizing React functional components and hooks. Organized into `pages`, `features` (Redux slices), `api` (Axios interceptors), and `services`.
-* **Routing:** Handled via `react-router-dom`. Routes are deeply nested and protected via `ProtectedRoute` and `AdminRoute` guard components.
-* **State Management:** Redux Toolkit handles centralized data (e.g., `authSlice` captures `isAuthenticated`, `user`, loading states, and active 2FA requirements).
-* **Dashboard Capabilities:** Admins have exclusive access to data-tables rendering users and game inventories with direct inline-action capabilities.
-
----
-
-## ⚙️ Installation & Setup
-
-### Backend
-
-1. Clone the repository and navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the `backend` directory (see [Environment Variables](#-environment-variables) below) and set up your local PostgreSQL database to match those credentials.
-4. Run the development server:
-   ```bash
-   npm run start:dev
-   ```
-
-### Frontend
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the development application:
-   ```bash
-   npm run dev
-   ```
-
----
-
-## 🔐 Environment Variables
-
-This project uses template `.env.example` files to help you configure your environment variables. 
-
-### Backend
-1. Navigate to the `backend` directory.
-2. Copy the `.env.example` file and rename it to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-3. Open the `.env` file and replace the dummy values (like `your_db_username`, `your_jwt_access_secret_key`, etc.) with your actual local configuration and secrets.
-
-### Frontend
-1. Navigate to the `frontend` directory.
-2. Copy the `.env.example` file and rename it to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-3. Open the `.env` file and ensure the URLs point to your backend correctly.
-
----
-
-## 🔄 Application Flow
-
-* **Authentication Flow:** Users register and authenticate. Upon login, the backend validates credentials. If TOTP is enabled, login halts and requests an OTP code. Upon success, an HTTP-only/secure pair of access and refresh tokens are distributed and synced into global Redux state.
-* **Forgot Password Flow:** A user triggers forgot password. Based on configuration (`PASSWORD_RESET_MODE`), the NestJS MailService dispatches either an OTP code or a Magic Link email. The frontend navigates to the Reset Password interface where the payload (`email`, `token`/`OTP`, and `newPassword`) is validated and submitted.
-* **Admin Operations:** Admin accounts bypass standard UI views into a dedicated dashboard layout, unlocking endpoints dynamically to mutate the main store catalog and audit user metrics.
-
----
-
-## 🧪 Testing
-
-Jest is configured for both unit and end-to-end (e2e) tests on the backend.
-
-To execute backend e2e tests:
 ```bash
 cd backend
-npm run test:e2e
+cp .env.example .env
+
+cd ../frontend
+cp .env.example .env
 ```
-To execute standard unit tests:
+
+Backend variables:
+
+```env
+NODE_ENV=development
+BACKEND_PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=playstation_store
+DATABASE_SYNCHRONIZE=false
+JWT_ACCESS_SECRET=replace_with_access_token_secret
+JWT_REFRESH_SECRET=replace_with_refresh_token_secret
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+FRONTEND_URL=http://localhost:5173
+FRONTEND_RESET_PASSWORD_URL=http://localhost:5173/reset-password
+MAIL_TRANSPORT=smtp
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=mailer@example.com
+SMTP_PASS=replace_with_smtp_password
+MAIL_FROM=mailer@example.com
+PASSWORD_RESET_MODE=otp
+PASSWORD_RESET_OTP_TTL_MINUTES=10
+PASSWORD_RESET_OTP_MAX_ATTEMPTS=5
+PASSWORD_RESET_TOKEN_TTL_MINUTES=60
+ENABLE_DEV_ADMIN_SIGNUP=true
+LOGIN_EMAIL_OTP_ENABLED=false
+```
+
+Frontend variables:
+
+```env
+VITE_API_URL=http://localhost:3000/api
+VITE_WEBSOCKET_URL=http://localhost:3000
+VITE_ENABLE_DEV_ADMIN_SIGNUP=true
+```
+
+Keep real `.env` files local. They are intentionally ignored by Git.
+
+## Local Development
+
+Install dependencies:
+
 ```bash
-npm run test
+cd backend
+npm install
+
+cd ../frontend
+npm install
 ```
 
----
+Start PostgreSQL with Docker:
 
-## 📌 Notes
+```bash
+cd backend
+docker compose up -d db
+```
 
-* App configurations strictly separate Admin roles (`admin`) from Standard roles (`playstation_user`).
-* Platform support defaults map primarily towards constraints like `PS4` and `PS5`.
-* Sockets are provisioned globally on the frontend (`socketService.ts`), requiring a properly hooked backend event gateway for real-time operations.
+Run the API:
 
----
+```bash
+cd backend
+npm run start:dev
+```
 
-## 👨‍💻 Author
+Run the frontend:
 
-Developed for advanced full-stack integration and REST architecture demonstration.
+```bash
+cd frontend
+npm run dev
+```
+
+Default local URLs:
+
+- Frontend: `http://localhost:5173`
+- REST API prefix: `http://localhost:3000/api`
+- GraphQL endpoint: `http://localhost:3000/graphql`
+
+## Quality Checks
+
+Backend:
+
+```bash
+cd backend
+npm run build
+npm run test
+npm run lint
+npm audit
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm run build
+npm audit
+```
+
+The frontend package currently does not define lint or test scripts. Backend lint, backend tests, backend build, and frontend build are the current baseline checks.
+
+## Build and Deployment
+
+Build the backend:
+
+```bash
+cd backend
+npm run build
+npm run start:prod
+```
+
+Build the frontend:
+
+```bash
+cd frontend
+npm run build
+npm run preview
+```
+
+Production deployments should provide real database, JWT, mail, frontend URL, and CORS configuration through environment variables. Do not commit secrets.
+
+## Contribution Notes
+
+- Keep source, configuration, docs, tests, and example env files committed.
+- Do not commit `node_modules`, `dist`, logs, local `.env` files, editor folders, or local database files.
+- Prefer focused changes and run the relevant build/test command before opening a pull request.
+- Add tests when changing shared backend behavior, authentication, orders, payments/wallets, or admin mutations.

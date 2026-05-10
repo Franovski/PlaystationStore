@@ -14,6 +14,10 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { RolesGuard } from '../auth/guards/rolesGuard';
 import { Roles } from '../auth/decorators/roleDecorator';
 import { UserRole } from '../users/userEntity';
+import {
+  getAuthenticatedUser,
+  GraphqlContext,
+} from '../auth/types/auth-context';
 
 /**
  * Resolver for review operations.
@@ -40,12 +44,11 @@ export class ReviewResolver {
   @Mutation(() => Review)
   async createReview(
     @Args('createReviewInput') createReviewInput: CreateReviewDto,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
-    return this.reviewService.createReview(
-      context.req.user.userId,
-      createReviewInput,
-    );
+    const user = getAuthenticatedUser(context);
+
+    return this.reviewService.createReview(user.userId, createReviewInput);
   }
 
   @UseGuards(GqlAuthGuard)
@@ -53,12 +56,14 @@ export class ReviewResolver {
   async updateReview(
     @Args('id', { type: () => Int }) id: number,
     @Args('updateReviewInput') updateReviewInput: UpdateReviewDto,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
+    const user = getAuthenticatedUser(context);
+
     return this.reviewService.updateReview(
       id,
-      context.req.user.userId,
-      context.req.user.role,
+      user.userId,
+      user.role,
       updateReviewInput,
     );
   }
@@ -67,13 +72,11 @@ export class ReviewResolver {
   @Mutation(() => Boolean)
   async deleteReview(
     @Args('id', { type: () => Int }) id: number,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
-    await this.reviewService.deleteReview(
-      id,
-      context.req.user.userId,
-      context.req.user.role,
-    );
+    const user = getAuthenticatedUser(context);
+
+    await this.reviewService.deleteReview(id, user.userId, user.role);
     return true;
   }
 }

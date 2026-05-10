@@ -14,6 +14,10 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { RolesGuard } from '../auth/guards/rolesGuard';
 import { Roles } from '../auth/decorators/roleDecorator';
 import { UserRole } from '../users/userEntity';
+import {
+  getAuthenticatedUser,
+  GraphqlContext,
+} from '../auth/types/auth-context';
 
 /**
  * Resolver for order operations.
@@ -26,8 +30,10 @@ export class OrderResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => [Order])
-  async orders(@Context() context: any) {
-    return this.ordersService.getOrdersForUser(context.req.user.userId);
+  async orders(@Context() context: GraphqlContext) {
+    const user = getAuthenticatedUser(context);
+
+    return this.ordersService.getOrdersForUser(user.userId);
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
@@ -41,24 +47,21 @@ export class OrderResolver {
   @Query(() => Order)
   async order(
     @Args('id', { type: () => Int }) id: number,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
-    return this.ordersService.getOrderForUser(
-      id,
-      context.req.user.userId,
-      context.req.user.role,
-    );
+    const user = getAuthenticatedUser(context);
+
+    return this.ordersService.getOrderForUser(id, user.userId, user.role);
   }
 
   @UseGuards(GqlAuthGuard)
   @Mutation(() => Order)
   async createOrder(
     @Args('createOrderInput') createOrderInput: CreateOrderDto,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
-    return this.ordersService.createOrder(
-      context.req.user.userId,
-      createOrderInput,
-    );
+    const user = getAuthenticatedUser(context);
+
+    return this.ordersService.createOrder(user.userId, createOrderInput);
   }
 }

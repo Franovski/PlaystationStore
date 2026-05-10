@@ -8,17 +8,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
 const passport_1 = require("@nestjs/passport");
-const config_1 = require("@nestjs/config");
-const authService_1 = require("./authService");
-const userModule_1 = require("../users/userModule");
-const mailModule_1 = require("../mail/mailModule");
-const reset_password_service_1 = require("./resetPassword/reset-password.service");
-const reset_password_otp_service_1 = require("./resetPassword/reset-password-otp.service");
-const reset_password_link_service_1 = require("./resetPassword/reset-password-link.service");
-const jwt_strategy_1 = require("./jwt.strategy");
 const authResolver_1 = require("./authResolver");
+const authService_1 = require("./authService");
+const jwt_strategy_1 = require("./jwt.strategy");
+const mailModule_1 = require("../mail/mailModule");
+const userModule_1 = require("../users/userModule");
+const reset_password_link_service_1 = require("./resetPassword/reset-password-link.service");
+const reset_password_otp_service_1 = require("./resetPassword/reset-password-otp.service");
+const reset_password_service_1 = require("./resetPassword/reset-password.service");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -32,7 +32,7 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
-                useFactory: async (configService) => {
+                useFactory: (configService) => {
                     const secret = configService.get('JWT_ACCESS_SECRET');
                     if (!secret) {
                         throw new Error('JWT_ACCESS_SECRET is missing in .env');

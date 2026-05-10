@@ -48,7 +48,10 @@ exports.AppModule = AppModule = __decorate([
                 driver: apollo_1.ApolloDriver,
                 autoSchemaFile: (0, path_1.join)(process.cwd(), 'src/schema.gql'),
                 sortSchema: true,
-                context: ({ req, res }) => ({ req, res }),
+                context: ({ req, res }) => ({
+                    req: req,
+                    res,
+                }),
             }),
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],

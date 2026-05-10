@@ -39,7 +39,7 @@ let PasswordResetLinkService = PasswordResetLinkService_1 = class PasswordResetL
                 resetToken,
             });
         }
-        catch (error) {
+        catch {
             this.logger.error('Failed to send password reset link email.');
             throw new common_1.InternalServerErrorException('Unable to process password reset request.');
         }

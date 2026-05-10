@@ -40,7 +40,7 @@ let PasswordResetOtpService = PasswordResetOtpService_1 = class PasswordResetOtp
                 expiresInMinutes: this.getOtpTtlMinutes(),
             });
         }
-        catch (error) {
+        catch {
             this.logger.error('Failed to send password reset OTP email.');
             throw new common_1.InternalServerErrorException('Unable to process password reset request.');
         }

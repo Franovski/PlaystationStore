@@ -1,6 +1,6 @@
-import { PlatformRepository } from './platformRepository';
 import { CreatePlatformDto, UpdatePlatformDto } from './platformDto';
 import { Platform } from './platformEntity';
+import { PlatformRepository } from './platformRepository';
 export declare class PlatformService {
     private readonly platformRepository;
     constructor(platformRepository: PlatformRepository);

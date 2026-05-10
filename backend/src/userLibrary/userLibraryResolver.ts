@@ -14,6 +14,10 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { RolesGuard } from '../auth/guards/rolesGuard';
 import { Roles } from '../auth/decorators/roleDecorator';
 import { UserRole } from '../users/userEntity';
+import {
+  getAuthenticatedUser,
+  GraphqlContext,
+} from '../auth/types/auth-context';
 
 /**
  * Resolver for library ownership.
@@ -26,8 +30,10 @@ export class UserLibraryResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => [UserLibrary])
-  async userLibrary(@Context() context: any) {
-    return this.libraryService.getLibraryForUser(context.req.user.userId);
+  async userLibrary(@Context() context: GraphqlContext) {
+    const user = getAuthenticatedUser(context);
+
+    return this.libraryService.getLibraryForUser(user.userId);
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
@@ -41,10 +47,12 @@ export class UserLibraryResolver {
   @Mutation(() => UserLibrary)
   async addLibraryItem(
     @Args('addLibraryItemInput') addLibraryItemInput: AddLibraryItemDto,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
+    const user = getAuthenticatedUser(context);
+
     return this.libraryService.grantOwnership(
-      context.req.user.userId,
+      user.userId,
       addLibraryItemInput.itemType,
       addLibraryItemInput.itemId,
     );

@@ -14,6 +14,10 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { RolesGuard } from '../auth/guards/rolesGuard';
 import { Roles } from '../auth/decorators/roleDecorator';
 import { UserRole } from '../users/userEntity';
+import {
+  getAuthenticatedUser,
+  GraphqlContext,
+} from '../auth/types/auth-context';
 
 /**
  * Resolver for wallet operations.
@@ -26,8 +30,10 @@ export class UserWalletResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => UserWallet)
-  async wallet(@Context() context: any) {
-    return this.walletService.getOrCreateWallet(context.req.user.userId);
+  async wallet(@Context() context: GraphqlContext) {
+    const user = getAuthenticatedUser(context);
+
+    return this.walletService.getOrCreateWallet(user.userId);
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
@@ -41,11 +47,10 @@ export class UserWalletResolver {
   @Mutation(() => UserWallet)
   async addWalletFunds(
     @Args('addWalletFundsInput') addWalletFundsInput: AddWalletFundsDto,
-    @Context() context: any,
+    @Context() context: GraphqlContext,
   ) {
-    return this.walletService.addFunds(
-      context.req.user.userId,
-      addWalletFundsInput.amount,
-    );
+    const user = getAuthenticatedUser(context);
+
+    return this.walletService.addFunds(user.userId, addWalletFundsInput.amount);
   }
 }
