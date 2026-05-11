@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { wishlistApi } from '../../features/wishlist/services/wishlistApi';
 import { Wishlist } from '../../types';
+import { gameDeletedSynced, gameDetailsSynced, gameSynced } from './gamesSlice';
 
 interface WishlistState {
   items: Wishlist[];
@@ -22,6 +23,9 @@ const errorMessage = (err: unknown, fallback: string) =>
   err && typeof err === 'object' && 'message' in err
     ? String((err as { message?: string }).message)
     : fallback;
+
+const sameId = (left: number | string, right: number | string) =>
+  String(left) === String(right);
 
 export const fetchWishlist = createAsyncThunk('wishlist/fetchAll', async (_, { rejectWithValue }) => {
   try {
@@ -59,6 +63,29 @@ const wishlistSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(gameSynced, (state, action) => {
+        const updatedGame = action.payload.game;
+        state.items.forEach((item) => {
+          if (item.game && sameId(item.game.gameId, updatedGame.gameId)) {
+            item.game = { ...item.game, ...updatedGame };
+          }
+        });
+      })
+      .addCase(gameDetailsSynced, (state, action) => {
+        const updatedGame = action.payload.game;
+        state.items.forEach((item) => {
+          if (item.game && sameId(item.game.gameId, updatedGame.gameId)) {
+            item.game = { ...item.game, ...updatedGame };
+          }
+        });
+      })
+      .addCase(gameDeletedSynced, (state, action) => {
+        state.items = state.items.filter(
+          (item) =>
+            !sameId(item.gameId, action.payload.id) &&
+            (!item.game || !sameId(item.game.gameId, action.payload.id)),
+        );
+      })
       .addCase(fetchWishlist.pending, (state) => {
         state.isLoading = true;
         state.error = null;

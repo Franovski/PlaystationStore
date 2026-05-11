@@ -8,6 +8,7 @@ import { GameService } from '../games/gameService';
 import { CategoryService } from '../categories/categoryService';
 import { AddGameCategoryDto } from './gameCategoryDto';
 import { GameCategory } from './gameCategoryEntity';
+import { emitGameChanged } from '../socket';
 
 @Injectable()
 export class GameCategoryService {
@@ -21,7 +22,7 @@ export class GameCategoryService {
    * Links a game and a category.
    */
   async linkGameAndCategory(dto: AddGameCategoryDto): Promise<GameCategory> {
-    await this.gameService.getGameById(dto.gameId);
+    const game = await this.gameService.getGameById(dto.gameId);
     await this.categoryService.getCategoryById(dto.categoryId);
 
     const existing = await this.gameCategoryRepository.checkLink(
@@ -34,7 +35,12 @@ export class GameCategoryService {
       );
     }
 
-    return this.gameCategoryRepository.link(dto.gameId, dto.categoryId);
+    const link = await this.gameCategoryRepository.link(
+      dto.gameId,
+      dto.categoryId,
+    );
+    emitGameChanged('updated', game);
+    return link;
   }
 
   /**
@@ -54,6 +60,8 @@ export class GameCategoryService {
       );
     }
     await this.gameCategoryRepository.unlink(gameId, categoryId);
+    const game = await this.gameService.getGameById(gameId);
+    emitGameChanged('updated', game);
   }
 
   /**

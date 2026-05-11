@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const gameCategoryRepository_1 = require("./gameCategoryRepository");
 const gameService_1 = require("../games/gameService");
 const categoryService_1 = require("../categories/categoryService");
+const socket_1 = require("../socket");
 let GameCategoryService = class GameCategoryService {
     constructor(gameCategoryRepository, gameService, categoryService) {
         this.gameCategoryRepository = gameCategoryRepository;
@@ -21,13 +22,15 @@ let GameCategoryService = class GameCategoryService {
         this.categoryService = categoryService;
     }
     async linkGameAndCategory(dto) {
-        await this.gameService.getGameById(dto.gameId);
+        const game = await this.gameService.getGameById(dto.gameId);
         await this.categoryService.getCategoryById(dto.categoryId);
         const existing = await this.gameCategoryRepository.checkLink(dto.gameId, dto.categoryId);
         if (existing) {
             throw new common_1.ConflictException(`Game ID ${dto.gameId} is already linked with Category ID ${dto.categoryId}`);
         }
-        return this.gameCategoryRepository.link(dto.gameId, dto.categoryId);
+        const link = await this.gameCategoryRepository.link(dto.gameId, dto.categoryId);
+        (0, socket_1.emitGameChanged)('updated', game);
+        return link;
     }
     async unlinkGameAndCategory(gameId, categoryId) {
         const existing = await this.gameCategoryRepository.checkLink(gameId, categoryId);
@@ -35,6 +38,8 @@ let GameCategoryService = class GameCategoryService {
             throw new common_1.NotFoundException(`Link between Game ID ${gameId} and Category ID ${categoryId} not found`);
         }
         await this.gameCategoryRepository.unlink(gameId, categoryId);
+        const game = await this.gameService.getGameById(gameId);
+        (0, socket_1.emitGameChanged)('updated', game);
     }
     async getCategoriesByGame(gameId) {
         await this.gameService.getGameById(gameId);

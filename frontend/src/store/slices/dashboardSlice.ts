@@ -5,7 +5,8 @@ import { ordersApi, CreateOrderPayload } from '../../features/orders/services/or
 import { reviewsApi } from '../../features/reviews/services/reviewsApi';
 import { walletApi } from '../../features/wallet/services/walletApi';
 import { wishlistApi } from '../../features/wishlist/services/wishlistApi';
-import { CustomerDashboardData, GameDetails } from '../../types';
+import { CustomerDashboardData, Game, GameDetails } from '../../types';
+import { gameDeletedSynced, gameDetailsSynced, gameSynced } from './gamesSlice';
 
 interface DashboardState {
   dashboard: CustomerDashboardData | null;
@@ -30,6 +31,47 @@ const getErrorMessage = (err: unknown) =>
   err && typeof err === 'object' && 'message' in err
     ? String((err as { message?: string }).message)
     : 'Request failed';
+
+const sameId = (left: number | string, right: number | string) =>
+  String(left) === String(right);
+
+const updateNestedGame = (current: Game | null | undefined, game: Game) =>
+  current && sameId(current.gameId, game.gameId)
+    ? { ...current, ...game }
+    : current;
+
+const upsertCatalogDetails = (catalog: GameDetails[], details: GameDetails) => {
+  const index = catalog.findIndex((item) =>
+    sameId(item.game.gameId, details.game.gameId),
+  );
+
+  if (index >= 0) {
+    catalog[index] = details;
+  } else {
+    catalog.unshift(details);
+  }
+};
+
+const syncDashboardGame = (
+  dashboard: CustomerDashboardData | null,
+  game: Game,
+) => {
+  if (!dashboard) return;
+
+  dashboard.wishlist.forEach((item) => {
+    item.game = updateNestedGame(item.game, game);
+  });
+
+  dashboard.library.forEach((item) => {
+    item.game = updateNestedGame(item.game, game);
+    if (item.dlc?.game) {
+      item.dlc.game = updateNestedGame(item.dlc.game, game);
+    }
+    if (item.edition?.game) {
+      item.edition.game = updateNestedGame(item.edition.game, game);
+    }
+  });
+};
 
 const fetchDashboardPayload = async () => {
   const [dashboard, catalog] = await Promise.all([
@@ -173,6 +215,38 @@ const dashboardSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(gameSynced, (state, action) => {
+        const updatedGame = action.payload.game;
+        state.catalog.forEach((item) => {
+          if (sameId(item.game.gameId, updatedGame.gameId)) {
+            item.game = { ...item.game, ...updatedGame };
+          }
+        });
+        syncDashboardGame(state.dashboard, updatedGame);
+      })
+      .addCase(gameDetailsSynced, (state, action) => {
+        upsertCatalogDetails(state.catalog, action.payload);
+        syncDashboardGame(state.dashboard, action.payload.game);
+      })
+      .addCase(gameDeletedSynced, (state, action) => {
+        const deletedId = action.payload.id;
+        state.catalog = state.catalog.filter(
+          (item) => !sameId(item.game.gameId, deletedId),
+        );
+
+        if (state.dashboard) {
+          state.dashboard.wishlist = state.dashboard.wishlist.filter(
+            (item) => !sameId(item.gameId, deletedId),
+          );
+          state.dashboard.wishlistCount = state.dashboard.wishlist.length;
+          state.dashboard.library = state.dashboard.library.filter(
+            (item) =>
+              item.itemType !== 'game' ||
+              !sameId(item.itemId, deletedId),
+          );
+          state.dashboard.libraryCount = state.dashboard.library.length;
+        }
+      })
       .addCase(fetchDashboardData.pending, (state) => {
         state.isLoading = true;
         state.error = null;

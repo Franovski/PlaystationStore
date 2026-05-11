@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, isAnyOf } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  isAnyOf,
+  PayloadAction,
+} from '@reduxjs/toolkit';
 import { Game, GameDetails, Review } from '../../types';
 import { gameApi } from '../../features/games/services/gameApi';
 import { gameDetailsApi } from '../../features/games/services/gameDetailsApi';
@@ -39,6 +44,88 @@ const getErrorMessage = (err: unknown, fallback: string) =>
     ? String((err as { message?: string }).message)
     : fallback;
 
+const sameId = (left: number | string, right: number | string) =>
+  String(left) === String(right);
+
+const catalogShell = (game: Game): GameDetails => ({
+  game,
+  currentPrice: Number(game.basePrice ?? 0),
+  activeDiscountPercentage: null,
+  dlcs: [],
+  editions: [],
+  categories: [],
+  platforms: [],
+  discounts: [],
+  reviews: [],
+});
+
+const syncGame = (state: GamesState, game: Game) => {
+  const itemIndex = state.items.findIndex((item) =>
+    sameId(item.gameId, game.gameId),
+  );
+
+  if (itemIndex >= 0) {
+    state.items[itemIndex] = { ...state.items[itemIndex], ...game };
+  } else {
+    state.items.unshift(game);
+  }
+
+  const catalogIndex = state.catalogItems.findIndex((item) =>
+    sameId(item.game.gameId, game.gameId),
+  );
+
+  if (catalogIndex >= 0) {
+    const current = state.catalogItems[catalogIndex];
+    const nextGame = { ...current.game, ...game };
+    const discount = Number(current.activeDiscountPercentage ?? 0);
+    state.catalogItems[catalogIndex] = {
+      ...current,
+      game: nextGame,
+      currentPrice: discount
+        ? Number(nextGame.basePrice) * (1 - discount / 100)
+        : Number(nextGame.basePrice),
+    };
+  } else {
+    state.catalogItems.unshift(catalogShell(game));
+  }
+
+  if (state.selectedGame && sameId(state.selectedGame.gameId, game.gameId)) {
+    state.selectedGame = { ...state.selectedGame, ...game };
+  }
+
+  if (
+    state.selectedGameDetails &&
+    sameId(state.selectedGameDetails.game.gameId, game.gameId)
+  ) {
+    state.selectedGameDetails.game = {
+      ...state.selectedGameDetails.game,
+      ...game,
+    };
+  }
+};
+
+const syncGameDetails = (state: GamesState, details: GameDetails) => {
+  syncGame(state, details.game);
+
+  const catalogIndex = state.catalogItems.findIndex((item) =>
+    sameId(item.game.gameId, details.game.gameId),
+  );
+
+  if (catalogIndex >= 0) {
+    state.catalogItems[catalogIndex] = details;
+  } else {
+    state.catalogItems.unshift(details);
+  }
+
+  if (
+    state.selectedGameDetails &&
+    sameId(state.selectedGameDetails.game.gameId, details.game.gameId)
+  ) {
+    state.selectedGameDetails = details;
+    state.selectedGame = details.game;
+  }
+};
+
 export const fetchGames = createAsyncThunk(
   'games/fetchAll',
   async (_, { rejectWithValue }) => {
@@ -68,6 +155,17 @@ export const fetchGameDetails = createAsyncThunk(
       return await gameDetailsApi.getDetails(gameId);
     } catch (err) {
       return rejectWithValue(getErrorMessage(err, 'Failed to fetch game details'));
+    }
+  },
+);
+
+export const syncGameDetailsFromSocket = createAsyncThunk(
+  'games/syncDetailsFromSocket',
+  async (gameId: number | string, { rejectWithValue }) => {
+    try {
+      return await gameDetailsApi.getDetails(gameId);
+    } catch (err) {
+      return rejectWithValue(getErrorMessage(err, 'Failed to sync game details'));
     }
   },
 );
@@ -167,6 +265,25 @@ const gamesSlice = createSlice({
       state.detailsError = null;
       state.successMessage = null;
     },
+    gameSynced: (state, action: PayloadAction<{ game: Game }>) => {
+      if (!action.payload.game?.gameId) return;
+      syncGame(state, action.payload.game);
+    },
+    gameDetailsSynced: (state, action: PayloadAction<GameDetails>) => {
+      syncGameDetails(state, action.payload);
+    },
+    gameDeletedSynced: (state, action: PayloadAction<{ id: number | string }>) => {
+      const deletedId = action.payload.id;
+      state.items = state.items.filter((game) => !sameId(game.gameId, deletedId));
+      state.catalogItems = state.catalogItems.filter(
+        (item) => !sameId(item.game.gameId, deletedId),
+      );
+
+      if (state.selectedGame && sameId(state.selectedGame.gameId, deletedId)) {
+        state.selectedGame = null;
+        state.selectedGameDetails = null;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -207,6 +324,9 @@ const gamesSlice = createSlice({
       .addCase(fetchGameDetails.rejected, (state, action) => {
         state.detailsLoading = false;
         state.detailsError = action.payload as string;
+      })
+      .addCase(syncGameDetailsFromSocket.fulfilled, (state, action) => {
+        syncGameDetails(state, action.payload);
       })
       .addMatcher(
         isAnyOf(
@@ -250,5 +370,11 @@ const gamesSlice = createSlice({
   }
 });
 
-export const { clearGameDetailsStatus, clearSelectedGameDetails } = gamesSlice.actions;
+export const {
+  clearGameDetailsStatus,
+  clearSelectedGameDetails,
+  gameSynced,
+  gameDetailsSynced,
+  gameDeletedSynced,
+} = gamesSlice.actions;
 export default gamesSlice.reducer;

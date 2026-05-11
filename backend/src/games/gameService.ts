@@ -13,6 +13,7 @@ import {
 import { GameRepository } from './gameRepository';
 import { CreateGameDto, UpdateGameDto } from './gameDto';
 import { Game } from './gameEntity';
+import { emitGameChanged, emitGameDeleted } from '../socket';
 
 /**
  * Service orchestrating functionality for games management.
@@ -97,7 +98,9 @@ export class GameService {
       }
     }
 
-    return this.gameRepository.create(createDto);
+    const createdGame = await this.gameRepository.create(createDto);
+    emitGameChanged('created', createdGame);
+    return createdGame;
   }
 
   /**
@@ -136,12 +139,18 @@ export class GameService {
       return this.getGameById(id);
     }
 
+    const changedFields = Object.keys(updateDto);
     const game = await this.gameRepository.update(id, updateDto);
     if (!game) {
       throw new NotFoundException(
         `Game with ID ${id} not found after update attempt`,
       );
     }
+
+    const isPriceOnlyUpdate =
+      changedFields.length === 1 && updateDto.basePrice !== undefined;
+    emitGameChanged(isPriceOnlyUpdate ? 'priceUpdated' : 'updated', game);
+
     return game;
   }
 
@@ -160,5 +169,6 @@ export class GameService {
     }
 
     await this.gameRepository.remove(id);
+    emitGameDeleted(id);
   }
 }

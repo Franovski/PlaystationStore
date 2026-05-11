@@ -14,6 +14,7 @@ import { Edition } from './editionEntity';
 import { CreateEditionDto, UpdateEditionDto } from './editionDto';
 import { EditionRepository } from './editionRepository';
 import { GameService } from '../games/gameService';
+import { emitGameChanged } from '../socket';
 
 /**
  * Service class for edition behavior.
@@ -72,7 +73,9 @@ export class EditionService {
     await this.gameService.getGameById(sanitized.gameId);
     await this.ensureUniqueNameForGame(sanitized.name, sanitized.gameId);
 
-    return this.repository.create(sanitized);
+    const edition = await this.repository.create(sanitized);
+    await this.emitParentGameUpdated(edition.gameId);
+    return edition;
   }
 
   /**
@@ -112,6 +115,11 @@ export class EditionService {
       );
     }
 
+    await this.emitParentGameUpdated(existing.gameId);
+    if (edition.gameId !== existing.gameId) {
+      await this.emitParentGameUpdated(edition.gameId);
+    }
+
     return edition;
   }
 
@@ -120,8 +128,14 @@ export class EditionService {
    */
   async deleteEdition(id: number): Promise<void> {
     this.validateId(id, 'Edition ID');
-    await this.getEditionById(id);
+    const edition = await this.getEditionById(id);
     await this.repository.remove(id);
+    await this.emitParentGameUpdated(edition.gameId);
+  }
+
+  private async emitParentGameUpdated(gameId: number): Promise<void> {
+    const game = await this.gameService.getGameById(gameId);
+    emitGameChanged('updated', game);
   }
 
   private validateId(id: number, fieldName: string): void {

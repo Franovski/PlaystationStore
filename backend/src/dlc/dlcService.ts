@@ -15,6 +15,7 @@ import { DLCRepository } from './dlcRepository';
 import { DLC } from './dlcEntity';
 import { CreateDLCDto, UpdateDLCDto } from './dlcDto';
 import { GameService } from '../games/gameService';
+import { emitGameChanged } from '../socket';
 
 /**
  * Service orchestrating functionality for downloadable content management.
@@ -168,7 +169,9 @@ export class DLCService {
       sanitizedDTO.gameId,
     );
 
-    return this.repository.create(sanitizedDTO);
+    const dlc = await this.repository.create(sanitizedDTO);
+    await this.emitParentGameUpdated(dlc.gameId);
+    return dlc;
   }
 
   /**
@@ -220,6 +223,11 @@ export class DLCService {
       );
     }
 
+    await this.emitParentGameUpdated(existingDLC.gameId);
+    if (dlc.gameId !== existingDLC.gameId) {
+      await this.emitParentGameUpdated(dlc.gameId);
+    }
+
     return dlc;
   }
 
@@ -240,6 +248,12 @@ export class DLCService {
     }
 
     await this.repository.remove(id);
+    await this.emitParentGameUpdated(dlc.gameId);
+  }
+
+  private async emitParentGameUpdated(gameId: number): Promise<void> {
+    const game = await this.gameService.getGameById(gameId);
+    emitGameChanged('updated', game);
   }
 
   /**

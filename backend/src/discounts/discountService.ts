@@ -14,6 +14,7 @@ import { Discount } from './discountEntity';
 import { CreateDiscountDto, UpdateDiscountDto } from './discountDto';
 import { DiscountRepository } from './discountRepository';
 import { GameService } from '../games/gameService';
+import { emitGameChanged } from '../socket';
 
 /**
  * Service class for discount rules.
@@ -113,7 +114,9 @@ export class DiscountService {
     const game = await this.gameService.getGameById(dto.gameId);
     this.validateDateRange(dto.startDate, dto.endDate, game.releaseDate);
 
-    return this.repository.create(dto);
+    const discount = await this.repository.create(dto);
+    await this.emitGamePriceUpdated(discount.gameId);
+    return discount;
   }
 
   /**
@@ -147,6 +150,11 @@ export class DiscountService {
       );
     }
 
+    await this.emitGamePriceUpdated(existing.gameId);
+    if (discount.gameId !== existing.gameId) {
+      await this.emitGamePriceUpdated(discount.gameId);
+    }
+
     return discount;
   }
 
@@ -154,8 +162,14 @@ export class DiscountService {
    * Deletes a discount.
    */
   async deleteDiscount(id: number): Promise<void> {
-    await this.getDiscountById(id);
+    const discount = await this.getDiscountById(id);
     await this.repository.remove(id);
+    await this.emitGamePriceUpdated(discount.gameId);
+  }
+
+  private async emitGamePriceUpdated(gameId: number): Promise<void> {
+    const game = await this.gameService.getGameById(gameId);
+    emitGameChanged('priceUpdated', game);
   }
 
   private validateId(id: number, fieldName: string): void {

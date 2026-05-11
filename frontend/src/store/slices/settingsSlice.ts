@@ -11,6 +11,7 @@ interface SettingsState {
   isLoading: boolean;
   isUpdating: boolean;
   updatingUserId: string | null;
+  isRealtimeConnected: boolean;
   error: string | null;
   successMessage: string | null;
 }
@@ -21,9 +22,25 @@ const initialState: SettingsState = {
   isLoading: false,
   isUpdating: false,
   updatingUserId: null,
+  isRealtimeConnected: false,
   error: null,
   successMessage: null,
 };
+
+type ClientChangedPayload =
+  | {
+      type?: 'created' | 'updated';
+      client?: User;
+    }
+  | User;
+
+type ClientDeletedPayload =
+  | string
+  | {
+      id?: string;
+      clientId?: string;
+      userId?: string;
+    };
 
 const getErrorMessage = (err: unknown, fallback: string) =>
   err && typeof err === 'object' && 'message' in err
@@ -77,6 +94,59 @@ const settingsSlice = createSlice({
         state.successMessage = null;
       }
     },
+    socketConnected: (state) => {
+      state.isRealtimeConnected = true;
+    },
+    socketDisconnected: (state) => {
+      state.isRealtimeConnected = false;
+    },
+    clientSynced: (state, action: PayloadAction<ClientChangedPayload>) => {
+      const payload = action.payload;
+      const client = (
+        'client' in payload ? payload.client : payload
+      ) as User | undefined;
+
+      if (!client?.userId) return;
+
+      const existingIndex = state.users.findIndex(
+        (user) => user.userId === client.userId,
+      );
+
+      if (existingIndex >= 0) {
+        state.users[existingIndex] = {
+          ...state.users[existingIndex],
+          ...client,
+        };
+      } else {
+        state.users.unshift(client);
+      }
+
+      if (state.selectedUser?.userId === client.userId) {
+        state.selectedUser = {
+          ...state.selectedUser,
+          ...client,
+        };
+      }
+    },
+    clientDeletedSynced: (
+      state,
+      action: PayloadAction<ClientDeletedPayload>,
+    ) => {
+      const id =
+        typeof action.payload === 'string'
+          ? action.payload
+          : action.payload.id ||
+            action.payload.clientId ||
+            action.payload.userId;
+
+      if (!id) return;
+
+      state.users = state.users.filter((user) => user.userId !== id);
+
+      if (state.selectedUser?.userId === id) {
+        state.selectedUser = null;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -118,5 +188,13 @@ const settingsSlice = createSlice({
 });
 
 export const fetchAdminSettingsUsers = fetchAdminUsers;
-export const { clearSettingsStatus, setSelectedUser, setSettingsError } = settingsSlice.actions;
+export const {
+  clearSettingsStatus,
+  setSelectedUser,
+  setSettingsError,
+  socketConnected,
+  socketDisconnected,
+  clientSynced,
+  clientDeletedSynced,
+} = settingsSlice.actions;
 export default settingsSlice.reducer;

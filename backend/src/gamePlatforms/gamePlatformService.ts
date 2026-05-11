@@ -8,6 +8,7 @@ import { GameService } from '../games/gameService';
 import { PlatformService } from '../platforms/platformService';
 import { AddGamePlatformDto } from './gamePlatformDto';
 import { GamePlatform } from './gamePlatformEntity';
+import { emitGameChanged } from '../socket';
 
 @Injectable()
 export class GamePlatformService {
@@ -18,7 +19,7 @@ export class GamePlatformService {
   ) {}
 
   async linkGameAndPlatform(dto: AddGamePlatformDto): Promise<GamePlatform> {
-    await this.gameService.getGameById(dto.gameId);
+    const game = await this.gameService.getGameById(dto.gameId);
     await this.platformService.getPlatformById(dto.platformId);
 
     const existing = await this.gamePlatformRepository.checkLink(
@@ -31,7 +32,12 @@ export class GamePlatformService {
       );
     }
 
-    return this.gamePlatformRepository.link(dto.gameId, dto.platformId);
+    const link = await this.gamePlatformRepository.link(
+      dto.gameId,
+      dto.platformId,
+    );
+    emitGameChanged('updated', game);
+    return link;
   }
 
   async unlinkGameAndPlatform(
@@ -48,6 +54,8 @@ export class GamePlatformService {
       );
     }
     await this.gamePlatformRepository.unlink(gameId, platformId);
+    const game = await this.gameService.getGameById(gameId);
+    emitGameChanged('updated', game);
   }
 
   async getPlatformsByGame(gameId: number) {

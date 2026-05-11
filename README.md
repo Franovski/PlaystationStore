@@ -1,47 +1,29 @@
 # PlayStation Store Project
 
-A full-stack digital game store built with a NestJS GraphQL API and a React/Vite frontend. The app supports public catalog browsing, authentication, user dashboards, and admin management for store data such as games, platforms, categories, DLC, editions, discounts, orders, reviews, wallets, wishlists, and user libraries.
-
-## Features
-
-- GraphQL API with modular NestJS feature modules.
-- PostgreSQL persistence through TypeORM entities and repositories.
-- JWT authentication with refresh tokens, role-based admin access, optional TOTP, and optional email OTP login.
-- Password reset flows using OTP or reset links.
-- Public storefront catalog and game detail pages.
-- Customer dashboard for wallet, wishlist, library, orders, and reviews.
-- Admin dashboard for users, games, platforms, categories, and store settings.
-- React Router protected routes and Redux Toolkit state management.
-- Vite production build for the frontend.
+A full-stack digital game store built with a NestJS GraphQL API and a React/Vite frontend. The app supports public catalog browsing, authentication, user dashboards, and admin management for games, platforms, categories, DLC, editions, discounts, orders, reviews, wallets, wishlists, and user libraries.
 
 ## Tech Stack
 
-- Backend: Node.js, NestJS, GraphQL, Apollo, TypeORM, PostgreSQL, Passport/JWT, Jest, ESLint, Prettier.
-- Frontend: React 18, TypeScript, Vite, Apollo Client, Redux Toolkit, React Router, Axios, Tailwind CSS, Socket.IO client.
+- Backend: Node.js, NestJS, GraphQL, Apollo, TypeORM, PostgreSQL, Passport/JWT, Socket.IO.
+- Frontend: React 18, TypeScript, Vite, Apollo Client, Redux Toolkit, React Router, Tailwind CSS, Socket.IO client.
 - Local services: Docker Compose for PostgreSQL.
 
 ## Project Structure
 
 ```text
 .
-├── backend/              # NestJS API, GraphQL resolvers, TypeORM entities, tests
-│   ├── src/              # Feature modules and application bootstrap
-│   ├── test/             # E2E test scaffold
-│   ├── .env.example      # Backend environment template
-│   └── docker-compose.yml
-├── frontend/             # React + Vite client
-│   ├── src/              # App routes, features, services, store, styles
-│   └── .env.example      # Frontend environment template
-└── README.md
+|-- backend/              # NestJS API, GraphQL resolvers, TypeORM entities
+|   |-- src/
+|   |-- test/
+|   |-- .env.example
+|   `-- docker-compose.yml
+|-- frontend/             # React + Vite client
+|   |-- src/
+|   `-- .env.example
+`-- README.md
 ```
 
-There are no root-level npm workspaces or root scripts. Run backend and frontend commands from their own folders.
-
-## Prerequisites
-
-- Node.js 20 or newer recommended.
-- npm.
-- PostgreSQL 15+, or Docker for the included local database service.
+Run backend and frontend commands from their own folders.
 
 ## Environment Variables
 
@@ -55,11 +37,13 @@ cd ../frontend
 cp .env.example .env
 ```
 
-Backend variables:
+Backend:
 
 ```env
 NODE_ENV=development
-BACKEND_PORT=3000
+PORT=3001
+BACKEND_PORT=3001
+CLIENT_URL=http://localhost:5173
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
@@ -68,33 +52,17 @@ DB_NAME=playstation_store
 DATABASE_SYNCHRONIZE=false
 JWT_ACCESS_SECRET=replace_with_access_token_secret
 JWT_REFRESH_SECRET=replace_with_refresh_token_secret
-JWT_ACCESS_EXPIRATION=15m
-JWT_REFRESH_EXPIRATION=7d
-FRONTEND_URL=http://localhost:5173
-FRONTEND_RESET_PASSWORD_URL=http://localhost:5173/reset-password
-MAIL_TRANSPORT=smtp
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=mailer@example.com
-SMTP_PASS=replace_with_smtp_password
-MAIL_FROM=mailer@example.com
-PASSWORD_RESET_MODE=otp
-PASSWORD_RESET_OTP_TTL_MINUTES=10
-PASSWORD_RESET_OTP_MAX_ATTEMPTS=5
-PASSWORD_RESET_TOKEN_TTL_MINUTES=60
-ENABLE_DEV_ADMIN_SIGNUP=true
-LOGIN_EMAIL_OTP_ENABLED=false
 ```
 
-Frontend variables:
+Frontend:
 
 ```env
-VITE_API_URL=http://localhost:3000/api
-VITE_WEBSOCKET_URL=http://localhost:3000
+VITE_API_URL=http://localhost:3001
+VITE_SOCKET_URL=http://localhost:3001
 VITE_ENABLE_DEV_ADMIN_SIGNUP=true
 ```
 
-Keep real `.env` files local. They are intentionally ignored by Git.
+`VITE_SOCKET_URL` must be the backend origin only. Do not include `/api`, `/graphql`, `/games`, `/admin`, or any other path, because Socket.IO treats paths in the URL as namespaces. `VITE_API_URL` is separate and is used by HTTP/GraphQL clients.
 
 ## Local Development
 
@@ -108,7 +76,7 @@ cd ../frontend
 npm install
 ```
 
-Start PostgreSQL with Docker:
+Start PostgreSQL:
 
 ```bash
 cd backend
@@ -132,8 +100,41 @@ npm run dev
 Default local URLs:
 
 - Frontend: `http://localhost:5173`
-- REST API prefix: `http://localhost:3000/api`
-- GraphQL endpoint: `http://localhost:3000/graphql`
+- Backend origin: `http://localhost:3001`
+- REST prefix: `http://localhost:3001/api`
+- GraphQL endpoint: `http://localhost:3001/graphql`
+- Socket.IO origin: `http://localhost:3001`
+
+## Socket.IO Realtime
+
+Socket.IO is initialized in `backend/src/main.ts` by attaching one Socket.IO server to Nest's underlying HTTP server with `initializeSocket(app.getHttpServer())`. The socket server in `backend/src/socket.ts` uses the default namespace `/` and CORS allows `CLIENT_URL`, falling back to `http://localhost:5173`.
+
+The frontend creates one shared socket client in `frontend/src/services/socket.ts`. `frontend/src/app/ClientRealtimeSync.tsx` is mounted once in `App.tsx`, stays mounted across route changes, listens for realtime events, and dispatches Redux actions/thunks so global state rerenders everywhere.
+
+Supported events:
+
+- `client:changed` with `{ type, client }`
+- `client:deleted` with `{ id }`
+- `game:created` with `{ game }`
+- `game:updated` with `{ game }`
+- `game:deleted` with `{ id }`
+- `game:priceUpdated` with `{ game }`
+- `game:statusUpdated` is registered on the frontend for future game status support.
+
+Game-affecting mutations emit after successful database writes. This includes direct game CRUD plus discount, DLC, edition, game-category, game-platform, and review changes that affect storefront game detail data.
+
+## Manual Socket QA
+
+1. Start PostgreSQL, backend, and frontend.
+2. Open a public store tab on the home page.
+3. Open a second tab on a game detail page.
+4. Open a signed-in user or admin store dashboard tab.
+5. Open the admin dashboard in another tab.
+6. Create a game from Admin -> Games. It should appear in catalog/dashboard lists without refresh.
+7. Update a game title/metadata. It should update on home, detail, dashboard, wishlist, library, and admin lists.
+8. Change a game price or create/update/delete a discount. Current prices should update without refresh.
+9. Delete a game. It should disappear from catalog-style lists, selected details should fall back gracefully, and wishlist/library game entries are removed where applicable.
+10. Check the browser console: there should be no `Invalid namespace` socket error and no duplicate socket event spam.
 
 ## Quality Checks
 
@@ -142,9 +143,8 @@ Backend:
 ```bash
 cd backend
 npm run build
-npm run test
 npm run lint
-npm audit
+npm test
 ```
 
 Frontend:
@@ -152,34 +152,6 @@ Frontend:
 ```bash
 cd frontend
 npm run build
-npm audit
 ```
 
-The frontend package currently does not define lint or test scripts. Backend lint, backend tests, backend build, and frontend build are the current baseline checks.
-
-## Build and Deployment
-
-Build the backend:
-
-```bash
-cd backend
-npm run build
-npm run start:prod
-```
-
-Build the frontend:
-
-```bash
-cd frontend
-npm run build
-npm run preview
-```
-
-Production deployments should provide real database, JWT, mail, frontend URL, and CORS configuration through environment variables. Do not commit secrets.
-
-## Contribution Notes
-
-- Keep source, configuration, docs, tests, and example env files committed.
-- Do not commit `node_modules`, `dist`, logs, local `.env` files, editor folders, or local database files.
-- Prefer focused changes and run the relevant build/test command before opening a pull request.
-- Add tests when changing shared backend behavior, authentication, orders, payments/wallets, or admin mutations.
+The frontend package currently does not define lint or test scripts.

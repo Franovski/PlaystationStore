@@ -34,6 +34,7 @@ import {
   UserWallet,
   Wishlist,
 } from '../../types';
+import { gameDeletedSynced, gameDetailsSynced, gameSynced } from './gamesSlice';
 
 export type AdminTab =
   | 'dashboard'
@@ -121,6 +122,82 @@ const getErrorMessage = (err: unknown) =>
     : 'Request failed';
 
 const asArray = <T>(value: T[] | null | undefined): T[] => (Array.isArray(value) ? value : []);
+const sameId = (left: number | string, right: number | string) =>
+  String(left) === String(right);
+
+const syncNestedGame = <T extends { game?: Game | null }>(
+  item: T,
+  game: Game,
+) => {
+  if (item.game && sameId(item.game.gameId, game.gameId)) {
+    item.game = { ...item.game, ...game };
+  }
+};
+
+const syncAdminGame = (state: AdminState, game: Game) => {
+  const gameIndex = state.gamesList.findIndex((item) =>
+    sameId(item.gameId, game.gameId),
+  );
+
+  if (gameIndex >= 0) {
+    state.gamesList[gameIndex] = { ...state.gamesList[gameIndex], ...game };
+  } else {
+    state.gamesList.unshift(game);
+    state.stats.games += 1;
+  }
+
+  state.dlcsList.forEach((item) => syncNestedGame(item, game));
+  state.discountsList.forEach((item) => syncNestedGame(item, game));
+  state.editionsList.forEach((item) => syncNestedGame(item, game));
+  state.wishlistsList.forEach((item) => syncNestedGame(item, game));
+  state.librariesList.forEach((item) => {
+    syncNestedGame(item, game);
+    if (item.dlc?.game && sameId(item.dlc.game.gameId, game.gameId)) {
+      item.dlc.game = { ...item.dlc.game, ...game };
+    }
+    if (item.edition?.game && sameId(item.edition.game.gameId, game.gameId)) {
+      item.edition.game = { ...item.edition.game, ...game };
+    }
+  });
+  state.orderItemsList.forEach((item) => {
+    syncNestedGame(item, game);
+    if (item.dlc?.game && sameId(item.dlc.game.gameId, game.gameId)) {
+      item.dlc.game = { ...item.dlc.game, ...game };
+    }
+    if (item.edition?.game && sameId(item.edition.game.gameId, game.gameId)) {
+      item.edition.game = { ...item.edition.game, ...game };
+    }
+  });
+  state.ordersList.forEach((order) => {
+    order.items?.forEach((item) => {
+      syncNestedGame(item, game);
+      if (item.dlc?.game && sameId(item.dlc.game.gameId, game.gameId)) {
+        item.dlc.game = { ...item.dlc.game, ...game };
+      }
+      if (item.edition?.game && sameId(item.edition.game.gameId, game.gameId)) {
+        item.edition.game = { ...item.edition.game, ...game };
+      }
+    });
+  });
+};
+
+const removeAdminGame = (state: AdminState, id: number | string) => {
+  const hadGame = state.gamesList.some((game) => sameId(game.gameId, id));
+  state.gamesList = state.gamesList.filter((game) => !sameId(game.gameId, id));
+  if (hadGame) {
+    state.stats.games = Math.max(0, state.stats.games - 1);
+  }
+
+  state.dlcsList = state.dlcsList.filter((item) => !sameId(item.gameId, id));
+  state.discountsList = state.discountsList.filter((item) => !sameId(item.gameId, id));
+  state.editionsList = state.editionsList.filter((item) => !sameId(item.gameId, id));
+  state.gameCategoriesList = state.gameCategoriesList.filter((item) => !sameId(item.gameId, id));
+  state.gamePlatformsList = state.gamePlatformsList.filter((item) => !sameId(item.gameId, id));
+  state.wishlistsList = state.wishlistsList.filter((item) => !sameId(item.gameId, id));
+  state.librariesList = state.librariesList.filter(
+    (item) => item.itemType !== 'game' || !sameId(item.itemId, id),
+  );
+};
 
 export const loadAdminTabData = createAsyncThunk(
   'admin/loadTabData',
@@ -242,6 +319,15 @@ const adminSlice = createSlice({
       .addCase(loadAdminTabData.rejected, (state, action) => {
         state.isLoading = false;
         state.adminError = action.payload as string;
+      })
+      .addCase(gameSynced, (state, action) => {
+        syncAdminGame(state, action.payload.game);
+      })
+      .addCase(gameDetailsSynced, (state, action) => {
+        syncAdminGame(state, action.payload.game);
+      })
+      .addCase(gameDeletedSynced, (state, action) => {
+        removeAdminGame(state, action.payload.id);
       });
   },
 });

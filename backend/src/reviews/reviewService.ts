@@ -17,6 +17,7 @@ import { ReviewRepository } from './reviewRepository';
 import { GameService } from '../games/gameService';
 import { UserLibraryService } from '../userLibrary/userLibraryService';
 import { UserRole } from '../users/userEntity';
+import { emitGameChanged } from '../socket';
 
 /**
  * Service class for customer reviews.
@@ -68,10 +69,13 @@ export class ReviewService {
       throw new BadRequestException('You have already reviewed this game');
     }
 
-    return this.repository.create(userId, {
+    const review = await this.repository.create(userId, {
       ...dto,
       comment: this.normalizeOptionalComment(dto.comment),
     });
+    const game = await this.gameService.getGameById(review.gameId);
+    emitGameChanged('updated', game);
+    return review;
   }
 
   /**
@@ -105,6 +109,8 @@ export class ReviewService {
       );
     }
 
+    const game = await this.gameService.getGameById(updated.gameId);
+    emitGameChanged('updated', game);
     return updated;
   }
 
@@ -120,6 +126,8 @@ export class ReviewService {
     const review = await this.getReviewById(reviewId);
     this.ensureCanMutateReview(review, userId, role);
     await this.repository.remove(reviewId);
+    const game = await this.gameService.getGameById(review.gameId);
+    emitGameChanged('updated', game);
   }
 
   private async getReviewById(reviewId: number): Promise<Review> {

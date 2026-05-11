@@ -10,6 +10,7 @@ import {
 } from './dto/auth-additional';
 import { UnauthorizedException } from '@nestjs/common';
 import { PasswordResetService } from './resetPassword/reset-password.service';
+import { emitClientChanged } from '../socket';
 
 @Resolver()
 export class AuthResolver {
@@ -32,7 +33,9 @@ export class AuthResolver {
 
   @Mutation(() => RegisterResponse)
   async register(@Args('registerInput') registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    const result = await this.authService.register(registerDto);
+    emitClientChanged('created', result.user);
+    return result;
   }
 
   @Mutation(() => Boolean)

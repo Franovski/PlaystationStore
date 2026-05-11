@@ -9,6 +9,7 @@ import {
 } from '../../../store/slices/settingsSlice';
 import UserSettingsTable from '../components/UserSettingsTable';
 import { UpdateUserSettingsPayload } from '../services/settingsApi';
+import { SOCKET_ENABLED } from '../../../services/socket';
 
 const AdminSettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,10 +20,26 @@ const AdminSettingsPage: React.FC = () => {
     isLoading,
     isUpdating,
     updatingUserId,
+    isRealtimeConnected,
     error,
     successMessage,
   } = useAppSelector((state) => state.settings);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const realtimeStatus = !SOCKET_ENABLED
+    ? {
+        label: 'Realtime sync disabled',
+        className: 'border-gray-700 bg-gray-900 text-gray-400',
+      }
+    : isRealtimeConnected
+      ? {
+          label: 'Live sync active',
+          className: 'border-emerald-800/60 bg-emerald-900/30 text-emerald-300',
+        }
+      : {
+          label: 'Realtime sync unavailable',
+          className: 'border-amber-800/60 bg-amber-900/30 text-amber-300',
+        };
 
   useEffect(() => {
     dispatch(fetchAdminUsers());
@@ -96,8 +113,11 @@ const AdminSettingsPage: React.FC = () => {
             onChange={(event) => setSearchTerm(event.target.value)}
             className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition-shadow focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:w-96"
           />
-          <div className="text-sm font-semibold text-gray-400">
-            {filteredUsers.length} of {users.length} users
+          <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-gray-400">
+            <span>{filteredUsers.length} of {users.length} users</span>
+            <span className={`rounded-lg border px-3 py-2 ${realtimeStatus.className}`}>
+              {realtimeStatus.label}
+            </span>
           </div>
         </div>
 

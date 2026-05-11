@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GameService = void 0;
 const common_1 = require("@nestjs/common");
 const gameRepository_1 = require("./gameRepository");
+const socket_1 = require("../socket");
 let GameService = class GameService {
     constructor(gameRepository) {
         this.gameRepository = gameRepository;
@@ -46,7 +47,9 @@ let GameService = class GameService {
                 throw new common_1.BadRequestException('Game release date must be in the future');
             }
         }
-        return this.gameRepository.create(createDto);
+        const createdGame = await this.gameRepository.create(createDto);
+        (0, socket_1.emitGameChanged)('created', createdGame);
+        return createdGame;
     }
     async updateGame(id, updateDto) {
         await this.getGameById(id);
@@ -65,10 +68,13 @@ let GameService = class GameService {
         if (Object.keys(updateDto).length === 0) {
             return this.getGameById(id);
         }
+        const changedFields = Object.keys(updateDto);
         const game = await this.gameRepository.update(id, updateDto);
         if (!game) {
             throw new common_1.NotFoundException(`Game with ID ${id} not found after update attempt`);
         }
+        const isPriceOnlyUpdate = changedFields.length === 1 && updateDto.basePrice !== undefined;
+        (0, socket_1.emitGameChanged)(isPriceOnlyUpdate ? 'priceUpdated' : 'updated', game);
         return game;
     }
     async deleteGame(id) {
@@ -77,6 +83,7 @@ let GameService = class GameService {
             throw new common_1.NotFoundException(`Game with ID ${id} not found`);
         }
         await this.gameRepository.remove(id);
+        (0, socket_1.emitGameDeleted)(id);
     }
 };
 exports.GameService = GameService;

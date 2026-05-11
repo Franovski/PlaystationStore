@@ -1,39 +1,49 @@
 import { io, Socket } from 'socket.io-client';
 import { tokenService } from './tokenService';
 
-class SocketService {
-  private socket: Socket | null = null;
-
-  connect() {
-    if (this.socket?.connected) return;
-
-    const token = tokenService.getToken();
-    
-    this.socket = io(import.meta.env.VITE_WEBSOCKET_URL || 'http://localhost:3000', {
-      auth: { token },
-      transports: ['websocket'],
-      autoConnect: true,
-    });
-
-    this.socket.on('connect', () => {
-      console.log('[Socket] Connected');
-    });
-
-    this.socket.on('disconnect', () => {
-      console.log('[Socket] Disconnected');
-    });
+// Keep sockets on the backend origin only; paths become namespaces in Socket.IO.
+const getSocketOrigin = (url?: string) => {
+  if (!url) {
+    return '';
   }
 
-  disconnect() {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
+  try {
+    return new URL(url.trim()).origin;
+  } catch {
+    return '';
+  }
+};
+
+const socketUrl = getSocketOrigin(import.meta.env.VITE_SOCKET_URL);
+
+export const SOCKET_ENABLED = Boolean(socketUrl);
+
+let socket: Socket | null = null;
+
+// Returns the one shared Socket.IO client used by the realtime sync component.
+export const getSocket = () => {
+  if (!SOCKET_ENABLED) {
+    return null;
+  }
+
+  if (!socket) {
+    socket = io(socketUrl, {
+      autoConnect: false,
+      auth: {
+        token: tokenService.getToken(),
+      },
+    });
+
+    if (import.meta.env.DEV) {
+      socket.on('connect_error', (error) => {
+        console.error(`Socket connection error: ${error.message}`);
+      });
     }
   }
 
-  getSocket(): Socket | null {
-    return this.socket;
-  }
-}
+  socket.auth = {
+    token: tokenService.getToken(),
+  };
 
-export const socketService = new SocketService();
+  return socket;
+};

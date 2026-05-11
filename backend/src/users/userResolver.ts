@@ -7,6 +7,7 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { RolesGuard } from '../auth/guards/rolesGuard';
 import { Roles } from '../auth/decorators/roleDecorator';
 import { UserRole } from './userEntity';
+import { emitClientChanged, emitClientDeleted } from '../socket';
 
 type GqlRequestContext = {
   req: {
@@ -43,7 +44,9 @@ export class UserResolver {
 
   @Mutation(() => User)
   async createUser(@Args('createUserInput') createUserInput: CreateUserDto) {
-    return this.userService.create(createUserInput);
+    const user = await this.userService.create(createUserInput);
+    emitClientChanged('created', this.userService.sanitizeUser(user));
+    return user;
   }
 
   @UseGuards(GqlAuthGuard)
@@ -52,7 +55,9 @@ export class UserResolver {
     @Args('id', { type: () => ID }) id: string,
     @Args('updateUserInput') updateUserInput: UpdateUserDto,
   ) {
-    return this.userService.update(id, updateUserInput);
+    const user = await this.userService.update(id, updateUserInput);
+    emitClientChanged('updated', this.userService.sanitizeUser(user));
+    return user;
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
@@ -64,11 +69,13 @@ export class UserResolver {
     updateUserSettingsInput: UpdateUserSettingsDto,
     @Context() context: GqlRequestContext,
   ) {
-    return this.userService.updateUserSettings(
+    const user = await this.userService.updateUserSettings(
       id,
       updateUserSettingsInput,
       context.req.user.userId,
     );
+    emitClientChanged('updated', this.userService.sanitizeUser(user as User));
+    return user;
   }
 
   @UseGuards(GqlAuthGuard, RolesGuard)
@@ -76,6 +83,7 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async deleteUser(@Args('id', { type: () => ID }) id: string) {
     await this.userService.remove(id);
+    emitClientDeleted(id);
     return true;
   }
 }

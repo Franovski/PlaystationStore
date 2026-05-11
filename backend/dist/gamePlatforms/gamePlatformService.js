@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const gamePlatformRepository_1 = require("./gamePlatformRepository");
 const gameService_1 = require("../games/gameService");
 const platformService_1 = require("../platforms/platformService");
+const socket_1 = require("../socket");
 let GamePlatformService = class GamePlatformService {
     constructor(gamePlatformRepository, gameService, platformService) {
         this.gamePlatformRepository = gamePlatformRepository;
@@ -21,13 +22,15 @@ let GamePlatformService = class GamePlatformService {
         this.platformService = platformService;
     }
     async linkGameAndPlatform(dto) {
-        await this.gameService.getGameById(dto.gameId);
+        const game = await this.gameService.getGameById(dto.gameId);
         await this.platformService.getPlatformById(dto.platformId);
         const existing = await this.gamePlatformRepository.checkLink(dto.gameId, dto.platformId);
         if (existing) {
             throw new common_1.ConflictException(`Game ID ${dto.gameId} is already linked with Platform ID ${dto.platformId}`);
         }
-        return this.gamePlatformRepository.link(dto.gameId, dto.platformId);
+        const link = await this.gamePlatformRepository.link(dto.gameId, dto.platformId);
+        (0, socket_1.emitGameChanged)('updated', game);
+        return link;
     }
     async unlinkGameAndPlatform(gameId, platformId) {
         const existing = await this.gamePlatformRepository.checkLink(gameId, platformId);
@@ -35,6 +38,8 @@ let GamePlatformService = class GamePlatformService {
             throw new common_1.NotFoundException(`Link between Game ID ${gameId} and Platform ID ${platformId} not found`);
         }
         await this.gamePlatformRepository.unlink(gameId, platformId);
+        const game = await this.gameService.getGameById(gameId);
+        (0, socket_1.emitGameChanged)('updated', game);
     }
     async getPlatformsByGame(gameId) {
         await this.gameService.getGameById(gameId);
